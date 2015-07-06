@@ -4,7 +4,6 @@ export default function googleMapDriver() {
   // Observe all todos data and save them to localStorage
   var start_bounds = new google.maps.LatLngBounds();
   start_bounds.extend(new google.maps.LatLng(60.16, 24.93));
-  start_bounds.extend(new google.maps.LatLng(61.16, 24.93));
   var map$ = new Rx.ReplaySubject(1);
     function initialize() {
       var mapOptions = {
