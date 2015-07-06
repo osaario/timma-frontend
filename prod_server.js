@@ -1,3 +1,3 @@
 var connect = require('connect');
 var serveStatic = require('serve-static');
-connect().use(serveStatic(__dirname)).listen(443);
+connect().use(serveStatic(__dirname)).listen(process.ENV.port);
