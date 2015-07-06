@@ -14,7 +14,7 @@ function todoItemComponent(drivers) {
       .share()
   };
 
-  const defaultProps = {todoid: 0, content: '', completed: false};
+  const defaultProps = {todoid: 0, content: '', times: '', completed: false};
   let props$ = drivers.props.getAll().startWith(defaultProps).shareReplay(1);
 
   var editing$ = Rx.Observable.merge(
@@ -23,17 +23,19 @@ function todoItemComponent(drivers) {
   ).startWith(false);
 
   let vtree$ = Rx.Observable
-    .combineLatest(props$, editing$, function({content, completed}, editing) {
+    .combineLatest(props$, editing$, function({content, times, completed}, editing) {
       let classes = (completed ? '.completed' : '') +
         (editing ? '.editing' : '');
       return h('li.todoRoot' + classes, [
         h('div.view', [
+          /*
           h('input.toggle', {
             type: 'checkbox',
             checked: propHook(elem => elem.checked = completed)
-          }),
+          }),*/
           h('label', content),
-          h('button.destroy')
+          h('label', times)
+          //h('button.destroy')
         ]),
         h('input.edit', {
           type: 'text',

@@ -15654,7 +15654,7 @@ function todoItemComponent(drivers) {
     }).share()
   };
 
-  var defaultProps = { todoid: 0, content: '', completed: false };
+  var defaultProps = { todoid: 0, content: '', times: '', completed: false };
   var props$ = drivers.props.getAll().startWith(defaultProps).shareReplay(1);
 
   var editing$ = _cycleCore.Rx.Observable.merge(intent.startEdit$.map(function () {
@@ -15665,15 +15665,19 @@ function todoItemComponent(drivers) {
 
   var vtree$ = _cycleCore.Rx.Observable.combineLatest(props$, editing$, function (_ref, editing) {
     var content = _ref.content;
+    var times = _ref.times;
     var completed = _ref.completed;
 
     var classes = (completed ? '.completed' : '') + (editing ? '.editing' : '');
-    return (0, _cycleWeb.h)('li.todoRoot' + classes, [(0, _cycleWeb.h)('div.view', [(0, _cycleWeb.h)('input.toggle', {
+    return (0, _cycleWeb.h)('li.todoRoot' + classes, [(0, _cycleWeb.h)('div.view', [
+    /*
+    h('input.toggle', {
       type: 'checkbox',
-      checked: (0, _utils.propHook)(function (elem) {
-        return elem.checked = completed;
-      })
-    }), (0, _cycleWeb.h)('label', content), (0, _cycleWeb.h)('button.destroy')]), (0, _cycleWeb.h)('input.edit', {
+      checked: propHook(elem => elem.checked = completed)
+    }),*/
+    (0, _cycleWeb.h)('label', content), (0, _cycleWeb.h)('label', times)
+    //h('button.destroy')
+    ]), (0, _cycleWeb.h)('input.edit', {
       type: 'text',
       value: (0, _utils.propHook)(function (element) {
         element.value = content;
@@ -16017,31 +16021,19 @@ var _cycleWeb = require('@cycle/web');
 
 var _utils = require('../utils');
 
-function vrenderHeader(todosData) {
-  return (0, _cycleWeb.h)('header#header', [(0, _cycleWeb.h)('h1', 'timma')
-  /*  h('input#new-todo', {
-      type: 'text',
-      value: propHook(elem => { elem.value = todosData.input; }),
-      attributes: {
-        placeholder: 'Shit needs to be done'
-      },
-      autofocus: true,
-      name: 'newTodo'
-    })*/
-  ]);
+function vrenderMapSection() {
+  return (0, _cycleWeb.h)('section#map', [(0, _cycleWeb.h)('div.jumbotron', [(0, _cycleWeb.h)('h1.page-header', 'Tervetuloa Timmaan!'), (0, _cycleWeb.h)('div', 'Tähän tulee big-ass kartta')])]);
 }
 
 function vrenderMainSection(todosData) {
   return (0, _cycleWeb.h)('section#main', {
     style: { 'display': '' }
-  }, [(0, _cycleWeb.h)('input#toggle-all', {
-    type: 'checkbox',
-    checked: true
-  }), (0, _cycleWeb.h)('ul#todo-list', todosData.map(function (todoData) {
+  }, [(0, _cycleWeb.h)('ul#todo-list', todosData.map(function (todoData) {
     return (0, _cycleWeb.h)('todo-item.todo-item', {
       key: todoData.id,
       todoid: todoData.id,
       content: todoData.lastMinuteInfo.customerName,
+      times: todoData.start,
       completed: todoData.completed
     });
   }))]);
@@ -16088,7 +16080,7 @@ function vrenderFooter(todosData) {
 function view(todos$) {
   return {
     DOM: todos$.map(function (todos) {
-      return (0, _cycleWeb.h)('div', [vrenderHeader(todos), vrenderMainSection(todos)
+      return (0, _cycleWeb.h)('div', [vrenderMapSection(), vrenderMainSection(todos)
       //vrenderFooter(todos)
       ]);
     })

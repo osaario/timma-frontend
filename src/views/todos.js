@@ -2,35 +2,27 @@ import {Rx} from '@cycle/core';
 import {h} from '@cycle/web';
 import {propHook} from '../utils';
 
-function vrenderHeader(todosData) {
-  return h('header#header', [
-    h('h1', 'timma')
-  /*  h('input#new-todo', {
-      type: 'text',
-      value: propHook(elem => { elem.value = todosData.input; }),
-      attributes: {
-        placeholder: 'Shit needs to be done'
-      },
-      autofocus: true,
-      name: 'newTodo'
-    })*/
-  ]);
+
+function vrenderMapSection() {
+  return h('section#map', [
+    h('div.jumbotron', [
+      h('h1.page-header', "Tervetuloa Timmaan!"),
+      h('div', "Tähän tulee big-ass kartta")
+     ])
+   ]);
 }
 
 function vrenderMainSection(todosData) {
   return h('section#main', {
     style: {'display': ''}
   }, [
-    h('input#toggle-all', {
-      type: 'checkbox',
-      checked: true
-    }),
     h('ul#todo-list', todosData
       .map(todoData =>
         h('todo-item.todo-item', {
           key: todoData.id,
           todoid: todoData.id,
           content: todoData.lastMinuteInfo.customerName,
+          times: todoData.start,
           completed: todoData.completed
         })
       )
@@ -80,7 +72,7 @@ export default function view(todos$) {
   return {
     DOM: todos$.map(todos =>
       h('div', [
-        vrenderHeader(todos),
+        vrenderMapSection(),
         vrenderMainSection(todos)
         //vrenderFooter(todos)
       ])
