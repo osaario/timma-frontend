@@ -1,4 +1,4 @@
-Timma Frontend or a prodution experiment in Cycle.js
+Timma Frontend or a production experiment in Cycle.js
 ===================
 Current DEV version is running at https://timmafront-dev.herokuapp.com/
 
