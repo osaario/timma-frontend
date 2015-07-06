@@ -15628,8 +15628,15 @@ var _sinksLocalStorageJs2 = _interopRequireDefault(_sinksLocalStorageJs);
 function main(drivers) {
   var todos$ = (0, _modelsTodos2['default'])((0, _intentsTodos2['default'])(drivers.DOM), _sourcesTodos2['default']);
   drivers.googleMap.markers(todos$);
-  drivers.googleMap.bounds$.subscribe(function (x) {});
-  return (0, _viewsTodos2['default'])(todos$);
+  drivers.googleMap.bounds$.subscribe(function (x) {
+    console.log(x);
+  });
+  return (0, _viewsTodos2['default'])(todos$.combineLatest(drivers.googleMap.bounds$, function (providers, bounds) {
+    return _.filter(providers, function (elem) {
+      var myLatLng = new google.maps.LatLng(elem.lastMinuteInfo.lat, elem.lastMinuteInfo.lon);
+      return bounds.contains(myLatLng);
+    });
+  }));
 }
 
 _cycleCore2['default'].run(main, {
@@ -15731,13 +15738,14 @@ var _cycleCore = require('@cycle/core');
 
 function googleMapDriver() {
   // Observe all todos data and save them to localStorage
+  var start_bounds = new google.maps.LatLngBounds();
+  start_bounds.extend(new google.maps.LatLng(60.16, 24.93));
+  start_bounds.extend(new google.maps.LatLng(61.16, 24.93));
   var map$ = new _cycleCore.Rx.ReplaySubject(1);
   function initialize() {
-    var center = new google.maps.LatLng(60.16, 24.93);
     var mapOptions = {
-      center: center,
-      zoom: 10
-    };
+      center: start_bounds.getCenter(),
+      zoom: 12 };
     var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
     map$.onNext(map);
   }
@@ -15750,7 +15758,7 @@ function googleMapDriver() {
         observer.onNext(bounds);
       });
     });
-  });
+  }).startWith(start_bounds);
   google.maps.event.addDomListener(window, 'load', initialize);
   this.markers = function (providerData$) {
     var pairObs = map$.combineLatest(providerData$, function (gMap, providerData) {

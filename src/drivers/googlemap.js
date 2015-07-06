@@ -2,13 +2,14 @@ import {Rx} from '@cycle/core';
 
 export default function googleMapDriver() {
   // Observe all todos data and save them to localStorage
+  var start_bounds = new google.maps.LatLngBounds();
+  start_bounds.extend(new google.maps.LatLng(60.16, 24.93));
+  start_bounds.extend(new google.maps.LatLng(61.16, 24.93));
   var map$ = new Rx.ReplaySubject(1);
     function initialize() {
-      var center = new google.maps.LatLng(60.16, 24.93);
       var mapOptions = {
-        center: center,
-        zoom: 10
-      };
+        center: start_bounds.getCenter(),
+        zoom: 12 };
       var map = new google.maps.Map(document.getElementById('map-canvas'),
       mapOptions);
       map$.onNext(map);
@@ -23,7 +24,7 @@ export default function googleMapDriver() {
       });
 
      });
-   });
+   }).startWith(start_bounds);
   google.maps.event.addDomListener(window, 'load', initialize);
   this.markers = function(providerData$) {
     var pairObs = map$.combineLatest(providerData$, (gMap, providerData) => {
