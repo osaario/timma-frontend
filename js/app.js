@@ -15627,7 +15627,8 @@ var _sinksLocalStorageJs2 = _interopRequireDefault(_sinksLocalStorageJs);
 
 function main(drivers) {
   var todos$ = (0, _modelsTodos2['default'])((0, _intentsTodos2['default'])(drivers.DOM), _sourcesTodos2['default']);
-  todos$.subscribe(drivers.googleMap.markers);
+  drivers.googleMap.markers(todos$);
+  drivers.googleMap.bounds$.subscribe(function (x) {});
   return (0, _viewsTodos2['default'])(todos$);
 }
 
@@ -15726,37 +15727,54 @@ Object.defineProperty(exports, '__esModule', {
 });
 exports['default'] = googleMapDriver;
 
+var _cycleCore = require('@cycle/core');
+
 function googleMapDriver() {
   // Observe all todos data and save them to localStorage
-  var map = null;
+  var map$ = new _cycleCore.Rx.ReplaySubject(1);
   function initialize() {
     var center = new google.maps.LatLng(60.16, 24.93);
     var mapOptions = {
       center: center,
       zoom: 10
     };
-    map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+    var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+    map$.onNext(map);
   }
-  google.maps.event.addDomListener(window, 'load', initialize);
-  this.markers = function (providerData) {
-    if (map == null) return;
-    for (var i = 0; i < providerData.length; i++) {
-      var provider = providerData[i];
-      var myLatLng = new google.maps.LatLng(provider.lastMinuteInfo.lat, provider.lastMinuteInfo.lon);
-      var marker = new google.maps.Marker({
-        position: myLatLng,
-        map: map,
-        title: provider.lastMinuteInfo.customerName,
-        zIndex: 0
+  this.bounds$ = map$.flatMap(function (gMap) {
+    return _cycleCore.Rx.Observable.create(function (observer) {
+      google.maps.event.addListener(gMap, 'bounds_changed', function () {
+        // 3 seconds after the center of the map has changed, pan back to the
+        // marker.
+        var bounds = gMap.getBounds();
+        observer.onNext(bounds);
       });
-    }
+    });
+  });
+  google.maps.event.addDomListener(window, 'load', initialize);
+  this.markers = function (providerData$) {
+    var pairObs = map$.combineLatest(providerData$, function (gMap, providerData) {
+      return { map: gMap, providers: providerData };
+    });
+    pairObs.subscribe(function (pair) {
+      for (var i = 0; i < pair.providers.length; i++) {
+        var provider = pair.providers[i];
+        var myLatLng = new google.maps.LatLng(provider.lastMinuteInfo.lat, provider.lastMinuteInfo.lon);
+        var marker = new google.maps.Marker({
+          position: myLatLng,
+          map: pair.map,
+          title: provider.lastMinuteInfo.customerName,
+          zIndex: 0
+        });
+      }
+    });
   };
   return this;
 }
 
 module.exports = exports['default'];
 
-},{}],118:[function(require,module,exports){
+},{"@cycle/core":1}],118:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {

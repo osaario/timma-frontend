@@ -11,7 +11,8 @@ import localStorageSink from './sinks/local-storage.js';
 
 function main(drivers) {
   let todos$ = model(intent(drivers.DOM), source);
-  todos$.subscribe(drivers.googleMap.markers);
+  drivers.googleMap.markers(todos$);
+  drivers.googleMap.bounds$.subscribe(function(x){});
   return view(todos$);
 }
 
