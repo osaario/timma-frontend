@@ -15621,9 +15621,15 @@ var _sinksLocalStorageJs = require('./sinks/local-storage.js');
 
 var _sinksLocalStorageJs2 = _interopRequireDefault(_sinksLocalStorageJs);
 
+var _sinksGooglemapJs = require('./sinks/googlemap.js');
+
+var _sinksGooglemapJs2 = _interopRequireDefault(_sinksGooglemapJs);
+
 function main(drivers) {
+  var loaded$ = _cycleCore.Rx.Observable.interval(1000).take(1);
   var todos$ = (0, _modelsTodos2['default'])((0, _intentsTodos2['default'])(drivers.DOM), _sourcesTodos2['default']);
   todos$.subscribe(_sinksLocalStorageJs2['default']);
+  loaded$.subscribe(_sinksGooglemapJs2['default']);
   return (0, _viewsTodos2['default'])(todos$);
 }
 
@@ -15633,7 +15639,7 @@ _cycleCore2['default'].run(main, {
   })
 });
 
-},{"./components/todo-item":116,"./intents/todos":117,"./models/todos":118,"./sinks/local-storage.js":119,"./sources/todos":120,"./views/todos":122,"@cycle/core":1,"@cycle/web":5}],116:[function(require,module,exports){
+},{"./components/todo-item":116,"./intents/todos":117,"./models/todos":118,"./sinks/googlemap.js":119,"./sinks/local-storage.js":120,"./sources/todos":121,"./views/todos":123,"@cycle/core":1,"@cycle/web":5}],116:[function(require,module,exports){
 'use strict';
 
 var _cycleCore = require('@cycle/core');
@@ -15669,24 +15675,27 @@ function todoItemComponent(drivers) {
     var completed = _ref.completed;
 
     var classes = (completed ? '.completed' : '') + (editing ? '.editing' : '');
-    return (0, _cycleWeb.h)('li.todoRoot' + classes, [(0, _cycleWeb.h)('div.view', [
+    return (0, _cycleWeb.h)('li.list-group-item' + classes, [(0, _cycleWeb.h)('div', [
     /*
     h('input.toggle', {
       type: 'checkbox',
       checked: propHook(elem => elem.checked = completed)
     }),*/
-    (0, _cycleWeb.h)('label', content), (0, _cycleWeb.h)('label', times)
+    (0, _cycleWeb.h)('div', content), (0, _cycleWeb.h)('div', times)
     //h('button.destroy')
-    ]), (0, _cycleWeb.h)('input.edit', {
+    ])
+    /*
+    h('input.edit', {
       type: 'text',
-      value: (0, _utils.propHook)(function (element) {
+      value: propHook(element => {
         element.value = content;
         if (editing) {
           element.focus();
           element.selectionStart = element.value.length;
         }
       })
-    })]);
+    })*/
+    ]);
   });
 
   return {
@@ -15710,7 +15719,7 @@ function todoItemComponent(drivers) {
 
 module.exports = todoItemComponent;
 
-},{"../utils":121,"@cycle/core":1,"@cycle/web":5}],117:[function(require,module,exports){
+},{"../utils":122,"@cycle/core":1,"@cycle/web":5}],117:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -15760,7 +15769,7 @@ function intent(domDriver) {
 ;
 module.exports = exports['default'];
 
-},{"../utils":121,"@cycle/core":1}],118:[function(require,module,exports){
+},{"../utils":122,"@cycle/core":1}],118:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -15894,6 +15903,51 @@ exports['default'] = model;
 module.exports = exports['default'];
 
 },{"@cycle/core":1}],119:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+exports['default'] = initalizeMapSink;
+
+function initalizeMapSink(serviceProviderData) {
+  // Observe all todos data and save them to localStorage
+  var mapOptions = {
+    center: { lat: -34.397, lng: 150.644 },
+    zoom: 8
+  };
+  var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+}
+
+;
+
+/*
+export default function googleMapSink(serviceProviderData) {
+  // Observe all todos data and save them to localStorage
+  function initalizeMap() {
+    var mapOptions = {
+      center: { lat: -34.397, lng: 150.644},
+      zoom: 8
+    };
+    var map = new google.maps.Map(document.getElementById('map-canvas'),
+        mapOptions);
+  };
+
+  let savedTodosData = {
+    list: todosData.list.map(todoData =>
+      ({
+        title: todoData.title,
+        completed: todoData.completed,
+        id: todoData.id
+      })
+    )
+  };
+  localStorage.setItem('todos-cycle', JSON.stringify(savedTodosData))
+};
+*/
+module.exports = exports['default'];
+
+},{}],120:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15920,7 +15974,7 @@ let savedTodosData = {
 */
 //localStorage.setItem('todos-cycle', JSON.stringify(savedTodosData))
 
-},{}],120:[function(require,module,exports){
+},{}],121:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -15968,7 +16022,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{"@cycle/core":1}],121:[function(require,module,exports){
+},{"@cycle/core":1}],122:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -16007,7 +16061,7 @@ exports.propHook = propHook;
 exports.ENTER_KEY = ENTER_KEY;
 exports.ESC_KEY = ESC_KEY;
 
-},{}],122:[function(require,module,exports){
+},{}],123:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -16020,10 +16074,6 @@ var _cycleCore = require('@cycle/core');
 var _cycleWeb = require('@cycle/web');
 
 var _utils = require('../utils');
-
-function vrenderMapSection() {
-  return (0, _cycleWeb.h)('section#map', [(0, _cycleWeb.h)('div.jumbotron', [(0, _cycleWeb.h)('h1.page-header', 'Tervetuloa Timmaan!'), (0, _cycleWeb.h)('div', 'Tähän tulee big-ass kartta')])]);
-}
 
 function vrenderMainSection(todosData) {
   return (0, _cycleWeb.h)('section#main', {
@@ -16080,7 +16130,7 @@ function vrenderFooter(todosData) {
 function view(todos$) {
   return {
     DOM: todos$.map(function (todos) {
-      return (0, _cycleWeb.h)('div', [vrenderMapSection(), vrenderMainSection(todos)
+      return (0, _cycleWeb.h)('div', [vrenderMainSection(todos)
       //vrenderFooter(todos)
       ]);
     })
@@ -16090,4 +16140,4 @@ function view(todos$) {
 ;
 module.exports = exports['default'];
 
-},{"../utils":121,"@cycle/core":1,"@cycle/web":5}]},{},[115]);
+},{"../utils":122,"@cycle/core":1,"@cycle/web":5}]},{},[115]);

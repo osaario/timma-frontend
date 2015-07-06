@@ -26,17 +26,18 @@ function todoItemComponent(drivers) {
     .combineLatest(props$, editing$, function({content, times, completed}, editing) {
       let classes = (completed ? '.completed' : '') +
         (editing ? '.editing' : '');
-      return h('li.todoRoot' + classes, [
-        h('div.view', [
+      return h('li.list-group-item' + classes, [
+        h('div', [
           /*
           h('input.toggle', {
             type: 'checkbox',
             checked: propHook(elem => elem.checked = completed)
           }),*/
-          h('label', content),
-          h('label', times)
+          h('div', content),
+          h('div', times)
           //h('button.destroy')
-        ]),
+        ])
+        /*
         h('input.edit', {
           type: 'text',
           value: propHook(element => {
@@ -46,7 +47,7 @@ function todoItemComponent(drivers) {
               element.selectionStart = element.value.length;
             }
           })
-        })
+        })*/
       ]);
     });
 
