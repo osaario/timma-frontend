@@ -7,16 +7,24 @@ function vrenderMainSection(todosData) {
   return h('section#main', {
     style: {'display': ''}
   }, [
-    h('ul#todo-list', todosData
-      .map(todoData =>
-        h('todo-item.todo-item', {
-          key: todoData.id,
-          todoid: todoData.id,
-          content: todoData.lastMinuteInfo.customerName,
-          times: todoData.start,
-          completed: todoData.completed
-        })
-      )
+    h('ul.list-group',
+    _.chain(todosData)
+    .groupBy(x => x.customerId)
+    .map(todoData =>
+      h('li.list-group-item', [
+        h('div.row', [
+          h('div.col-sm-3', [
+            h('a.thumbnail', [
+              h('img', {"src": todoData[0].lastMinuteInfo.imageUrl})
+            ]),
+          ]),
+          h('div.col-sm-9', [
+            h('h3', todoData[0].lastMinuteInfo.customerName),
+            h('div', todoData[0].lastMinuteInfo.district)
+          ]),
+        ])
+      ])
+    ).value()
     )
   ])
 }

@@ -33,7 +33,7 @@ function todoItemComponent(drivers) {
             type: 'checkbox',
             checked: propHook(elem => elem.checked = completed)
           }),*/
-          h('div', content),
+          h('h3', content),
           h('div', times)
           //h('button.destroy')
         ])

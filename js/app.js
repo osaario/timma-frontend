@@ -15688,7 +15688,7 @@ function todoItemComponent(drivers) {
       type: 'checkbox',
       checked: propHook(elem => elem.checked = completed)
     }),*/
-    (0, _cycleWeb.h)('div', content), (0, _cycleWeb.h)('div', times)
+    (0, _cycleWeb.h)('h3', content), (0, _cycleWeb.h)('div', times)
     //h('button.destroy')
     ])
     /*
@@ -16095,15 +16095,11 @@ var _utils = require('../utils');
 function vrenderMainSection(todosData) {
   return (0, _cycleWeb.h)('section#main', {
     style: { 'display': '' }
-  }, [(0, _cycleWeb.h)('ul#todo-list', todosData.map(function (todoData) {
-    return (0, _cycleWeb.h)('todo-item.todo-item', {
-      key: todoData.id,
-      todoid: todoData.id,
-      content: todoData.lastMinuteInfo.customerName,
-      times: todoData.start,
-      completed: todoData.completed
-    });
-  }))]);
+  }, [(0, _cycleWeb.h)('ul.list-group', _.chain(todosData).groupBy(function (x) {
+    return x.customerId;
+  }).map(function (todoData) {
+    return (0, _cycleWeb.h)('li.list-group-item', [(0, _cycleWeb.h)('div.row', [(0, _cycleWeb.h)('div.col-sm-3', [(0, _cycleWeb.h)('a.thumbnail', [(0, _cycleWeb.h)('img', { 'src': todoData[0].lastMinuteInfo.imageUrl, 'height': '100px' })])]), (0, _cycleWeb.h)('div.col-sm-9', [(0, _cycleWeb.h)('h3', todoData[0].lastMinuteInfo.customerName), (0, _cycleWeb.h)('div', todoData[0].lastMinuteInfo.district)])])]);
+  }).value())]);
 }
 
 /*
