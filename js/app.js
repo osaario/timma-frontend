@@ -15605,6 +15605,10 @@ var _sourcesTodos = require('./sources/todos');
 
 var _sourcesTodos2 = _interopRequireDefault(_sourcesTodos);
 
+var _driversGooglemap = require('./drivers/googlemap');
+
+var _driversGooglemap2 = _interopRequireDefault(_driversGooglemap);
+
 var _intentsTodos = require('./intents/todos');
 
 var _intentsTodos2 = _interopRequireDefault(_intentsTodos);
@@ -15621,23 +15625,20 @@ var _sinksLocalStorageJs = require('./sinks/local-storage.js');
 
 var _sinksLocalStorageJs2 = _interopRequireDefault(_sinksLocalStorageJs);
 
-var _sinksGooglemapJs = require('./sinks/googlemap.js');
-
-var _sinksGooglemapJs2 = _interopRequireDefault(_sinksGooglemapJs);
-
 function main(drivers) {
   var todos$ = (0, _modelsTodos2['default'])((0, _intentsTodos2['default'])(drivers.DOM), _sourcesTodos2['default']);
-  todos$.subscribe(_sinksGooglemapJs2['default']);
+  todos$.subscribe(drivers.googleMap.markers);
   return (0, _viewsTodos2['default'])(todos$);
 }
 
 _cycleCore2['default'].run(main, {
   DOM: _cycleWeb2['default'].makeDOMDriver('#todoapp', {
     'todo-item': _componentsTodoItem2['default']
-  })
+  }),
+  googleMap: _driversGooglemap2['default']
 });
 
-},{"./components/todo-item":116,"./intents/todos":117,"./models/todos":118,"./sinks/googlemap.js":119,"./sinks/local-storage.js":120,"./sources/todos":121,"./views/todos":123,"@cycle/core":1,"@cycle/web":5}],116:[function(require,module,exports){
+},{"./components/todo-item":116,"./drivers/googlemap":117,"./intents/todos":118,"./models/todos":119,"./sinks/local-storage.js":120,"./sources/todos":121,"./views/todos":123,"@cycle/core":1,"@cycle/web":5}],116:[function(require,module,exports){
 'use strict';
 
 var _cycleCore = require('@cycle/core');
@@ -15723,6 +15724,44 @@ module.exports = todoItemComponent;
 Object.defineProperty(exports, '__esModule', {
   value: true
 });
+exports['default'] = googleMapDriver;
+
+function googleMapDriver() {
+  // Observe all todos data and save them to localStorage
+  var map = null;
+  function initialize() {
+    var center = new google.maps.LatLng(60.16, 24.93);
+    var mapOptions = {
+      center: center,
+      zoom: 10
+    };
+    map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+  }
+  google.maps.event.addDomListener(window, 'load', initialize);
+  this.markers = function (providerData) {
+    if (map == null) return;
+    for (var i = 0; i < providerData.length; i++) {
+      var provider = providerData[i];
+      var myLatLng = new google.maps.LatLng(provider.lastMinuteInfo.lat, provider.lastMinuteInfo.lon);
+      var marker = new google.maps.Marker({
+        position: myLatLng,
+        map: map,
+        title: provider.lastMinuteInfo.customerName,
+        zIndex: 0
+      });
+    }
+  };
+  return this;
+}
+
+module.exports = exports['default'];
+
+},{}],118:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
 exports['default'] = intent;
 
 var _cycleCore = require('@cycle/core');
@@ -15767,7 +15806,7 @@ function intent(domDriver) {
 ;
 module.exports = exports['default'];
 
-},{"../utils":122,"@cycle/core":1}],118:[function(require,module,exports){
+},{"../utils":122,"@cycle/core":1}],119:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -15900,68 +15939,7 @@ function model(intent, source) {
 exports['default'] = model;
 module.exports = exports['default'];
 
-},{"@cycle/core":1}],119:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
-exports['default'] = initalizeMapSink;
-
-function initalizeMapSink(providerData) {
-  // Observe all todos data and save them to localStorage
-  function initialize() {
-    var provider1 = providerData[0].lastMinuteInfo;
-    var center = new google.maps.LatLng(provider1.lat, provider1.lon);
-    var mapOptions = {
-      center: center,
-      zoom: 10
-    };
-    var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
-
-    for (var i = 0; i < providerData.length; i++) {
-      var provider = providerData[i];
-      var myLatLng = new google.maps.LatLng(provider.lastMinuteInfo.lat, provider.lastMinuteInfo.lon);
-      var marker = new google.maps.Marker({
-        position: myLatLng,
-        map: map,
-        title: provider.lastMinuteInfo.customerName,
-        zIndex: 0
-      });
-    }
-  }
-  initialize();
-}
-
-;
-
-/*
-export default function googleMapSink(serviceProviderData) {
-  // Observe all todos data and save them to localStorage
-  function initalizeMap() {
-    var mapOptions = {
-      center: { lat: -34.397, lng: 150.644},
-      zoom: 8
-    };
-    var map = new google.maps.Map(document.getElementById('map-canvas'),
-        mapOptions);
-  };
-
-  let savedTodosData = {
-    list: todosData.list.map(todoData =>
-      ({
-        title: todoData.title,
-        completed: todoData.completed,
-        id: todoData.id
-      })
-    )
-  };
-  localStorage.setItem('todos-cycle', JSON.stringify(savedTodosData))
-};
-*/
-module.exports = exports['default'];
-
-},{}],120:[function(require,module,exports){
+},{"@cycle/core":1}],120:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
