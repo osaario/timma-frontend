@@ -15626,10 +15626,8 @@ var _sinksGooglemapJs = require('./sinks/googlemap.js');
 var _sinksGooglemapJs2 = _interopRequireDefault(_sinksGooglemapJs);
 
 function main(drivers) {
-  var loaded$ = _cycleCore.Rx.Observable.interval(1000).take(1);
   var todos$ = (0, _modelsTodos2['default'])((0, _intentsTodos2['default'])(drivers.DOM), _sourcesTodos2['default']);
-  todos$.subscribe(_sinksLocalStorageJs2['default']);
-  loaded$.subscribe(_sinksGooglemapJs2['default']);
+  todos$.subscribe(_sinksGooglemapJs2['default']);
   return (0, _viewsTodos2['default'])(todos$);
 }
 
@@ -15910,13 +15908,29 @@ Object.defineProperty(exports, '__esModule', {
 });
 exports['default'] = initalizeMapSink;
 
-function initalizeMapSink(serviceProviderData) {
+function initalizeMapSink(providerData) {
   // Observe all todos data and save them to localStorage
-  var mapOptions = {
-    center: { lat: -34.397, lng: 150.644 },
-    zoom: 8
-  };
-  var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+  function initialize() {
+    var provider1 = providerData[0].lastMinuteInfo;
+    var center = new google.maps.LatLng(provider1.lat, provider1.lon);
+    var mapOptions = {
+      center: center,
+      zoom: 10
+    };
+    var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+    for (var i = 0; i < providerData.length; i++) {
+      var provider = providerData[i];
+      var myLatLng = new google.maps.LatLng(provider.lastMinuteInfo.lat, provider.lastMinuteInfo.lon);
+      var marker = new google.maps.Marker({
+        position: myLatLng,
+        map: map,
+        title: provider.lastMinuteInfo.customerName,
+        zIndex: 0
+      });
+    }
+  }
+  initialize();
 }
 
 ;

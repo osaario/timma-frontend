@@ -10,10 +10,8 @@ import localStorageSink from './sinks/local-storage.js';
 import initalizeMapSink from './sinks/googlemap.js';
 
 function main(drivers) {
-  let loaded$ = Rx.Observable.interval(1000).take(1);
   let todos$ = model(intent(drivers.DOM), source);
-  todos$.subscribe(localStorageSink);
-  loaded$.subscribe(initalizeMapSink)
+  todos$.subscribe(initalizeMapSink);
   return view(todos$);
 }
 
