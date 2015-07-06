@@ -21,5 +21,10 @@
     "build-debug": "mkdir -p js && browserify src/app.js -t babelify --outfile js/app.js",
     "uglify": "uglifyjs js/app.js -o js/app.min.js",
     "build": "npm run build-debug && npm run uglify"
+  },
+  "dependencies": {
+    "connect": "^3.4.0",
+    "jquery": "^2.1.4",
+    "serve-static": "^1.10.0"
   }
 }

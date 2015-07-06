@@ -4,35 +4,33 @@ import {propHook} from '../utils';
 
 function vrenderHeader(todosData) {
   return h('header#header', [
-    h('h1', 'todos'),
-    h('input#new-todo', {
+    h('h1', 'timma')
+  /*  h('input#new-todo', {
       type: 'text',
       value: propHook(elem => { elem.value = todosData.input; }),
       attributes: {
-        placeholder: 'What needs to be done?'
+        placeholder: 'Shit needs to be done'
       },
       autofocus: true,
       name: 'newTodo'
-    })
+    })*/
   ]);
 }
 
 function vrenderMainSection(todosData) {
-  let allCompleted = todosData.list.reduce((x, y) => x && y.completed, true);
   return h('section#main', {
-    style: {'display': todosData.list.length ? '' : 'none'}
+    style: {'display': ''}
   }, [
     h('input#toggle-all', {
       type: 'checkbox',
-      checked: allCompleted
+      checked: true
     }),
-    h('ul#todo-list', todosData.list
-      .filter(todosData.filterFn)
+    h('ul#todo-list', todosData
       .map(todoData =>
         h('todo-item.todo-item', {
           key: todoData.id,
           todoid: todoData.id,
-          content: todoData.title,
+          content: todoData.lastMinuteInfo.customerName,
           completed: todoData.completed
         })
       )
@@ -40,6 +38,7 @@ function vrenderMainSection(todosData) {
   ])
 }
 
+/*
 function vrenderFooter(todosData) {
   let amountCompleted = todosData.list
     .filter(todoData => todoData.completed)
@@ -75,14 +74,15 @@ function vrenderFooter(todosData) {
     )
   ])
 }
+*/
 
 export default function view(todos$) {
   return {
     DOM: todos$.map(todos =>
       h('div', [
         vrenderHeader(todos),
-        vrenderMainSection(todos),
-        vrenderFooter(todos)
+        vrenderMainSection(todos)
+        //vrenderFooter(todos)
       ])
     )
   };

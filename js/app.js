@@ -15543,7 +15543,7 @@ process.nextTick = function (fun) {
         }
     }
     queue.push(new Item(fun, args));
-    if (!draining) {
+    if (queue.length === 1 && !draining) {
         setTimeout(drainQueue, 0);
     }
 };
@@ -15587,6 +15587,55 @@ process.umask = function() { return 0; };
 },{}],115:[function(require,module,exports){
 'use strict';
 
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _cycleCore = require('@cycle/core');
+
+var _cycleCore2 = _interopRequireDefault(_cycleCore);
+
+var _cycleWeb = require('@cycle/web');
+
+var _cycleWeb2 = _interopRequireDefault(_cycleWeb);
+
+var _componentsTodoItem = require('./components/todo-item');
+
+var _componentsTodoItem2 = _interopRequireDefault(_componentsTodoItem);
+
+var _sourcesTodos = require('./sources/todos');
+
+var _sourcesTodos2 = _interopRequireDefault(_sourcesTodos);
+
+var _intentsTodos = require('./intents/todos');
+
+var _intentsTodos2 = _interopRequireDefault(_intentsTodos);
+
+var _modelsTodos = require('./models/todos');
+
+var _modelsTodos2 = _interopRequireDefault(_modelsTodos);
+
+var _viewsTodos = require('./views/todos');
+
+var _viewsTodos2 = _interopRequireDefault(_viewsTodos);
+
+var _sinksLocalStorageJs = require('./sinks/local-storage.js');
+
+var _sinksLocalStorageJs2 = _interopRequireDefault(_sinksLocalStorageJs);
+
+function main(drivers) {
+  var todos$ = (0, _modelsTodos2['default'])((0, _intentsTodos2['default'])(drivers.DOM), _sourcesTodos2['default']);
+  todos$.subscribe(_sinksLocalStorageJs2['default']);
+  return (0, _viewsTodos2['default'])(todos$);
+}
+
+_cycleCore2['default'].run(main, {
+  DOM: _cycleWeb2['default'].makeDOMDriver('#todoapp', {
+    'todo-item': _componentsTodoItem2['default']
+  })
+});
+
+},{"./components/todo-item":116,"./intents/todos":117,"./models/todos":118,"./sinks/local-storage.js":119,"./sources/todos":120,"./views/todos":122,"@cycle/core":1,"@cycle/web":5}],116:[function(require,module,exports){
+'use strict';
+
 var _cycleCore = require('@cycle/core');
 
 var _cycleWeb = require('@cycle/web');
@@ -15619,14 +15668,14 @@ function todoItemComponent(drivers) {
     var completed = _ref.completed;
 
     var classes = (completed ? '.completed' : '') + (editing ? '.editing' : '');
-    return _cycleWeb.h('li.todoRoot' + classes, [_cycleWeb.h('div.view', [_cycleWeb.h('input.toggle', {
+    return (0, _cycleWeb.h)('li.todoRoot' + classes, [(0, _cycleWeb.h)('div.view', [(0, _cycleWeb.h)('input.toggle', {
       type: 'checkbox',
-      checked: _utils.propHook(function (elem) {
+      checked: (0, _utils.propHook)(function (elem) {
         return elem.checked = completed;
       })
-    }), _cycleWeb.h('label', content), _cycleWeb.h('button.destroy')]), _cycleWeb.h('input.edit', {
+    }), (0, _cycleWeb.h)('label', content), (0, _cycleWeb.h)('button.destroy')]), (0, _cycleWeb.h)('input.edit', {
       type: 'text',
-      value: _utils.propHook(function (element) {
+      value: (0, _utils.propHook)(function (element) {
         element.value = content;
         if (editing) {
           element.focus();
@@ -15657,7 +15706,7 @@ function todoItemComponent(drivers) {
 
 module.exports = todoItemComponent;
 
-},{"../utils":120,"@cycle/core":1,"@cycle/web":5}],116:[function(require,module,exports){
+},{"../utils":121,"@cycle/core":1,"@cycle/web":5}],117:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -15707,7 +15756,7 @@ function intent(domDriver) {
 ;
 module.exports = exports['default'];
 
-},{"../utils":120,"@cycle/core":1}],117:[function(require,module,exports){
+},{"../utils":121,"@cycle/core":1}],118:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -15840,32 +15889,34 @@ function model(intent, source) {
 exports['default'] = model;
 module.exports = exports['default'];
 
-},{"@cycle/core":1}],118:[function(require,module,exports){
-'use strict';
+},{"@cycle/core":1}],119:[function(require,module,exports){
+"use strict";
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports['default'] = localStorageSink;
+exports["default"] = localStorageSink;
 
-function localStorageSink(todosData) {
-  // Observe all todos data and save them to localStorage
-  var savedTodosData = {
-    list: todosData.list.map(function (todoData) {
-      return {
-        title: todoData.title,
-        completed: todoData.completed,
-        id: todoData.id
-      };
-    })
-  };
-  localStorage.setItem('todos-cycle', JSON.stringify(savedTodosData));
-}
+function localStorageSink(todosData) {}
 
 ;
-module.exports = exports['default'];
+module.exports = exports["default"];
 
-},{}],119:[function(require,module,exports){
+// Observe all todos data and save them to localStorage
+/*
+let savedTodosData = {
+  list: todosData.list.map(todoData =>
+    ({
+      title: todoData.title,
+      completed: todoData.completed,
+      id: todoData.id
+    })
+  )
+};
+*/
+//localStorage.setItem('todos-cycle', JSON.stringify(savedTodosData))
+
+},{}],120:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -15896,16 +15947,24 @@ var defaultTodosData = {
     ;
   } };
 
+function getServiceSlots() {
+  return $.ajax({
+    url: 'https://timma.fi/api/public/lastminuteslots/service/101?city=Helsinki'
+  }).promise();
+};
+
 var storedTodosData = JSON.parse(localStorage.getItem('todos-cycle')) || {};
 
 var initialTodosData = merge(defaultTodosData, storedTodosData);
 
+var serviceSlotsData = _cycleCore.Rx.Observable.fromPromise(getServiceSlots());
+
 exports['default'] = {
-  todosData$: _cycleCore.Rx.Observable.just(initialTodosData)
+  todosData$: serviceSlotsData
 };
 module.exports = exports['default'];
 
-},{"@cycle/core":1}],120:[function(require,module,exports){
+},{"@cycle/core":1}],121:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -15944,7 +16003,7 @@ exports.propHook = propHook;
 exports.ENTER_KEY = ENTER_KEY;
 exports.ESC_KEY = ESC_KEY;
 
-},{}],121:[function(require,module,exports){
+},{}],122:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -15959,58 +16018,79 @@ var _cycleWeb = require('@cycle/web');
 var _utils = require('../utils');
 
 function vrenderHeader(todosData) {
-  return _cycleWeb.h('header#header', [_cycleWeb.h('h1', 'todos'), _cycleWeb.h('input#new-todo', {
-    type: 'text',
-    value: _utils.propHook(function (elem) {
-      elem.value = todosData.input;
-    }),
-    attributes: {
-      placeholder: 'What needs to be done?'
-    },
-    autofocus: true,
-    name: 'newTodo'
-  })]);
+  return (0, _cycleWeb.h)('header#header', [(0, _cycleWeb.h)('h1', 'timma')
+  /*  h('input#new-todo', {
+      type: 'text',
+      value: propHook(elem => { elem.value = todosData.input; }),
+      attributes: {
+        placeholder: 'Shit needs to be done'
+      },
+      autofocus: true,
+      name: 'newTodo'
+    })*/
+  ]);
 }
 
 function vrenderMainSection(todosData) {
-  var allCompleted = todosData.list.reduce(function (x, y) {
-    return x && y.completed;
-  }, true);
-  return _cycleWeb.h('section#main', {
-    style: { 'display': todosData.list.length ? '' : 'none' }
-  }, [_cycleWeb.h('input#toggle-all', {
+  return (0, _cycleWeb.h)('section#main', {
+    style: { 'display': '' }
+  }, [(0, _cycleWeb.h)('input#toggle-all', {
     type: 'checkbox',
-    checked: allCompleted
-  }), _cycleWeb.h('ul#todo-list', todosData.list.filter(todosData.filterFn).map(function (todoData) {
-    return _cycleWeb.h('todo-item.todo-item', {
+    checked: true
+  }), (0, _cycleWeb.h)('ul#todo-list', todosData.map(function (todoData) {
+    return (0, _cycleWeb.h)('todo-item.todo-item', {
       key: todoData.id,
       todoid: todoData.id,
-      content: todoData.title,
+      content: todoData.lastMinuteInfo.customerName,
       completed: todoData.completed
     });
   }))]);
 }
 
+/*
 function vrenderFooter(todosData) {
-  var amountCompleted = todosData.list.filter(function (todoData) {
-    return todoData.completed;
-  }).length;
-  var amountActive = todosData.list.length - amountCompleted;
-  return _cycleWeb.h('footer#footer', {
-    style: { 'display': todosData.list.length ? '' : 'none' }
-  }, [_cycleWeb.h('span#todo-count', [_cycleWeb.h('strong', String(amountActive)), ' item' + (amountActive !== 1 ? 's' : '') + ' left']), _cycleWeb.h('ul#filters', [_cycleWeb.h('li', [_cycleWeb.h('a' + (todosData.filter === '' ? '.selected' : ''), {
-    attributes: { 'href': '#/' }
-  }, 'All')]), _cycleWeb.h('li', [_cycleWeb.h('a' + (todosData.filter === 'active' ? '.selected' : ''), {
-    attributes: { 'href': '#/active' }
-  }, 'Active')]), _cycleWeb.h('li', [_cycleWeb.h('a' + (todosData.filter === 'completed' ? '.selected' : ''), {
-    attributes: { 'href': '#/completed' }
-  }, 'Completed')])]), amountCompleted > 0 ? _cycleWeb.h('button#clear-completed', 'Clear completed (' + amountCompleted + ')') : null]);
+  let amountCompleted = todosData.list
+    .filter(todoData => todoData.completed)
+    .length;
+  let amountActive = todosData.list.length - amountCompleted;
+  return h('footer#footer', {
+    style: {'display': todosData.list.length ? '' : 'none'}
+  }, [
+    h('span#todo-count', [
+      h('strong', String(amountActive)),
+      ' item' + (amountActive !== 1 ? 's' : '') + ' left'
+    ]),
+    h('ul#filters', [
+      h('li', [
+        h('a' + (todosData.filter === '' ? '.selected' : ''), {
+          attributes: {'href': '#/'}
+        }, 'All')
+      ]),
+      h('li', [
+        h('a' + (todosData.filter === 'active' ? '.selected' : ''), {
+          attributes: {'href': '#/active'}
+        }, 'Active')
+      ]),
+      h('li', [
+        h('a' + (todosData.filter === 'completed' ? '.selected' : ''), {
+          attributes: {'href': '#/completed'}
+        }, 'Completed')
+      ])
+    ]),
+    (amountCompleted > 0 ?
+      h('button#clear-completed', 'Clear completed (' + amountCompleted + ')')
+      : null
+    )
+  ])
 }
+*/
 
 function view(todos$) {
   return {
     DOM: todos$.map(function (todos) {
-      return _cycleWeb.h('div', [vrenderHeader(todos), vrenderMainSection(todos), vrenderFooter(todos)]);
+      return (0, _cycleWeb.h)('div', [vrenderHeader(todos), vrenderMainSection(todos)
+      //vrenderFooter(todos)
+      ]);
     })
   };
 }
@@ -16018,53 +16098,4 @@ function view(todos$) {
 ;
 module.exports = exports['default'];
 
-},{"../utils":120,"@cycle/core":1,"@cycle/web":5}],122:[function(require,module,exports){
-'use strict';
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-var _cycleCore = require('@cycle/core');
-
-var _cycleCore2 = _interopRequireDefault(_cycleCore);
-
-var _cycleWeb = require('@cycle/web');
-
-var _cycleWeb2 = _interopRequireDefault(_cycleWeb);
-
-var _componentsTodoItem = require('./components/todo-item');
-
-var _componentsTodoItem2 = _interopRequireDefault(_componentsTodoItem);
-
-var _sourcesTodos = require('./sources/todos');
-
-var _sourcesTodos2 = _interopRequireDefault(_sourcesTodos);
-
-var _intentsTodos = require('./intents/todos');
-
-var _intentsTodos2 = _interopRequireDefault(_intentsTodos);
-
-var _modelsTodos = require('./models/todos');
-
-var _modelsTodos2 = _interopRequireDefault(_modelsTodos);
-
-var _viewsTodos = require('./views/todos');
-
-var _viewsTodos2 = _interopRequireDefault(_viewsTodos);
-
-var _sinksLocalStorageJs = require('./sinks/local-storage.js');
-
-var _sinksLocalStorageJs2 = _interopRequireDefault(_sinksLocalStorageJs);
-
-function main(drivers) {
-  var todos$ = _modelsTodos2['default'](_intentsTodos2['default'](drivers.DOM), _sourcesTodos2['default']);
-  todos$.subscribe(_sinksLocalStorageJs2['default']);
-  return _viewsTodos2['default'](todos$);
-}
-
-_cycleCore2['default'].run(main, {
-  DOM: _cycleWeb2['default'].makeDOMDriver('#todoapp', {
-    'todo-item': _componentsTodoItem2['default']
-  })
-});
-
-},{"./components/todo-item":115,"./intents/todos":116,"./models/todos":117,"./sinks/local-storage.js":118,"./sources/todos":119,"./views/todos":121,"@cycle/core":1,"@cycle/web":5}]},{},[122]);
+},{"../utils":121,"@cycle/core":1,"@cycle/web":5}]},{},[115]);
