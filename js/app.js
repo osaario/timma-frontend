@@ -20529,6 +20529,10 @@ var _componentsTodoItem = require('./components/todo-item');
 
 var _componentsTodoItem2 = _interopRequireDefault(_componentsTodoItem);
 
+var _componentsGooglemapComponent = require('./components/googlemap-component');
+
+var _componentsGooglemapComponent2 = _interopRequireDefault(_componentsGooglemapComponent);
+
 var _sourcesTodos = require('./sources/todos');
 
 var _sourcesTodos2 = _interopRequireDefault(_sourcesTodos);
@@ -20566,11 +20570,49 @@ function main(drivers) {
 
 _cycleCore2['default'].run(main, {
   DOM: _cycleWeb2['default'].makeDOMDriver('#todoapp', {
-    'todo-item': _componentsTodoItem2['default']
+    'todo-item': _componentsTodoItem2['default'],
+    'main-map': _componentsGooglemapComponent2['default']
   })
 });
 
-},{"./components/todo-item":117,"./drivers/googlemap":118,"./intents/todos":119,"./models/todos":120,"./sinks/local-storage.js":121,"./sources/todos":122,"./views/todos":124,"@cycle/core":1,"@cycle/web":5}],117:[function(require,module,exports){
+},{"./components/googlemap-component":117,"./components/todo-item":118,"./drivers/googlemap":119,"./intents/todos":120,"./models/todos":121,"./sinks/local-storage.js":122,"./sources/todos":123,"./views/todos":125,"@cycle/core":1,"@cycle/web":5}],117:[function(require,module,exports){
+'use strict';
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _cycleCore = require('@cycle/core');
+
+var _cycleWeb = require('@cycle/web');
+
+var _widgetsGooglemapWidget = require('../widgets/googlemap-widget');
+
+var _widgetsGooglemapWidget2 = _interopRequireDefault(_widgetsGooglemapWidget);
+
+function googleMapComponent(drivers) {
+  var intent = {
+    bounds$: drivers.DOM.get('timma-map', 'bounds_changed')
+  };
+
+  var defaultProps = { markers: [] };
+  var props$ = drivers.props.getAll().startWith(defaultProps).shareReplay(1);
+
+  var vtree$ = props$.map(function (_ref) {
+    var markers = _ref.markers;
+
+    return new _widgetsGooglemapWidget2['default'](markers);
+  });
+
+  return {
+    DOM: vtree$,
+    events: {
+      bounds: intent.bounds$
+    }
+  };
+}
+
+module.exports = googleMapComponent;
+
+},{"../widgets/googlemap-widget":126,"@cycle/core":1,"@cycle/web":5}],118:[function(require,module,exports){
 'use strict';
 
 var _cycleCore = require('@cycle/core');
@@ -20650,7 +20692,7 @@ function todoItemComponent(drivers) {
 
 module.exports = todoItemComponent;
 
-},{"../utils":123,"@cycle/core":1,"@cycle/web":5}],118:[function(require,module,exports){
+},{"../utils":124,"@cycle/core":1,"@cycle/web":5}],119:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -20705,7 +20747,7 @@ function googleMapDriver() {
 
 module.exports = exports['default'];
 
-},{"@cycle/core":1}],119:[function(require,module,exports){
+},{"@cycle/core":1}],120:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -20755,7 +20797,7 @@ function intent(domDriver) {
 ;
 module.exports = exports['default'];
 
-},{"../utils":123,"@cycle/core":1}],120:[function(require,module,exports){
+},{"../utils":124,"@cycle/core":1}],121:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -20888,7 +20930,7 @@ function model(intent, source) {
 exports['default'] = model;
 module.exports = exports['default'];
 
-},{"@cycle/core":1}],121:[function(require,module,exports){
+},{"@cycle/core":1}],122:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20915,7 +20957,7 @@ let savedTodosData = {
 */
 //localStorage.setItem('todos-cycle', JSON.stringify(savedTodosData))
 
-},{}],122:[function(require,module,exports){
+},{}],123:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -20963,7 +21005,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{"@cycle/core":1}],123:[function(require,module,exports){
+},{"@cycle/core":1}],124:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21002,7 +21044,7 @@ exports.propHook = propHook;
 exports.ENTER_KEY = ENTER_KEY;
 exports.ESC_KEY = ESC_KEY;
 
-},{}],124:[function(require,module,exports){
+},{}],125:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -21010,24 +21052,16 @@ Object.defineProperty(exports, '__esModule', {
 });
 exports['default'] = view;
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
 var _cycleCore = require('@cycle/core');
 
 var _cycleWeb = require('@cycle/web');
 
 var _utils = require('../utils');
 
-var _widgetsGooglemapWidget = require('../widgets/googlemap-widget');
-
-var _widgetsGooglemapWidget2 = _interopRequireDefault(_widgetsGooglemapWidget);
-
 function vrenderMainSection(todosData) {
   return (0, _cycleWeb.h)('section#main', {
     style: { 'display': '' }
-  }, [new _widgetsGooglemapWidget2['default'](todosData.map(function (data) {
-    return new google.maps.LatLng(data.lastMinuteInfo.lat, data.lastMinuteInfo.lon);
-  })), (0, _cycleWeb.h)('ul.list-group', _.chain(todosData).groupBy(function (x) {
+  }, [(0, _cycleWeb.h)('main-map.main-map', { markers: todosData }), (0, _cycleWeb.h)('ul.list-group', _.chain(todosData).groupBy(function (x) {
     return x.customerId;
   }).map(function (todoData) {
     return (0, _cycleWeb.h)('li.list-group-item', [(0, _cycleWeb.h)('div.row', [(0, _cycleWeb.h)('div.col-sm-3', [(0, _cycleWeb.h)('a.thumbnail', [(0, _cycleWeb.h)('img', { 'src': todoData[0].lastMinuteInfo.imageUrl })])]), (0, _cycleWeb.h)('div.col-sm-9', [(0, _cycleWeb.h)('h3', todoData[0].lastMinuteInfo.customerName), (0, _cycleWeb.h)('div', todoData[0].lastMinuteInfo.district)])])]);
@@ -21085,7 +21119,7 @@ function view(todos$) {
 ;
 module.exports = exports['default'];
 
-},{"../utils":123,"../widgets/googlemap-widget":125,"@cycle/core":1,"@cycle/web":5}],125:[function(require,module,exports){
+},{"../utils":124,"@cycle/core":1,"@cycle/web":5}],126:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
