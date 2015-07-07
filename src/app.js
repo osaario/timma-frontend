@@ -11,22 +11,17 @@ import localStorageSink from './sinks/local-storage.js';
 
 function main(drivers) {
   let todos$ = model(intent(drivers.DOM), source);
+  /*
   drivers.googleMap.markers(todos$);
   drivers.googleMap.bounds$.subscribe(function(x){
     console.log(x);
   });
-  return view(todos$.combineLatest(drivers.googleMap.bounds$, (providers, bounds) =>
-  {
-    return _.filter(providers, (elem) => {
-        var myLatLng = new google.maps.LatLng(elem.lastMinuteInfo.lat, elem.lastMinuteInfo.lon);
-        return bounds.contains(myLatLng);
-    });
-  }));
+  */
+  return view(todos$);
 }
 
 Cycle.run(main, {
   DOM: CycleWeb.makeDOMDriver('#todoapp', {
     'todo-item': todoItemComponent
-  }),
-  googleMap: googleMapDriver
+  })
 });
