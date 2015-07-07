@@ -1,9 +1,10 @@
 import Immutable from 'immutable';
 
-class OfficesMap {
-  constructor(percentage) {
+class TimmaMap {
+  constructor(markers) {
     this.type = 'Widget';
-    this.percentage = percentage;
+    this.markers = markers;
+    this.markersRendered = false;
   }
 
   init() {
@@ -32,6 +33,17 @@ class OfficesMap {
   }
 
   update(previous, domNode) {
+    //Epic diffing function for now since we only render markers once atm
+    if(this.markersRendered == true) return;
+    this.markers.forEach((m) => {
+      var _ = new google.maps.Marker({
+        position: m,
+        map: domNode.officesMap.map,
+        title: "",
+        zIndex: 0
+      });
+    });
+    if(this.markers.length > 0) this.markersRendered = true;
     // Let's be optimistic: ceil()
 
     // How much we have traveled already
@@ -40,4 +52,4 @@ class OfficesMap {
   destroy(domNode) { }
 }
 
-module.exports = OfficesMap;
+module.exports = TimmaMap;

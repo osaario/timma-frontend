@@ -1,14 +1,14 @@
 import {Rx} from '@cycle/core';
 import {h} from '@cycle/web';
 import {propHook} from '../utils';
-import OfficesMap from '../widgets/googlemap-widget'
+import TimmaMap from '../widgets/googlemap-widget'
 
 
 function vrenderMainSection(todosData) {
   return h('section#main', {
     style: {'display': ''}
   }, [
-    new OfficesMap(0.5),
+    new TimmaMap(todosData.map( data => new google.maps.LatLng(data.lastMinuteInfo.lat, data.lastMinuteInfo.lon))),
     h('ul.list-group',
     _.chain(todosData)
     .groupBy(x => x.customerId)

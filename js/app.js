@@ -21025,7 +21025,9 @@ var _widgetsGooglemapWidget2 = _interopRequireDefault(_widgetsGooglemapWidget);
 function vrenderMainSection(todosData) {
   return (0, _cycleWeb.h)('section#main', {
     style: { 'display': '' }
-  }, [new _widgetsGooglemapWidget2['default'](0.5), (0, _cycleWeb.h)('ul.list-group', _.chain(todosData).groupBy(function (x) {
+  }, [new _widgetsGooglemapWidget2['default'](todosData.map(function (data) {
+    return new google.maps.LatLng(data.lastMinuteInfo.lat, data.lastMinuteInfo.lon);
+  })), (0, _cycleWeb.h)('ul.list-group', _.chain(todosData).groupBy(function (x) {
     return x.customerId;
   }).map(function (todoData) {
     return (0, _cycleWeb.h)('li.list-group-item', [(0, _cycleWeb.h)('div.row', [(0, _cycleWeb.h)('div.col-sm-3', [(0, _cycleWeb.h)('a.thumbnail', [(0, _cycleWeb.h)('img', { 'src': todoData[0].lastMinuteInfo.imageUrl })])]), (0, _cycleWeb.h)('div.col-sm-9', [(0, _cycleWeb.h)('h3', todoData[0].lastMinuteInfo.customerName), (0, _cycleWeb.h)('div', todoData[0].lastMinuteInfo.district)])])]);
@@ -21096,15 +21098,16 @@ var _immutable = require('immutable');
 
 var _immutable2 = _interopRequireDefault(_immutable);
 
-var OfficesMap = (function () {
-  function OfficesMap(percentage) {
-    _classCallCheck(this, OfficesMap);
+var TimmaMap = (function () {
+  function TimmaMap(markers) {
+    _classCallCheck(this, TimmaMap);
 
     this.type = 'Widget';
-    this.percentage = percentage;
+    this.markers = markers;
+    this.markersRendered = false;
   }
 
-  _createClass(OfficesMap, [{
+  _createClass(TimmaMap, [{
     key: 'init',
     value: function init() {
       var element = document.createElement('div');
@@ -21129,19 +21132,30 @@ var OfficesMap = (function () {
     }
   }, {
     key: 'update',
-    value: function update(previous, domNode) {}
+    value: function update(previous, domNode) {
+      //Epic diffing function for now since we only render markers once atm
+      if (this.markersRendered == true) return;
+      this.markers.forEach(function (m) {
+        var _ = new google.maps.Marker({
+          position: m,
+          map: domNode.officesMap.map,
+          title: '',
+          zIndex: 0
+        });
+      });
+      if (this.markers.length > 0) this.markersRendered = true;
+      // Let's be optimistic: ceil()
+
+      // How much we have traveled already
+    }
   }, {
     key: 'destroy',
     value: function destroy(domNode) {}
   }]);
 
-  return OfficesMap;
+  return TimmaMap;
 })();
 
-module.exports = OfficesMap;
-
-// Let's be optimistic: ceil()
-
-// How much we have traveled already
+module.exports = TimmaMap;
 
 },{"immutable":115}]},{},[116]);
