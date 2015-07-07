@@ -16,7 +16,7 @@ function vrenderMainSection(todosData) {
     _.chain(todosData)
     .groupBy(x => x.customerId)
     .map(todoData =>
-      h('li.list-group-item', [
+      h('li.list-group-item.container', [
         h('div.row', [
           h('div.col-sm-3', [
             h('a.thumbnail', [

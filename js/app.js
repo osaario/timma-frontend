@@ -20831,7 +20831,7 @@ function vrenderMainSection(todosData) {
   }), (0, _cycleWeb.h)('ul.list-group', _.chain(todosData).groupBy(function (x) {
     return x.customerId;
   }).map(function (todoData) {
-    return (0, _cycleWeb.h)('li.list-group-item', [(0, _cycleWeb.h)('div.row', [(0, _cycleWeb.h)('div.col-sm-3', [(0, _cycleWeb.h)('a.thumbnail', [(0, _cycleWeb.h)('img', { 'src': todoData[0].lastMinuteInfo.imageUrl })])]), (0, _cycleWeb.h)('div.col-sm-9', [(0, _cycleWeb.h)('h3', todoData[0].lastMinuteInfo.customerName), (0, _cycleWeb.h)('div', todoData[0].lastMinuteInfo.district)])])]);
+    return (0, _cycleWeb.h)('li.list-group-item.container', [(0, _cycleWeb.h)('div.row', [(0, _cycleWeb.h)('div.col-sm-3', [(0, _cycleWeb.h)('a.thumbnail', [(0, _cycleWeb.h)('img', { 'src': todoData[0].lastMinuteInfo.imageUrl })])]), (0, _cycleWeb.h)('div.col-sm-9', [(0, _cycleWeb.h)('h3', todoData[0].lastMinuteInfo.customerName), (0, _cycleWeb.h)('div', todoData[0].lastMinuteInfo.district)])])]);
   }).value())]);
 }
 
