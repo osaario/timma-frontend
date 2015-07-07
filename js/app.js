@@ -20537,10 +20537,6 @@ var _sourcesTodos = require('./sources/todos');
 
 var _sourcesTodos2 = _interopRequireDefault(_sourcesTodos);
 
-var _driversGooglemap = require('./drivers/googlemap');
-
-var _driversGooglemap2 = _interopRequireDefault(_driversGooglemap);
-
 var _intentsTodos = require('./intents/todos');
 
 var _intentsTodos2 = _interopRequireDefault(_intentsTodos);
@@ -20559,12 +20555,6 @@ var _sinksLocalStorageJs2 = _interopRequireDefault(_sinksLocalStorageJs);
 
 function main(drivers) {
   var todos$ = (0, _modelsTodos2['default'])((0, _intentsTodos2['default'])(drivers.DOM), _sourcesTodos2['default']);
-  /*
-  drivers.googleMap.markers(todos$);
-  drivers.googleMap.bounds$.subscribe(function(x){
-    console.log(x);
-  });
-  */
   return (0, _viewsTodos2['default'])(todos$);
 }
 
@@ -20575,7 +20565,7 @@ _cycleCore2['default'].run(main, {
   })
 });
 
-},{"./components/googlemap-component":117,"./components/todo-item":118,"./drivers/googlemap":119,"./intents/todos":120,"./models/todos":121,"./sinks/local-storage.js":122,"./sources/todos":123,"./views/todos":125,"@cycle/core":1,"@cycle/web":5}],117:[function(require,module,exports){
+},{"./components/googlemap-component":117,"./components/todo-item":118,"./intents/todos":119,"./models/todos":120,"./sinks/local-storage.js":121,"./sources/todos":122,"./views/todos":124,"@cycle/core":1,"@cycle/web":5}],117:[function(require,module,exports){
 'use strict';
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -20589,10 +20579,6 @@ var _widgetsGooglemapWidget = require('../widgets/googlemap-widget');
 var _widgetsGooglemapWidget2 = _interopRequireDefault(_widgetsGooglemapWidget);
 
 function googleMapComponent(drivers) {
-  var intent = {
-    bounds$: drivers.DOM.get('timma-map', 'bounds_changed')
-  };
-
   var defaultProps = { markers: [] };
   var props$ = drivers.props.getAll().startWith(defaultProps).shareReplay(1);
 
@@ -20603,16 +20589,13 @@ function googleMapComponent(drivers) {
   });
 
   return {
-    DOM: vtree$,
-    events: {
-      bounds: intent.bounds$
-    }
+    DOM: vtree$
   };
 }
 
 module.exports = googleMapComponent;
 
-},{"../widgets/googlemap-widget":126,"@cycle/core":1,"@cycle/web":5}],118:[function(require,module,exports){
+},{"../widgets/googlemap-widget":125,"@cycle/core":1,"@cycle/web":5}],118:[function(require,module,exports){
 'use strict';
 
 var _cycleCore = require('@cycle/core');
@@ -20692,62 +20675,7 @@ function todoItemComponent(drivers) {
 
 module.exports = todoItemComponent;
 
-},{"../utils":124,"@cycle/core":1,"@cycle/web":5}],119:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
-exports['default'] = googleMapDriver;
-
-var _cycleCore = require('@cycle/core');
-
-function googleMapDriver() {
-  // Observe all todos data and save them to localStorage
-  var start_bounds = new google.maps.LatLngBounds();
-  start_bounds.extend(new google.maps.LatLng(60.16, 24.93));
-  var map$ = new _cycleCore.Rx.ReplaySubject(1);
-  function initialize() {
-    var mapOptions = {
-      center: start_bounds.getCenter(),
-      zoom: 12 };
-    var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
-    map$.onNext(map);
-  }
-  this.bounds$ = map$.flatMap(function (gMap) {
-    return _cycleCore.Rx.Observable.create(function (observer) {
-      google.maps.event.addListener(gMap, 'bounds_changed', function () {
-        // 3 seconds after the center of the map has changed, pan back to the
-        // marker.
-        var bounds = gMap.getBounds();
-        observer.onNext(bounds);
-      });
-    });
-  }).startWith(start_bounds);
-  google.maps.event.addDomListener(window, 'load', initialize);
-  this.markers = function (providerData$) {
-    var pairObs = map$.combineLatest(providerData$, function (gMap, providerData) {
-      return { map: gMap, providers: providerData };
-    });
-    pairObs.subscribe(function (pair) {
-      for (var i = 0; i < pair.providers.length; i++) {
-        var provider = pair.providers[i];
-        var myLatLng = new google.maps.LatLng(provider.lastMinuteInfo.lat, provider.lastMinuteInfo.lon);
-        var marker = new google.maps.Marker({
-          position: myLatLng,
-          map: pair.map,
-          title: provider.lastMinuteInfo.customerName,
-          zIndex: 0
-        });
-      }
-    });
-  };
-  return this;
-}
-
-module.exports = exports['default'];
-
-},{"@cycle/core":1}],120:[function(require,module,exports){
+},{"../utils":123,"@cycle/core":1,"@cycle/web":5}],119:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -20761,43 +20689,14 @@ var _utils = require('../utils');
 
 function intent(domDriver) {
   return {
-    changeRoute$: _cycleCore.Rx.Observable.fromEvent(window, 'hashchange').map(function (ev) {
-      return ev.newURL.match(/\#[^\#]*$/)[0].replace('#', '');
-    }).startWith(window.location.hash.replace('#', '')),
-
-    clearInput$: domDriver.get('#new-todo', 'keyup').filter(function (ev) {
-      return ev.keyCode === _utils.ESC_KEY;
-    }),
-
-    insertTodo$: domDriver.get('#new-todo', 'keyup').filter(function (ev) {
-      var trimmedVal = String(ev.target.value).trim();
-      return ev.keyCode === _utils.ENTER_KEY && trimmedVal;
-    }).map(function (ev) {
-      return String(ev.target.value).trim();
-    }),
-
-    editTodo$: domDriver.get('.todo-item', 'newContent').map(function (ev) {
-      return ev.detail;
-    }),
-
-    toggleTodo$: domDriver.get('.todo-item', 'toggle').map(function (ev) {
-      return ev.detail;
-    }),
-
-    toggleAll$: domDriver.get('#toggle-all', 'click'),
-
-    deleteTodo$: domDriver.get('.todo-item', 'destroy').map(function (ev) {
-      return ev.detail;
-    }),
-
-    deleteCompleteds$: domDriver.get('#clear-completed', 'click')
+    mapBoundsChanged$: domDriver.get('#timma-map', 'bounds_changed').startWith(null)
   };
 }
 
 ;
 module.exports = exports['default'];
 
-},{"../utils":124,"@cycle/core":1}],121:[function(require,module,exports){
+},{"../utils":123,"@cycle/core":1}],120:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -20806,131 +20705,22 @@ Object.defineProperty(exports, '__esModule', {
 
 var _cycleCore = require('@cycle/core');
 
-function getFilterFn(route) {
-  switch (route) {
-    case '/active':
-      return function (task) {
-        return task.completed === false;
-      };
-    case '/completed':
-      return function (task) {
-        return task.completed === true;
-      };
-    default:
-      return function () {
-        return true;
-      }; // allow anything
-  }
-}
-
-function determineFilter(todosData, route) {
-  todosData.filter = route.replace('/', '').trim();
-  todosData.filterFn = getFilterFn(route);
-  return todosData;
-}
-
-function searchTodoIndex(todosList, todoid) {
-  var top = todosList.length;
-  var bottom = 0;
-  var pointerId = undefined;
-  var index = undefined;
-  while (true) {
-    // binary search
-    index = bottom + (top - bottom >> 1);
-    pointerId = todosList[index].id;
-    if (pointerId === todoid) {
-      return index;
-    } else if (pointerId < todoid) {
-      bottom = index;
-    } else if (pointerId > todoid) {
-      top = index;
-    }
-  }
-}
-
-function makeModification$(intent) {
-  var clearInputMod$ = intent.clearInput$.map(function () {
-    return function (todosData) {
-      todosData.input = '';
-      return todosData;
-    };
-  });
-
-  var insertTodoMod$ = intent.insertTodo$.map(function (todoTitle) {
-    return function (todosData) {
-      var lastId = todosData.list.length > 0 ? todosData.list[todosData.list.length - 1].id : 0;
-      todosData.list.push({
-        id: lastId + 1,
-        title: todoTitle,
-        completed: false
-      });
-      todosData.input = '';
-      return todosData;
-    };
-  });
-
-  var editTodoMod$ = intent.editTodo$.map(function (evdata) {
-    return function (todosData) {
-      var todoIndex = searchTodoIndex(todosData.list, evdata.id);
-      todosData.list[todoIndex].title = evdata.content;
-      return todosData;
-    };
-  });
-
-  var toggleTodoMod$ = intent.toggleTodo$.map(function (todoid) {
-    return function (todosData) {
-      var todoIndex = searchTodoIndex(todosData.list, todoid);
-      var previousCompleted = todosData.list[todoIndex].completed;
-      todosData.list[todoIndex].completed = !previousCompleted;
-      return todosData;
-    };
-  });
-
-  var toggleAllMod$ = intent.toggleAll$.map(function () {
-    return function (todosData) {
-      var allAreCompleted = todosData.list.reduce(function (x, y) {
-        return x && y.completed;
-      }, true);
-      todosData.list.forEach(function (todoData) {
-        todoData.completed = allAreCompleted ? false : true;
-      });
-      return todosData;
-    };
-  });
-
-  var deleteTodoMod$ = intent.deleteTodo$.map(function (todoid) {
-    return function (todosData) {
-      var todoIndex = searchTodoIndex(todosData.list, todoid);
-      todosData.list.splice(todoIndex, 1);
-      return todosData;
-    };
-  });
-
-  var deleteCompletedsMod$ = intent.deleteCompleteds$.map(function () {
-    return function (todosData) {
-      todosData.list = todosData.list.filter(function (todoData) {
-        return todoData.completed === false;
-      });
-      return todosData;
-    };
-  });
-
-  return _cycleCore.Rx.Observable.merge(insertTodoMod$, deleteTodoMod$, toggleTodoMod$, toggleAllMod$, clearInputMod$, deleteCompletedsMod$, editTodoMod$);
-}
-
 function model(intent, source) {
-  var modification$ = makeModification$(intent);
-  var route$ = _cycleCore.Rx.Observable.just('/').merge(intent.changeRoute$);
+  return _cycleCore.Rx.Observable.combineLatest(intent.mapBoundsChanged$, source.todosData$, function (bounds, slots) {
 
-  return modification$.merge(source.todosData$).scan(function (todosData, modFn) {
-    return modFn(todosData);
-  }).combineLatest(route$, determineFilter).shareReplay(1);
+    if (bounds != null) {
+      return _.filter(slots, function (slot) {
+        return bounds.detail.contains(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon));
+      });
+    }
+    return slots;
+  });
 }
 
 exports['default'] = model;
 module.exports = exports['default'];
 
-},{"@cycle/core":1}],122:[function(require,module,exports){
+},{"@cycle/core":1}],121:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -20957,7 +20747,7 @@ let savedTodosData = {
 */
 //localStorage.setItem('todos-cycle', JSON.stringify(savedTodosData))
 
-},{}],123:[function(require,module,exports){
+},{}],122:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -20966,37 +20756,11 @@ Object.defineProperty(exports, '__esModule', {
 
 var _cycleCore = require('@cycle/core');
 
-function merge() {
-  var result = {};
-  for (var i = 0; i < arguments.length; i++) {
-    var object = arguments[i];
-    for (var key in object) {
-      if (object.hasOwnProperty(key)) {
-        result[key] = object[key];
-      }
-    }
-  }
-  return result;
-}
-
-var defaultTodosData = {
-  list: [],
-  input: '',
-  filter: '',
-  filterFn: function filterFn() {
-    return true // allow anything
-    ;
-  } };
-
 function getServiceSlots() {
   return $.ajax({
     url: 'https://timma.fi/api/public/lastminuteslots/service/101?city=Helsinki'
   }).promise();
 };
-
-var storedTodosData = JSON.parse(localStorage.getItem('todos-cycle')) || {};
-
-var initialTodosData = merge(defaultTodosData, storedTodosData);
 
 var serviceSlotsData = _cycleCore.Rx.Observable.fromPromise(getServiceSlots());
 
@@ -21005,7 +20769,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{"@cycle/core":1}],124:[function(require,module,exports){
+},{"@cycle/core":1}],123:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -21044,7 +20808,7 @@ exports.propHook = propHook;
 exports.ENTER_KEY = ENTER_KEY;
 exports.ESC_KEY = ESC_KEY;
 
-},{}],125:[function(require,module,exports){
+},{}],124:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -21061,7 +20825,7 @@ var _utils = require('../utils');
 function vrenderMainSection(todosData) {
   return (0, _cycleWeb.h)('section#main', {
     style: { 'display': '' }
-  }, [(0, _cycleWeb.h)('main-map.main-map', { markers: todosData.map(function (x) {
+  }, [(0, _cycleWeb.h)('main-map', { markers: todosData.map(function (x) {
       return new google.maps.LatLng(x.lastMinuteInfo.lat, x.lastMinuteInfo.lon);
     })
   }), (0, _cycleWeb.h)('ul.list-group', _.chain(todosData).groupBy(function (x) {
@@ -21122,7 +20886,7 @@ function view(todos$) {
 ;
 module.exports = exports['default'];
 
-},{"../utils":124,"@cycle/core":1,"@cycle/web":5}],126:[function(require,module,exports){
+},{"../utils":123,"@cycle/core":1,"@cycle/web":5}],125:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -21148,6 +20912,7 @@ var TimmaMap = (function () {
     key: 'init',
     value: function init() {
       var element = document.createElement('div');
+      element.id = 'timma-map';
       element.style.height = '500px';
       element.style.width = '100%';
 
@@ -21165,6 +20930,15 @@ var TimmaMap = (function () {
       };
 
       this.update(null, element);
+
+      google.maps.event.addListener(map, 'bounds_changed', function () {
+        // 3 seconds after the center of the map has changed, pan back to the
+        // marker.
+        var event = new CustomEvent('bounds_changed', { 'detail': map.getBounds() });
+        element.dispatchEvent(event);
+      });
+      var event = new CustomEvent('bounds_changed', { 'detail': map.getBounds() });
+      element.dispatchEvent(event);
       return element;
     }
   }, {

@@ -9,6 +9,7 @@ class TimmaMap {
 
   init() {
     let element = document.createElement('div');
+    element.id = 'timma-map'
     element.style.height = '500px';
     element.style.width = '100%';
 
@@ -29,6 +30,16 @@ class TimmaMap {
     };
 
     this.update(null, element);
+
+
+    google.maps.event.addListener(map, 'bounds_changed', function() {
+      // 3 seconds after the center of the map has changed, pan back to the
+      // marker.
+      var event = new CustomEvent('bounds_changed', {'detail': map.getBounds()});
+      element.dispatchEvent(event);
+    })
+    var event = new CustomEvent('bounds_changed', {'detail': map.getBounds()});
+    element.dispatchEvent(event);
     return element;
   }
 
