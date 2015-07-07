@@ -7,7 +7,11 @@ function vrenderMainSection(todosData) {
   return h('section#main', {
     style: {'display': ''}
   }, [
-    h('main-map.main-map', {markers: todosData}),
+    h('main-map.main-map', {markers:
+      todosData.map((x) =>  {
+        return new google.maps.LatLng(x.lastMinuteInfo.lat, x.lastMinuteInfo.lon);
+      })
+    }),
     h('ul.list-group',
     _.chain(todosData)
     .groupBy(x => x.customerId)
