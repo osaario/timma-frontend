@@ -73,12 +73,10 @@ function vrenderFooter(todosData) {
 */
 
 export default function view(todos$) {
-  return {
-    DOM: todos$.map(todos =>
+  return todos$.map(todos =>
       h('div', [
         vrenderMainSection(todos)
         //vrenderFooter(todos)
       ])
-    )
-  };
+    );
 };
