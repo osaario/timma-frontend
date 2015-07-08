@@ -2,18 +2,11 @@ import {Rx} from '@cycle/core';
 import {h} from '@cycle/web';
 import {propHook} from '../utils';
 
-
-function vrenderMainSection(todosData) {
+function vrenderSlotList(slots) {
   return h('section#main', {
     style: {'display': ''}
-  }, [
-    h('main-map', {markers:
-      todosData.map((x) =>  {
-        return new google.maps.LatLng(x.lastMinuteInfo.lat, x.lastMinuteInfo.lon);
-      })
-    }),
-    h('ul.list-group',
-    _.chain(todosData)
+  }, [ h('ul.list-group',
+    _.chain(slots)
     .groupBy(x => x.customerId)
     .map(todoData =>
       h('li.list-group-item.container', [
@@ -31,50 +24,25 @@ function vrenderMainSection(todosData) {
       ])
     ).value()
     )
-  ])
+  ]);
+}
+function vrenderMapSection({slots: slots}) {
+  return h('main-map', {markers:
+      slots.map((x) =>  {
+        return new google.maps.LatLng(x.lastMinuteInfo.lat, x.lastMinuteInfo.lon);
+      })
+    });
 }
 
-/*
-function vrenderFooter(todosData) {
-  let amountCompleted = todosData.list
-    .filter(todoData => todoData.completed)
-    .length;
-  let amountActive = todosData.list.length - amountCompleted;
-  return h('footer#footer', {
-    style: {'display': todosData.list.length ? '' : 'none'}
-  }, [
-    h('span#todo-count', [
-      h('strong', String(amountActive)),
-      ' item' + (amountActive !== 1 ? 's' : '') + ' left'
-    ]),
-    h('ul#filters', [
-      h('li', [
-        h('a' + (todosData.filter === '' ? '.selected' : ''), {
-          attributes: {'href': '#/'}
-        }, 'All')
-      ]),
-      h('li', [
-        h('a' + (todosData.filter === 'active' ? '.selected' : ''), {
-          attributes: {'href': '#/active'}
-        }, 'Active')
-      ]),
-      h('li', [
-        h('a' + (todosData.filter === 'completed' ? '.selected' : ''), {
-          attributes: {'href': '#/completed'}
-        }, 'Completed')
-      ])
-    ]),
-    (amountCompleted > 0 ?
-      h('button#clear-completed', 'Clear completed (' + amountCompleted + ')')
-      : null
-    )
-  ])
+
+function vrenderMainSection({slots: slots, route: route}) {
+  return vrenderSlotList(slots);
 }
-*/
 
 export default function view(todos$) {
   return todos$.map(todos =>
       h('div', [
+        vrenderMapSection(todos),
         vrenderMainSection(todos)
         //vrenderFooter(todos)
       ])

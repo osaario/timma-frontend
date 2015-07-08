@@ -22035,6 +22035,15 @@ function main(drivers) {
     url: SLOT_URL,
     method: 'GET'
   });
+
+  var providerClick$ = drivers.DOM.get('.thumbnail', 'click').doOnNext(function (ev) {
+    return ev.preventDefault();
+  }).map(function (ev) {
+    return ev.currentTarget.attributes.img.src;
+  }).subscribe(function (x) {
+    console.log(x);
+  });
+
   var slots$ = drivers.HTTP.filter(function (res$) {
     return res$.request.url.indexOf(SLOT_URL) === 0;
   }).mergeAll().map(function (res) {
@@ -22180,7 +22189,8 @@ var _utils = require('../utils');
 
 function intent(domDriver) {
   return {
-    mapBoundsChanged$: domDriver.get('#timma-map', 'bounds_changed').startWith(null)
+    mapBoundsChanged$: domDriver.get('#timma-map', 'bounds_changed').startWith(null),
+    thumbnailClick$: domDriver.get('.thumbnail', 'click')
   };
 }
 
@@ -22197,6 +22207,9 @@ Object.defineProperty(exports, '__esModule', {
 var _cycleCore = require('@cycle/core');
 
 function model(intent, source) {
+  var route$ = intent.thumbnailClick$.scan(function (acc, slot) {
+    return '/slot_id';
+  }).startWith('/');
   return _cycleCore.Rx.Observable.combineLatest(intent.mapBoundsChanged$, source, function (bounds, slots) {
 
     if (bounds != null) {
@@ -22205,6 +22218,11 @@ function model(intent, source) {
       });
     }
     return slots;
+  }).combineLatest(route$, function (slots, route) {
+    return {
+      slots: slots,
+      route: route
+    };
   });
 }
 
@@ -22291,60 +22309,34 @@ var _cycleWeb = require('@cycle/web');
 
 var _utils = require('../utils');
 
-function vrenderMainSection(todosData) {
+function vrenderSlotList(slots) {
   return (0, _cycleWeb.h)('section#main', {
     style: { 'display': '' }
-  }, [(0, _cycleWeb.h)('main-map', { markers: todosData.map(function (x) {
-      return new google.maps.LatLng(x.lastMinuteInfo.lat, x.lastMinuteInfo.lon);
-    })
-  }), (0, _cycleWeb.h)('ul.list-group', _.chain(todosData).groupBy(function (x) {
+  }, [(0, _cycleWeb.h)('ul.list-group', _.chain(slots).groupBy(function (x) {
     return x.customerId;
   }).map(function (todoData) {
     return (0, _cycleWeb.h)('li.list-group-item.container', [(0, _cycleWeb.h)('div.row', [(0, _cycleWeb.h)('div.col-sm-3', [(0, _cycleWeb.h)('a.thumbnail', [(0, _cycleWeb.h)('img', { 'src': todoData[0].lastMinuteInfo.imageUrl })])]), (0, _cycleWeb.h)('div.col-sm-9', [(0, _cycleWeb.h)('h3', todoData[0].lastMinuteInfo.customerName), (0, _cycleWeb.h)('div', todoData[0].lastMinuteInfo.district)])])]);
   }).value())]);
 }
+function vrenderMapSection(_ref) {
+  var slots = _ref.slots;
 
-/*
-function vrenderFooter(todosData) {
-  let amountCompleted = todosData.list
-    .filter(todoData => todoData.completed)
-    .length;
-  let amountActive = todosData.list.length - amountCompleted;
-  return h('footer#footer', {
-    style: {'display': todosData.list.length ? '' : 'none'}
-  }, [
-    h('span#todo-count', [
-      h('strong', String(amountActive)),
-      ' item' + (amountActive !== 1 ? 's' : '') + ' left'
-    ]),
-    h('ul#filters', [
-      h('li', [
-        h('a' + (todosData.filter === '' ? '.selected' : ''), {
-          attributes: {'href': '#/'}
-        }, 'All')
-      ]),
-      h('li', [
-        h('a' + (todosData.filter === 'active' ? '.selected' : ''), {
-          attributes: {'href': '#/active'}
-        }, 'Active')
-      ]),
-      h('li', [
-        h('a' + (todosData.filter === 'completed' ? '.selected' : ''), {
-          attributes: {'href': '#/completed'}
-        }, 'Completed')
-      ])
-    ]),
-    (amountCompleted > 0 ?
-      h('button#clear-completed', 'Clear completed (' + amountCompleted + ')')
-      : null
-    )
-  ])
+  return (0, _cycleWeb.h)('main-map', { markers: slots.map(function (x) {
+      return new google.maps.LatLng(x.lastMinuteInfo.lat, x.lastMinuteInfo.lon);
+    })
+  });
 }
-*/
+
+function vrenderMainSection(_ref2) {
+  var slots = _ref2.slots;
+  var route = _ref2.route;
+
+  return vrenderSlotList(slots);
+}
 
 function view(todos$) {
   return todos$.map(function (todos) {
-    return (0, _cycleWeb.h)('div', [vrenderMainSection(todos)
+    return (0, _cycleWeb.h)('div', [vrenderMapSection(todos), vrenderMainSection(todos)
     //vrenderFooter(todos)
     ]);
   });

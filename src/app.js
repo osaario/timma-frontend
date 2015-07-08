@@ -15,6 +15,15 @@ function main(drivers) {
     url: SLOT_URL,
     method: 'GET'
   });
+
+  let providerClick$ = drivers.DOM.get('.thumbnail', 'click')
+    .doOnNext(ev => ev.preventDefault())
+    .map(ev => ev.currentTarget.attributes.img.src)
+    .subscribe((x) => {
+      console.log(x);
+
+    });
+
   let slots$ = drivers.HTTP
    .filter(res$ => res$.request.url.indexOf(SLOT_URL) === 0)
    .mergeAll()
