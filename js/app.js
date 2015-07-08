@@ -22236,7 +22236,7 @@ var _utils = require('../utils');
 
 function intent(domDriver) {
   return {
-    mapBoundsChanged$: domDriver.get('#timma-map', 'bounds_changed').startWith(null),
+    mapBoundsChanged$: domDriver.get('#timma-map', 'bounds_changed').startWith(null).shareReplay(1),
     thumbnailClick$: domDriver.get('.list-slot', 'clickCustom').map(function (ev) {
       return ev.detail;
     }).shareReplay(1)
@@ -22259,8 +22259,8 @@ function model(intent, _ref) {
   var slots$ = _ref.slots;
   var provider$ = _ref.provider;
 
-  var route$ = intent.thumbnailClick$.map(function (_) {
-    return '/slot_id';
+  var route$ = intent.thumbnailClick$.timestamp().combineLatest(intent.mapBoundsChanged$.timestamp(), function (click, bounds) {
+    return bounds.timestamp > click.timestamp ? '/' : '/slot_id';
   }).startWith('/');
   return _cycleCore.Rx.Observable.combineLatest(intent.mapBoundsChanged$, slots$, function (bounds, slots) {
 

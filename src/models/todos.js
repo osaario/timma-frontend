@@ -1,9 +1,9 @@
 import {Rx} from '@cycle/core';
 
 function model(intent, {slots: slots$, provider: provider$}) {
-  let route$ = intent.thumbnailClick$.map((_) =>
+  let route$ = intent.thumbnailClick$.timestamp().combineLatest(intent.mapBoundsChanged$.timestamp(), (click, bounds) =>
   {
-    return '/slot_id'
+    return bounds.timestamp > click.timestamp ? '/' : '/slot_id';
   }).startWith('/');
   return Rx.Observable.combineLatest(intent.mapBoundsChanged$, slots$, (bounds, slots) => {
 
