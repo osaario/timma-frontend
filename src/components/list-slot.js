@@ -3,7 +3,7 @@ import {h} from '@cycle/web';
 
 function listSlotComponent(drivers) {
   let intent = {
-    click$: drivers.DOM.get('.thumbnail', 'click'),
+    click$: drivers.DOM.get('.list-slot-clickable', 'click'),
   };
 
   let props$ = drivers.props.getAll().shareReplay(1);
@@ -12,7 +12,7 @@ function listSlotComponent(drivers) {
     return h('li.list-group-item.container', [
       h('div.row', [
         h('div.col-sm-3', [
-          h('a.thumbnail', [
+          h('a.thumbnail.list-slot-clickable', [
             h('img', {"src": slot[0].lastMinuteInfo.imageUrl})
           ]),
         ]),
@@ -27,7 +27,7 @@ function listSlotComponent(drivers) {
   return {
     DOM: vtree$,
     events: {
-      click: intent.click$.withLatestFrom(props$, (ev, {customerId}) => customerId),
+      clickCustom: intent.click$.withLatestFrom(props$, (ev, {slot: slot}) => slot[0]),
     }
   };
 }

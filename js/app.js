@@ -22035,15 +22035,19 @@ var _sinksLocalStorageJs2 = _interopRequireDefault(_sinksLocalStorageJs);
 
 function main(drivers) {
   var SLOT_URL = 'https://timma.fi/api/public/lastminuteslots/service/101?city=Helsinki';
+  var PROVIDER_URL = 'https://timma.fi/api/public/customers/';
   var slot_req$ = _cycleCore.Rx.Observable.just({
     url: SLOT_URL,
     method: 'GET'
   });
 
-  var providerClick$ = drivers.DOM.get('.thumbnail', 'click').doOnNext(function (ev) {
-    return ev.preventDefault();
-  }).map(function (ev) {
-    return ev.currentTarget.attributes.img.src;
+  var intents = (0, _intentsTodos2['default'])(drivers.DOM);
+
+  var provider_req$ = intents.thumbnailClick$.map(function (slot) {
+    return {
+      url: PROVIDER_URL + slot.customerId,
+      method: 'GET'
+    };
   });
 
   var slots$ = drivers.HTTP.filter(function (res$) {
@@ -22052,10 +22056,10 @@ function main(drivers) {
     return res.body;
   }).startWith([]);
 
-  var todos$ = (0, _modelsTodos2['default'])((0, _intentsTodos2['default'])(drivers.DOM), slots$);
+  var todos$ = (0, _modelsTodos2['default'])(intents, slots$);
   return {
     DOM: (0, _viewsTodos2['default'])(todos$),
-    HTTP: slot_req$
+    HTTP: _cycleCore.Rx.Observable.merge(slot_req$, provider_req$)
   };
 }
 
@@ -22107,7 +22111,7 @@ var _cycleWeb = require('@cycle/web');
 
 function listSlotComponent(drivers) {
   var intent = {
-    click$: drivers.DOM.get('.thumbnail', 'click')
+    click$: drivers.DOM.get('.list-slot-clickable', 'click')
   };
 
   var props$ = drivers.props.getAll().shareReplay(1);
@@ -22115,15 +22119,15 @@ function listSlotComponent(drivers) {
   var vtree$ = props$.map(function (_ref) {
     var slot = _ref.slot;
 
-    return (0, _cycleWeb.h)('li.list-group-item.container', [(0, _cycleWeb.h)('div.row', [(0, _cycleWeb.h)('div.col-sm-3', [(0, _cycleWeb.h)('a.thumbnail', [(0, _cycleWeb.h)('img', { 'src': slot[0].lastMinuteInfo.imageUrl })])]), (0, _cycleWeb.h)('div.col-sm-9', [(0, _cycleWeb.h)('h3', slot[0].lastMinuteInfo.customerName), (0, _cycleWeb.h)('div', slot[0].lastMinuteInfo.district)])])]);
+    return (0, _cycleWeb.h)('li.list-group-item.container', [(0, _cycleWeb.h)('div.row', [(0, _cycleWeb.h)('div.col-sm-3', [(0, _cycleWeb.h)('a.thumbnail.list-slot-clickable', [(0, _cycleWeb.h)('img', { 'src': slot[0].lastMinuteInfo.imageUrl })])]), (0, _cycleWeb.h)('div.col-sm-9', [(0, _cycleWeb.h)('h3', slot[0].lastMinuteInfo.customerName), (0, _cycleWeb.h)('div', slot[0].lastMinuteInfo.district)])])]);
   });
 
   return {
     DOM: vtree$,
     events: {
-      click: intent.click$.withLatestFrom(props$, function (ev, _ref2) {
-        var customerId = _ref2.customerId;
-        return customerId;
+      clickCustom: intent.click$.withLatestFrom(props$, function (ev, _ref2) {
+        var slot = _ref2.slot;
+        return slot[0];
       })
     }
   };
@@ -22226,7 +22230,9 @@ var _utils = require('../utils');
 function intent(domDriver) {
   return {
     mapBoundsChanged$: domDriver.get('#timma-map', 'bounds_changed').startWith(null),
-    thumbnailClick$: domDriver.get('.list-slot', 'click')
+    thumbnailClick$: domDriver.get('.list-slot', 'clickCustom').map(function (ev) {
+      return ev.detail;
+    }).shareReplay(1)
   };
 }
 
@@ -22357,7 +22363,7 @@ function vrenderSlotList(slots) {
   }, [(0, _cycleWeb.h)('ul.list-group', _.chain(slots).groupBy(function (x) {
     return x.customerId;
   }).map(function (todoData) {
-    return (0, _cycleWeb.h)('list-slot', { slot: todoData });
+    return (0, _cycleWeb.h)('list-slot.list-slot', { slot: todoData });
   }).value())]);
 }
 

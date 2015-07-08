@@ -28,7 +28,7 @@ function vrenderSlotList(slots) {
     _.chain(slots)
     .groupBy(x => x.customerId)
     .map((todoData) => {
-      return h('list-slot', {slot: todoData});
+      return h('list-slot.list-slot', {slot: todoData});
     }).value()
   )]);
 }

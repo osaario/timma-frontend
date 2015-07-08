@@ -12,14 +12,20 @@ import localStorageSink from './sinks/local-storage.js';
 
 function main(drivers) {
   let SLOT_URL = 'https://timma.fi/api/public/lastminuteslots/service/101?city=Helsinki';
+  let PROVIDER_URL = 'https://timma.fi/api/public/customers/';
   let slot_req$ = Rx.Observable.just({
     url: SLOT_URL,
     method: 'GET'
   });
 
-  let providerClick$ = drivers.DOM.get('.thumbnail', 'click')
-    .doOnNext(ev => ev.preventDefault())
-    .map(ev => ev.currentTarget.attributes.img.src)
+  let intents = intent(drivers.DOM);
+
+  let provider_req$ = intents.thumbnailClick$.map((slot) => {
+    return {
+      url: PROVIDER_URL + slot.customerId,
+      method: 'GET'
+    };
+  });
 
   let slots$ = drivers.HTTP
    .filter(res$ => res$.request.url.indexOf(SLOT_URL) === 0)
@@ -27,10 +33,10 @@ function main(drivers) {
    .map(res => res.body)
    .startWith([]);
 
-  let todos$ = model(intent(drivers.DOM), slots$);
+  let todos$ = model(intents, slots$);
   return {
     DOM: view(todos$),
-    HTTP: slot_req$
+    HTTP:  Rx.Observable.merge(slot_req$, provider_req$)
   };
 }
 
