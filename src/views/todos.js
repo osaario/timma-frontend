@@ -2,30 +2,37 @@ import {Rx} from '@cycle/core';
 import {h} from '@cycle/web';
 import {propHook} from '../utils';
 
+function vrenderIndividualProvider(provider) {
+  return h('section#main', {
+    style: {'display': ''}
+  }, [ h('div.container',
+        h('div.row', [
+          h('div.col-sm-3', [
+            h('a.thumbnail', [
+              h('img', {"src": provider.lastMinuteInfo.imageUrl})
+            ]),
+          ]),
+          h('div.col-sm-9', [
+            h('h3', provider.lastMinuteInfo.customerName),
+            h('div', provider.lastMinuteInfo.district)
+          ]),
+      ])
+    )
+  ]);
+}
+
 function vrenderSlotList(slots) {
   return h('section#main', {
     style: {'display': ''}
   }, [ h('ul.list-group',
     _.chain(slots)
     .groupBy(x => x.customerId)
-    .map(todoData =>
-      h('li.list-group-item.container', [
-        h('div.row', [
-          h('div.col-sm-3', [
-            h('a.thumbnail', [
-              h('img', {"src": todoData[0].lastMinuteInfo.imageUrl})
-            ]),
-          ]),
-          h('div.col-sm-9', [
-            h('h3', todoData[0].lastMinuteInfo.customerName),
-            h('div', todoData[0].lastMinuteInfo.district)
-          ]),
-        ])
-      ])
-    ).value()
-    )
-  ]);
+    .map((todoData) => {
+      return h('list-slot', {slot: todoData});
+    }).value()
+  )]);
 }
+
 function vrenderMapSection({slots: slots}) {
   return h('main-map', {markers:
       slots.map((x) =>  {
@@ -36,7 +43,11 @@ function vrenderMapSection({slots: slots}) {
 
 
 function vrenderMainSection({slots: slots, route: route}) {
-  return vrenderSlotList(slots);
+  switch(route) {
+    case '/': return vrenderSlotList(slots);
+    case '/slot_id': return vrenderSlotList(slots);
+    default: return vrenderSlotList(slots);
+  }
 }
 
 export default function view(todos$) {

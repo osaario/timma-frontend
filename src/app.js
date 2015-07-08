@@ -3,6 +3,7 @@ import CycleWeb from '@cycle/web';
 import {Rx} from '@cycle/core';
 import todoItemComponent from './components/todo-item';
 import googleMapComponent from './components/googlemap-component';
+import listSlotComponent from './components/list-slot';
 import intent from './intents/todos';
 import model from './models/todos';
 import view from './views/todos';
@@ -19,10 +20,6 @@ function main(drivers) {
   let providerClick$ = drivers.DOM.get('.thumbnail', 'click')
     .doOnNext(ev => ev.preventDefault())
     .map(ev => ev.currentTarget.attributes.img.src)
-    .subscribe((x) => {
-      console.log(x);
-
-    });
 
   let slots$ = drivers.HTTP
    .filter(res$ => res$.request.url.indexOf(SLOT_URL) === 0)
@@ -40,6 +37,7 @@ function main(drivers) {
 Cycle.run(main, {
   DOM: CycleWeb.makeDOMDriver('#todoapp', {
     'todo-item': todoItemComponent,
+    'list-slot': listSlotComponent,
     'main-map': googleMapComponent
   }),
   HTTP: makeHTTPDriver()
