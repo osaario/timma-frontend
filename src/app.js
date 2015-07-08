@@ -33,7 +33,13 @@ function main(drivers) {
    .map(res => res.body)
    .startWith([]);
 
-  let todos$ = model(intents, slots$);
+  let provider$ = drivers.HTTP
+   .filter(res$ => res$.request.url.indexOf(PROVIDER_URL) === 0)
+   .mergeAll()
+   .map(res => res.body).startWith(null);
+
+  let todos$ = model(intents,  {slots: slots$, provider: provider$});
+
   return {
     DOM: view(todos$),
     HTTP:  Rx.Observable.merge(slot_req$, provider_req$)

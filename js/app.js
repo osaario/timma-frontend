@@ -22056,7 +22056,14 @@ function main(drivers) {
     return res.body;
   }).startWith([]);
 
-  var todos$ = (0, _modelsTodos2['default'])(intents, slots$);
+  var provider$ = drivers.HTTP.filter(function (res$) {
+    return res$.request.url.indexOf(PROVIDER_URL) === 0;
+  }).mergeAll().map(function (res) {
+    return res.body;
+  }).startWith(null);
+
+  var todos$ = (0, _modelsTodos2['default'])(intents, { slots: slots$, provider: provider$ });
+
   return {
     DOM: (0, _viewsTodos2['default'])(todos$),
     HTTP: _cycleCore.Rx.Observable.merge(slot_req$, provider_req$)
@@ -22248,11 +22255,14 @@ Object.defineProperty(exports, '__esModule', {
 
 var _cycleCore = require('@cycle/core');
 
-function model(intent, source) {
-  var route$ = intent.thumbnailClick$.scan(function (acc, slot) {
+function model(intent, _ref) {
+  var slots$ = _ref.slots;
+  var provider$ = _ref.provider;
+
+  var route$ = intent.thumbnailClick$.map(function (_) {
     return '/slot_id';
   }).startWith('/');
-  return _cycleCore.Rx.Observable.combineLatest(intent.mapBoundsChanged$, source, function (bounds, slots) {
+  return _cycleCore.Rx.Observable.combineLatest(intent.mapBoundsChanged$, slots$, function (bounds, slots) {
 
     if (bounds != null) {
       return _.filter(slots, function (slot) {
@@ -22260,9 +22270,10 @@ function model(intent, source) {
       });
     }
     return slots;
-  }).combineLatest(route$, function (slots, route) {
+  }).combineLatest(route$, provider$, function (slots, route, provider) {
     return {
       slots: slots,
+      provider: provider,
       route: route
     };
   });
@@ -22352,9 +22363,12 @@ var _cycleWeb = require('@cycle/web');
 var _utils = require('../utils');
 
 function vrenderIndividualProvider(provider) {
+  if (provider == null) {
+    return (0, _cycleWeb.h)('div')[(0, _cycleWeb.h)('h1', 'Loading provider')];
+  }
   return (0, _cycleWeb.h)('section#main', {
     style: { 'display': '' }
-  }, [(0, _cycleWeb.h)('div.container', (0, _cycleWeb.h)('div.row', [(0, _cycleWeb.h)('div.col-sm-3', [(0, _cycleWeb.h)('a.thumbnail', [(0, _cycleWeb.h)('img', { 'src': provider.lastMinuteInfo.imageUrl })])]), (0, _cycleWeb.h)('div.col-sm-9', [(0, _cycleWeb.h)('h3', provider.lastMinuteInfo.customerName), (0, _cycleWeb.h)('div', provider.lastMinuteInfo.district)])]))]);
+  }, [(0, _cycleWeb.h)('div.container', [(0, _cycleWeb.h)('div.row', [(0, _cycleWeb.h)('div.col-sm-3', [(0, _cycleWeb.h)('a.thumbnail', [(0, _cycleWeb.h)('img', { 'src': provider.images[0].url })])]), (0, _cycleWeb.h)('div.col-sm-9', [(0, _cycleWeb.h)('h3', provider.name), (0, _cycleWeb.h)('div', provider.district)])]), (0, _cycleWeb.h)('div.row', [(0, _cycleWeb.h)('div.col-sm-12', [(0, _cycleWeb.h)('p', provider.description)])])])]);
 }
 
 function vrenderSlotList(slots) {
@@ -22378,13 +22392,14 @@ function vrenderMapSection(_ref) {
 
 function vrenderMainSection(_ref2) {
   var slots = _ref2.slots;
+  var provider = _ref2.provider;
   var route = _ref2.route;
 
   switch (route) {
     case '/':
       return vrenderSlotList(slots);
     case '/slot_id':
-      return vrenderSlotList(slots);
+      return vrenderIndividualProvider(provider);
     default:
       return vrenderSlotList(slots);
   }

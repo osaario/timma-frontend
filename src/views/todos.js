@@ -3,20 +3,31 @@ import {h} from '@cycle/web';
 import {propHook} from '../utils';
 
 function vrenderIndividualProvider(provider) {
+  if(provider == null) {
+    return(h('div')[
+      h('h1', 'Loading provider')
+    ]);
+  }
   return h('section#main', {
     style: {'display': ''}
-  }, [ h('div.container',
+  }, [ h('div.container', [
         h('div.row', [
           h('div.col-sm-3', [
             h('a.thumbnail', [
-              h('img', {"src": provider.lastMinuteInfo.imageUrl})
+              h('img', {"src": provider.images[0].url})
             ]),
           ]),
           h('div.col-sm-9', [
-            h('h3', provider.lastMinuteInfo.customerName),
-            h('div', provider.lastMinuteInfo.district)
+            h('h3', provider.name),
+            h('div', provider.district)
           ]),
-      ])
+        ]),
+        h('div.row', [
+          h('div.col-sm-12', [
+            h('p', provider.description)
+          ]),
+        ])
+      ]
     )
   ]);
 }
@@ -42,10 +53,10 @@ function vrenderMapSection({slots: slots}) {
 }
 
 
-function vrenderMainSection({slots: slots, route: route}) {
+function vrenderMainSection({slots: slots, provider: provider, route: route}) {
   switch(route) {
     case '/': return vrenderSlotList(slots);
-    case '/slot_id': return vrenderSlotList(slots);
+    case '/slot_id': return vrenderIndividualProvider(provider);
     default: return vrenderSlotList(slots);
   }
 }
