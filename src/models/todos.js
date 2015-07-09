@@ -21,7 +21,7 @@ function model(intent, {slots: slots$, provider: provider$, services: services$}
   });
 
   let setBounds$ = intent.mapBoundsChanged$.merge(intent.cityClick$.map((c) => {
-   return {zoomLevel: 13, center: new google.maps.LatLng(c.lat, c.lon)};
+   return {bounds: c.bounds, zoomLevel: 13, center: new google.maps.LatLng(c.lat, c.lon)};
  }));
 
   return Rx.Observable.combineLatest(intent.mapBoundsChanged$, slots$, ({bounds: bounds}, slots) => {
@@ -38,7 +38,7 @@ function model(intent, {slots: slots$, provider: provider$, services: services$}
         {
           bounds.extend(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon))
         });
-        return {city: slots[0].lastMinuteInfo.city, lat: bounds.getCenter().lat(), lon: bounds.getCenter().lng()};
+        return {city: slots[0].lastMinuteInfo.city, bounds: bounds, lat: bounds.getCenter().lat(), lon: bounds.getCenter().lng()};
       })
       .values()
       .value();

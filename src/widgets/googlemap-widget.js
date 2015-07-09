@@ -1,12 +1,11 @@
 import Immutable from 'immutable';
 
 class TimmaMap {
-  constructor(markers, {center: center, zoomLevel: zoom}) {
+  constructor(markers, {bounds: bounds}) {
     this.type = 'Widget';
     this.markers = markers;
     this.markersRendered = false;
-    this.zoom = zoom;
-    this.center = center;
+    this.bounds = bounds;
   }
 
   init() {
@@ -16,7 +15,7 @@ class TimmaMap {
     element.style.width = '100%';
 
     let mapOptions = {
-      zoom: this.zoom,
+      zoom: 14,
       scrollwheel: true,
       center: new google.maps.LatLng(
         60.1543,
@@ -58,11 +57,8 @@ class TimmaMap {
         zIndex: 0
       });
     });
-    if(this.zoom !== domNode.officesMap.map.getZoom()) {
-        domNode.officesMap.map.setZoom(this.zoom);
-    }
-    if(this.center != null && this.center !== domNode.officesMap.map.getCenter()) {
-        domNode.officesMap.map.setCenter(this.center);
+    if(this.bounds != null && this.bounds !== domNode.officesMap.map.getBounds()) {
+        domNode.officesMap.map.fitBounds(this.bounds);
     }
 
     if(this.markers.length > 0) this.markersRendered = true;

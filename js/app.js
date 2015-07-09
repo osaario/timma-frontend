@@ -22383,7 +22383,7 @@ function model(intent, _ref) {
   });
 
   var setBounds$ = intent.mapBoundsChanged$.merge(intent.cityClick$.map(function (c) {
-    return { zoomLevel: 13, center: new google.maps.LatLng(c.lat, c.lon) };
+    return { bounds: c.bounds, zoomLevel: 13, center: new google.maps.LatLng(c.lat, c.lon) };
   }));
 
   return _cycleCore.Rx.Observable.combineLatest(intent.mapBoundsChanged$, slots$, function (_ref2, slots) {
@@ -22400,7 +22400,7 @@ function model(intent, _ref) {
       slots.forEach(function (slot) {
         bounds.extend(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon));
       });
-      return { city: slots[0].lastMinuteInfo.city, lat: bounds.getCenter().lat(), lon: bounds.getCenter().lng() };
+      return { city: slots[0].lastMinuteInfo.city, bounds: bounds, lat: bounds.getCenter().lat(), lon: bounds.getCenter().lng() };
     }).values().value();
 
     var filtered_services = _.chain(filtered).map(function (s) {
@@ -22614,16 +22614,14 @@ var _immutable2 = _interopRequireDefault(_immutable);
 
 var TimmaMap = (function () {
   function TimmaMap(markers, _ref) {
-    var center = _ref.center;
-    var zoom = _ref.zoomLevel;
+    var bounds = _ref.bounds;
 
     _classCallCheck(this, TimmaMap);
 
     this.type = 'Widget';
     this.markers = markers;
     this.markersRendered = false;
-    this.zoom = zoom;
-    this.center = center;
+    this.bounds = bounds;
   }
 
   _createClass(TimmaMap, [{
@@ -22635,7 +22633,7 @@ var TimmaMap = (function () {
       element.style.width = '100%';
 
       var mapOptions = {
-        zoom: this.zoom,
+        zoom: 14,
         scrollwheel: true,
         center: new google.maps.LatLng(60.1543, 24.9341),
         draggable: true
@@ -22674,11 +22672,8 @@ var TimmaMap = (function () {
           zIndex: 0
         });
       });
-      if (this.zoom !== domNode.officesMap.map.getZoom()) {
-        domNode.officesMap.map.setZoom(this.zoom);
-      }
-      if (this.center != null && this.center !== domNode.officesMap.map.getCenter()) {
-        domNode.officesMap.map.setCenter(this.center);
+      if (this.bounds != null && this.bounds !== domNode.officesMap.map.getBounds()) {
+        domNode.officesMap.map.fitBounds(this.bounds);
       }
 
       if (this.markers.length > 0) this.markersRendered = true;
