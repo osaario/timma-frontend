@@ -6,7 +6,6 @@ class TimmaMap {
     this.markers = markers;
     this.markersRendered = false;
     this.zoom = zoom;
-    this.lastZoom = zoom;
   }
 
   init() {
@@ -62,9 +61,8 @@ class TimmaMap {
         zIndex: 0
       });
     });
-    if(this.zoom !== this.lastZoom) {
+    if(this.zoom !== domNode.officesMap.map.getZoom()) {
         domNode.officesMap.map.setZoom(this.zoom);
-        this.lastZoom = this.zoom;
     }
     if(this.markers.length > 0) this.markersRendered = true;
     // Let's be optimistic: ceil()

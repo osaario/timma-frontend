@@ -22149,13 +22149,13 @@ var _widgetsGooglemapWidget = require('../widgets/googlemap-widget');
 var _widgetsGooglemapWidget2 = _interopRequireDefault(_widgetsGooglemapWidget);
 
 function googleMapComponent(drivers) {
-  var defaultProps = { markers: [] };
-  var props$ = drivers.props.getAll().startWith(defaultProps).shareReplay(1);
+  var props$ = drivers.props.getAll().shareReplay(1);
 
   var vtree$ = props$.map(function (_ref) {
     var markers = _ref.markers;
+    var zoomLevel = _ref.zoomLevel;
 
-    return new _widgetsGooglemapWidget2['default'](markers, 14);
+    return new _widgetsGooglemapWidget2['default'](markers, zoomLevel);
   });
 
   return {
@@ -22326,8 +22326,13 @@ var _utils = require('../utils');
 function intent(domDriver) {
   return {
     mapBoundsChanged$: domDriver.get('#timma-map', 'bounds_changed').throttle(500).startWith(null).shareReplay(1),
-    mapZoomChanged$: domDriver.get('#timma-map', 'zoom_changed').throttle(500).startWith(0).shareReplay(1),
+    mapZoomChanged$: domDriver.get('#timma-map', 'zoom_changed').map(function (ev) {
+      return ev.detail;
+    }).throttle(500).startWith(14).shareReplay(1),
     thumbnailClick$: domDriver.get('.list-slot', 'clickCustom').map(function (ev) {
+      return ev.detail;
+    }).shareReplay(1),
+    cityClick$: domDriver.get('.city-item', 'clickCustom').map(function (ev) {
       return ev.detail;
     }).shareReplay(1),
     serviceClick$: domDriver.get('.service-item', 'clickCustom').map(function (ev) {
@@ -22371,10 +22376,14 @@ function model(intent, _ref) {
         return '/landing';
     }
   }).startWith('/landing').combineLatest(intent.mapZoomChanged$.map(function (x) {
-    return x.detail < 10;
+    return x < 10;
   }).distinctUntilChanged(), function (click, showCities) {
     return showCities ? '/city_list' : click;
   });
+
+  var zoomLevel$ = intent.mapZoomChanged$.merge(intent.cityClick$.map(function (c) {
+    return 14;
+  }));
   return _cycleCore.Rx.Observable.combineLatest(intent.mapBoundsChanged$, slots$, function (bounds, slots) {
 
     var filtered = _.filter(slots, function (slot) {
@@ -22405,7 +22414,7 @@ function model(intent, _ref) {
       return -x.count;
     }).value();
     return { slots: filtered, services: available_services, cities: cities };
-  }).combineLatest(route$, provider$, services$, function (_ref2, route, provider, _) {
+  }).combineLatest(route$, provider$, services$, zoomLevel$, function (_ref2, route, provider, _, zoomLevel) {
     var slots = _ref2.slots;
     var services = _ref2.services;
     var cities = _ref2.cities;
@@ -22415,7 +22424,8 @@ function model(intent, _ref) {
       provider: provider,
       services: services,
       cities: cities,
-      route: route
+      route: route,
+      zoomLevel: zoomLevel
     };
   });
 }
@@ -22540,10 +22550,13 @@ function vrenderServiceList(services) {
 
 function vrenderMapSection(_ref) {
   var slots = _ref.slots;
+  var zoomLevel = _ref.zoomLevel;
 
-  return (0, _cycleWeb.h)('main-map', { markers: slots.map(function (x) {
+  return (0, _cycleWeb.h)('main-map', {
+    markers: slots.map(function (x) {
       return new google.maps.LatLng(x.lastMinuteInfo.lat, x.lastMinuteInfo.lon);
-    })
+    }),
+    zoomLevel: zoomLevel
   });
 }
 
@@ -22600,7 +22613,6 @@ var TimmaMap = (function () {
     this.markers = markers;
     this.markersRendered = false;
     this.zoom = zoom;
-    this.lastZoom = zoom;
   }
 
   _createClass(TimmaMap, [{
@@ -22655,9 +22667,8 @@ var TimmaMap = (function () {
           zIndex: 0
         });
       });
-      if (this.zoom !== this.lastZoom) {
+      if (this.zoom !== domNode.officesMap.map.getZoom()) {
         domNode.officesMap.map.setZoom(this.zoom);
-        this.lastZoom = this.zoom;
       }
       if (this.markers.length > 0) this.markersRendered = true;
       // Let's be optimistic: ceil()

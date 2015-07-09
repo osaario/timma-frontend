@@ -15,10 +15,12 @@ function model(intent, {slots: slots$, provider: provider$, services: services$}
       default: return '/landing';
     }
   }).startWith('/landing')
-  .combineLatest(intent.mapZoomChanged$.map(x => x.detail < 10).distinctUntilChanged(),
+  .combineLatest(intent.mapZoomChanged$.map(x => x < 10).distinctUntilChanged(),
   (click, showCities) => {
     return showCities ? '/city_list' : click;
   });
+
+  let zoomLevel$ = intent.mapZoomChanged$.merge(intent.cityClick$.map(c => 14));
   return Rx.Observable.combineLatest(intent.mapBoundsChanged$, slots$, (bounds, slots) => {
 
 
@@ -49,13 +51,14 @@ function model(intent, {slots: slots$, provider: provider$, services: services$}
       .sortBy(x => -x.count)
       .value();
       return  {slots: filtered, services: available_services, cities: cities};
-  }).combineLatest(route$, provider$, services$, ({slots: slots, services: services, cities: cities}, route, provider, _) => {
+  }).combineLatest(route$, provider$, services$, zoomLevel$, ({slots: slots, services: services, cities: cities}, route, provider, _, zoomLevel) => {
       return {
         slots: slots,
         provider: provider,
         services: services,
         cities: cities,
-        route: route
+        route: route,
+        zoomLevel: zoomLevel
       };
   });
 
