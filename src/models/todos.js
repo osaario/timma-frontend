@@ -31,10 +31,16 @@ function model(intent, {slots: slots$, provider: provider$, services: services$}
       });
 
       let cities = _.chain(filtered)
-      .uniq(s => s.lastMinuteInfo.city)
-      .map((s) => {
-        return {city: s.lastMinuteInfo.city, lat: s.lastMinuteInfo.lat, lon: s.lastMinuteInfo.lon};
+      .groupBy(s => s.lastMinuteInfo.city)
+      .mapValues((slots) => {
+        var bounds = new google.maps.LatLngBounds();
+        slots.forEach((slot) =>
+        {
+          bounds.extend(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon))
+        });
+        return {city: slots[0].lastMinuteInfo.city, lat: bounds.getCenter().lat(), lon: bounds.getCenter().lng()};
       })
+      .values()
       .value();
 
       let filtered_services = _.chain(filtered)

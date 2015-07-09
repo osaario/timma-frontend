@@ -22393,11 +22393,15 @@ function model(intent, _ref) {
       return bounds != null ? bounds.contains(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon)) : true;
     });
 
-    var cities = _.chain(filtered).uniq(function (s) {
+    var cities = _.chain(filtered).groupBy(function (s) {
       return s.lastMinuteInfo.city;
-    }).map(function (s) {
-      return { city: s.lastMinuteInfo.city, lat: s.lastMinuteInfo.lat, lon: s.lastMinuteInfo.lon };
-    }).value();
+    }).mapValues(function (slots) {
+      var bounds = new google.maps.LatLngBounds();
+      slots.forEach(function (slot) {
+        bounds.extend(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon));
+      });
+      return { city: slots[0].lastMinuteInfo.city, lat: bounds.getCenter().lat(), lon: bounds.getCenter().lng() };
+    }).values().value();
 
     var filtered_services = _.chain(filtered).map(function (s) {
       return s.services;
