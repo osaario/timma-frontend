@@ -22382,7 +22382,9 @@ function model(intent, _ref) {
     return showCities ? '/city_list' : click;
   });
 
-  var setBounds$ = intent.mapBoundsChanged$.merge(intent.cityClick$.map(function (c) {
+  var setBounds$ = intent.mapBoundsChanged$.map(function (_) {
+    return { bounds: null };
+  }).merge(intent.cityClick$.map(function (c) {
     return { bounds: c.bounds, zoomLevel: 13, center: new google.maps.LatLng(c.lat, c.lon) };
   }));
 
@@ -22674,6 +22676,7 @@ var TimmaMap = (function () {
       });
       if (this.bounds != null && this.bounds !== domNode.officesMap.map.getBounds()) {
         domNode.officesMap.map.fitBounds(this.bounds);
+        this.bounds = null;
       }
 
       if (this.markers.length > 0) this.markersRendered = true;

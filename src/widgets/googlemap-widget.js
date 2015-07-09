@@ -59,6 +59,7 @@ class TimmaMap {
     });
     if(this.bounds != null && this.bounds !== domNode.officesMap.map.getBounds()) {
         domNode.officesMap.map.fitBounds(this.bounds);
+        this.bounds = null;
     }
 
     if(this.markers.length > 0) this.markersRendered = true;

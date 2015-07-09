@@ -20,7 +20,9 @@ function model(intent, {slots: slots$, provider: provider$, services: services$}
     return showCities ? '/city_list' : click;
   });
 
-  let setBounds$ = intent.mapBoundsChanged$.merge(intent.cityClick$.map((c) => {
+  let setBounds$ = intent.mapBoundsChanged$.map((_) => {
+      return {bounds: null};
+  }).merge(intent.cityClick$.map((c) => {
    return {bounds: c.bounds, zoomLevel: 13, center: new google.maps.LatLng(c.lat, c.lon)};
  }));
 
