@@ -22177,7 +22177,7 @@ function serviceItemComponent(drivers) {
   var vtree$ = props$.map(function (_ref) {
     var service = _ref.service;
 
-    return (0, _cycleWeb.h)('li.list-group-item.container', [(0, _cycleWeb.h)('div.col-sm-9', [(0, _cycleWeb.h)('h3', service.name), (0, _cycleWeb.h)('div', service.description)])]);
+    return (0, _cycleWeb.h)('li.list-group-item.container', [(0, _cycleWeb.h)('div.col-sm-9', [(0, _cycleWeb.h)('h2', service.name), (0, _cycleWeb.h)('h3', service.count + ' palveluntarjoajaa alueella'), (0, _cycleWeb.h)('div', service.description)])]);
   });
 
   return {
@@ -22345,7 +22345,7 @@ function model(intent, _ref) {
 
     var counts = _.chain(filtered_services).groupBy(function (s) {
       return s.serviceId;
-    }).map(function (s) {
+    }).mapValues(function (s) {
       return s.length;
     }).value();
 
@@ -22353,8 +22353,8 @@ function model(intent, _ref) {
       return x.serviceId;
     }).map(function (x) {
       return _.assign(x, { count: counts[x.serviceId] });
-    }).sort(function (x) {
-      return x.count;
+    }).sortBy(function (x) {
+      return -x.count;
     }).value();
     return { slots: filtered, services: available_services };
   }).combineLatest(route$, provider$, services$, function (_ref2, route, provider, _) {

@@ -11,7 +11,8 @@ function serviceItemComponent(drivers) {
   let vtree$ = props$.map(({service: service}) => {
     return h('li.list-group-item.container', [
         h('div.col-sm-9', [
-          h('h3', service.name),
+          h('h2', service.name),
+          h('h3', service.count + " palveluntarjoajaa alueella"),
           h('div', service.description)
         ])
     ]);

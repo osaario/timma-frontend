@@ -28,13 +28,13 @@ function model(intent, {slots: slots$, provider: provider$, services: services$}
 
       let counts = _.chain(filtered_services)
       .groupBy(s => s.serviceId)
-      .map(s => s.length)
+      .mapValues(s => s.length)
       .value();
 
       let available_services = _.chain(filtered_services)
       .uniq(x => x.serviceId)
       .map(x => _.assign(x, {count: counts[x.serviceId]}))
-      .sort(x => x.count)
+      .sortBy(x => -x.count)
       .value();
       return  {slots: filtered, services: available_services};
   }).combineLatest(route$, provider$, services$, ({slots: slots, services: services}, route, provider, _) => {
