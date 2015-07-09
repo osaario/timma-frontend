@@ -1,10 +1,12 @@
 import Immutable from 'immutable';
 
 class TimmaMap {
-  constructor(markers) {
+  constructor(markers, zoom) {
     this.type = 'Widget';
     this.markers = markers;
     this.markersRendered = false;
+    this.zoom = zoom;
+    this.lastZoom = zoom;
   }
 
   init() {
@@ -14,7 +16,7 @@ class TimmaMap {
     element.style.width = '100%';
 
     let mapOptions = {
-      zoom: 14,
+      zoom: this.zoom,
       scrollwheel: true,
       center: new google.maps.LatLng(
         60.1543,
@@ -37,9 +39,15 @@ class TimmaMap {
       // marker.
       var event = new CustomEvent('bounds_changed', {'detail': map.getBounds()});
       element.dispatchEvent(event);
+      var event = new CustomEvent('zoom_changed', {'detail': map.getZoom()});
+      element.dispatchEvent(event);
     })
     var event = new CustomEvent('bounds_changed', {'detail': map.getBounds()});
     element.dispatchEvent(event);
+    var event = new CustomEvent('zoom_changed', {'detail': map.getZoom()});
+    element.dispatchEvent(event);
+      // 3 seconds after the center of the map has changed, pan back to the
+      // marker.
     return element;
   }
 
@@ -54,6 +62,10 @@ class TimmaMap {
         zIndex: 0
       });
     });
+    if(this.zoom !== this.lastZoom) {
+        domNode.officesMap.map.setZoom(this.zoom);
+        this.lastZoom = this.zoom;
+    }
     if(this.markers.length > 0) this.markersRendered = true;
     // Let's be optimistic: ceil()
 

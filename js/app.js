@@ -22117,7 +22117,7 @@ function googleMapComponent(drivers) {
   var vtree$ = props$.map(function (_ref) {
     var markers = _ref.markers;
 
-    return new _widgetsGooglemapWidget2['default'](markers);
+    return new _widgetsGooglemapWidget2['default'](markers, 14);
   });
 
   return {
@@ -22287,7 +22287,8 @@ var _utils = require('../utils');
 
 function intent(domDriver) {
   return {
-    mapBoundsChanged$: domDriver.get('#timma-map', 'bounds_changed').startWith(null).shareReplay(1),
+    mapBoundsChanged$: domDriver.get('#timma-map', 'bounds_changed').throttle(1000).startWith(null).shareReplay(1),
+    mapZoomChanged$: domDriver.get('#timma-map', 'zoom_changed').throttle(1000).startWith(null).shareReplay(1),
     thumbnailClick$: domDriver.get('.list-slot', 'clickCustom').map(function (ev) {
       return ev.detail;
     }).shareReplay(1),
@@ -22532,12 +22533,14 @@ var _immutable = require('immutable');
 var _immutable2 = _interopRequireDefault(_immutable);
 
 var TimmaMap = (function () {
-  function TimmaMap(markers) {
+  function TimmaMap(markers, zoom) {
     _classCallCheck(this, TimmaMap);
 
     this.type = 'Widget';
     this.markers = markers;
     this.markersRendered = false;
+    this.zoom = zoom;
+    this.lastZoom = zoom;
   }
 
   _createClass(TimmaMap, [{
@@ -22549,7 +22552,7 @@ var TimmaMap = (function () {
       element.style.width = '100%';
 
       var mapOptions = {
-        zoom: 14,
+        zoom: this.zoom,
         scrollwheel: true,
         center: new google.maps.LatLng(60.1543, 24.9341),
         draggable: true
@@ -22568,9 +22571,15 @@ var TimmaMap = (function () {
         // marker.
         var event = new CustomEvent('bounds_changed', { 'detail': map.getBounds() });
         element.dispatchEvent(event);
+        var event = new CustomEvent('zoom_changed', { 'detail': map.getZoom() });
+        element.dispatchEvent(event);
       });
       var event = new CustomEvent('bounds_changed', { 'detail': map.getBounds() });
       element.dispatchEvent(event);
+      var event = new CustomEvent('zoom_changed', { 'detail': map.getZoom() });
+      element.dispatchEvent(event);
+      // 3 seconds after the center of the map has changed, pan back to the
+      // marker.
       return element;
     }
   }, {
@@ -22586,6 +22595,10 @@ var TimmaMap = (function () {
           zIndex: 0
         });
       });
+      if (this.zoom !== this.lastZoom) {
+        domNode.officesMap.map.setZoom(this.zoom);
+        this.lastZoom = this.zoom;
+      }
       if (this.markers.length > 0) this.markersRendered = true;
       // Let's be optimistic: ceil()
 

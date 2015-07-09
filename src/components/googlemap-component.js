@@ -8,7 +8,7 @@ function googleMapComponent(drivers) {
 
 
   let vtree$ = props$.map(({markers: markers}) => {
-    return new TimmaMap(markers);
+    return new TimmaMap(markers, 14);
   });
 
   return {
