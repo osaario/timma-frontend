@@ -22314,16 +22314,23 @@ function model(intent, _ref) {
   var provider$ = _ref.provider;
   var services$ = _ref.services;
 
-  var route$ = _cycleCore.Rx.Observable.combineLatest(intent.thumbnailClick$.timestamp().map(function (x) {
-    return _.assign(x, { route: '/slot_id' });
-  }), intent.serviceClick$.timestamp().map(function (x) {
-    return _.assign(x, { route: '/slot_list' });
-  }), intent.mapBoundsChanged$.timestamp().map(function (x) {
-    return _.assign(x, { route: '/slot_list' });
-  }), function (tnClick, sClick, boundsC) {
-    _.sort([tnClick, sClick, boundsC], function (xx) {
-      return xx.timestamp;
-    })[0].route;
+  var route$ = _cycleCore.Rx.Observable.merge(intent.thumbnailClick$.map(function (x) {
+    return 'thumbnail';
+  }), intent.serviceClick$.map(function (x) {
+    return 'service';
+  }), intent.mapBoundsChanged$.map(function (x) {
+    return 'bounds';
+  })).scan('/landing', function (acc, elem) {
+    switch (elem) {
+      case 'bounds':
+        if (acc !== '/slot_id') return acc;else return '/slot_list';
+      case 'service':
+        return '/slot_list';
+      case 'thumbnail':
+        return '/slot_id';
+      default:
+        return '/landing';
+    }
   }).startWith('/landing');
 
   return _cycleCore.Rx.Observable.combineLatest(intent.mapBoundsChanged$, slots$, function (bounds, slots) {

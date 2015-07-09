@@ -1,11 +1,18 @@
 import {Rx} from '@cycle/core';
 
 function model(intent, {slots: slots$, provider: provider$, services: services$}) {
-  let route$ = Rx.Observable.combineLatest(intent.thumbnailClick$.timestamp().map(x => _.assign(x, {route: '/slot_id'})),
-  intent.serviceClick$.timestamp().map(x => _.assign(x, {route: '/slot_list'})),
-  intent.mapBoundsChanged$.timestamp().map(x => _.assign(x, {route: '/slot_list'})),
-  (tnClick, sClick, boundsC) => {
-    _.sort([tnClick,sClick,boundsC], xx => xx.timestamp)[0].route;
+  let route$ = Rx.Observable.merge(intent.thumbnailClick$.map(x => 'thumbnail'),
+  intent.serviceClick$.map(x => 'service'),
+  intent.mapBoundsChanged$.map(x => 'bounds')).scan('/landing',
+  (acc, elem) => {
+    switch(elem) {
+      case 'bounds':
+        if(acc !== '/slot_id') return acc;
+        else return '/slot_list';
+      case 'service': return '/slot_list';
+      case 'thumbnail': return '/slot_id';
+      default: return '/landing';
+    }
   }).startWith('/landing');
 
   return Rx.Observable.combineLatest(intent.mapBoundsChanged$, slots$, (bounds, slots) => {
