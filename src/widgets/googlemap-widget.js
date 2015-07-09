@@ -1,11 +1,12 @@
 import Immutable from 'immutable';
 
 class TimmaMap {
-  constructor(markers, zoom) {
+  constructor(markers, {center: center, zoomLevel: zoom}) {
     this.type = 'Widget';
     this.markers = markers;
     this.markersRendered = false;
     this.zoom = zoom;
+    this.center = center;
   }
 
   init() {
@@ -36,15 +37,11 @@ class TimmaMap {
     google.maps.event.addListener(map, 'bounds_changed', function() {
       // 3 seconds after the center of the map has changed, pan back to the
       // marker.
-      var event = new CustomEvent('bounds_changed', {'detail': map.getBounds()});
-      element.dispatchEvent(event);
-      var event = new CustomEvent('zoom_changed', {'detail': map.getZoom()});
+      var event = new CustomEvent('bounds_changed', {'detail': {bounds: map.getBounds(), zoomLevel: map.getZoom(), center: map.getCenter()}});
       element.dispatchEvent(event);
     })
-    var event = new CustomEvent('bounds_changed', {'detail': map.getBounds()});
-    element.dispatchEvent(event);
-    var event = new CustomEvent('zoom_changed', {'detail': map.getZoom()});
-    element.dispatchEvent(event);
+      var event = new CustomEvent('bounds_changed', {'detail': {bounds: map.getBounds(), zoomLevel: map.getZoom(), center: map.getCenter()}});
+      element.dispatchEvent(event);
       // 3 seconds after the center of the map has changed, pan back to the
       // marker.
     return element;
@@ -64,6 +61,10 @@ class TimmaMap {
     if(this.zoom !== domNode.officesMap.map.getZoom()) {
         domNode.officesMap.map.setZoom(this.zoom);
     }
+    if(this.center != null && this.center !== domNode.officesMap.map.getCenter()) {
+        domNode.officesMap.map.setCenter(this.center);
+    }
+
     if(this.markers.length > 0) this.markersRendered = true;
     // Let's be optimistic: ceil()
 

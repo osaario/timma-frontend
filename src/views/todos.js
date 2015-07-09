@@ -66,10 +66,10 @@ function vrenderServiceList(services) {
   )]);
 }
 
-function vrenderMapSection({slots: slots, zoomLevel: zoomLevel}) {
+function vrenderMapSection({slots: slots, setBounds: setBounds}) {
   return h('main-map', {
     markers: slots.map(x => new google.maps.LatLng(x.lastMinuteInfo.lat, x.lastMinuteInfo.lon))
-      , zoomLevel: zoomLevel
+      , setBounds: setBounds
     });
 }
 

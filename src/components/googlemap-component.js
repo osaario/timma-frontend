@@ -6,8 +6,8 @@ function googleMapComponent(drivers) {
   let props$ = drivers.props.getAll().shareReplay(1);
 
 
-  let vtree$ = props$.map(({markers: markers, zoomLevel: zoomLevel}) => {
-    return new TimmaMap(markers, zoomLevel);
+  let vtree$ = props$.map(({markers: markers, setBounds: setBounds}) => {
+    return new TimmaMap(markers, setBounds);
   });
 
   return {

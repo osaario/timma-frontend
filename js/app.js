@@ -22153,9 +22153,9 @@ function googleMapComponent(drivers) {
 
   var vtree$ = props$.map(function (_ref) {
     var markers = _ref.markers;
-    var zoomLevel = _ref.zoomLevel;
+    var setBounds = _ref.setBounds;
 
-    return new _widgetsGooglemapWidget2['default'](markers, zoomLevel);
+    return new _widgetsGooglemapWidget2['default'](markers, setBounds);
   });
 
   return {
@@ -22325,10 +22325,9 @@ var _utils = require('../utils');
 
 function intent(domDriver) {
   return {
-    mapBoundsChanged$: domDriver.get('#timma-map', 'bounds_changed').throttle(500).startWith(null).shareReplay(1),
-    mapZoomChanged$: domDriver.get('#timma-map', 'zoom_changed').map(function (ev) {
+    mapBoundsChanged$: domDriver.get('#timma-map', 'bounds_changed').map(function (ev) {
       return ev.detail;
-    }).throttle(500).startWith(14).shareReplay(1),
+    }).throttle(500).startWith({ bounds: null, zoomLevel: 14, center: null }).shareReplay(1),
     thumbnailClick$: domDriver.get('.list-slot', 'clickCustom').map(function (ev) {
       return ev.detail;
     }).shareReplay(1),
@@ -22375,19 +22374,23 @@ function model(intent, _ref) {
       default:
         return '/landing';
     }
-  }).startWith('/landing').combineLatest(intent.mapZoomChanged$.map(function (x) {
+  }).startWith('/landing').combineLatest(intent.mapBoundsChanged$.map(function (x) {
+    return x.zoomLevel;
+  }).map(function (x) {
     return x < 10;
   }).distinctUntilChanged(), function (click, showCities) {
     return showCities ? '/city_list' : click;
   });
 
-  var zoomLevel$ = intent.mapZoomChanged$.merge(intent.cityClick$.map(function (c) {
-    return 14;
+  var setBounds$ = intent.mapBoundsChanged$.merge(intent.cityClick$.map(function (c) {
+    return { zoomLevel: 13, center: new google.maps.LatLng(c.lat, c.lon) };
   }));
-  return _cycleCore.Rx.Observable.combineLatest(intent.mapBoundsChanged$, slots$, function (bounds, slots) {
+
+  return _cycleCore.Rx.Observable.combineLatest(intent.mapBoundsChanged$, slots$, function (_ref2, slots) {
+    var bounds = _ref2.bounds;
 
     var filtered = _.filter(slots, function (slot) {
-      return bounds != null ? bounds.detail.contains(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon)) : true;
+      return bounds != null ? bounds.contains(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon)) : true;
     });
 
     var cities = _.chain(filtered).uniq(function (s) {
@@ -22414,10 +22417,10 @@ function model(intent, _ref) {
       return -x.count;
     }).value();
     return { slots: filtered, services: available_services, cities: cities };
-  }).combineLatest(route$, provider$, services$, zoomLevel$, function (_ref2, route, provider, _, zoomLevel) {
-    var slots = _ref2.slots;
-    var services = _ref2.services;
-    var cities = _ref2.cities;
+  }).combineLatest(route$, provider$, services$, setBounds$, function (_ref3, route, provider, _, setBounds) {
+    var slots = _ref3.slots;
+    var services = _ref3.services;
+    var cities = _ref3.cities;
 
     return {
       slots: slots,
@@ -22425,7 +22428,7 @@ function model(intent, _ref) {
       services: services,
       cities: cities,
       route: route,
-      zoomLevel: zoomLevel
+      setBounds: setBounds
     };
   });
 }
@@ -22550,13 +22553,13 @@ function vrenderServiceList(services) {
 
 function vrenderMapSection(_ref) {
   var slots = _ref.slots;
-  var zoomLevel = _ref.zoomLevel;
+  var setBounds = _ref.setBounds;
 
   return (0, _cycleWeb.h)('main-map', {
     markers: slots.map(function (x) {
       return new google.maps.LatLng(x.lastMinuteInfo.lat, x.lastMinuteInfo.lon);
     }),
-    zoomLevel: zoomLevel
+    setBounds: setBounds
   });
 }
 
@@ -22606,13 +22609,17 @@ var _immutable = require('immutable');
 var _immutable2 = _interopRequireDefault(_immutable);
 
 var TimmaMap = (function () {
-  function TimmaMap(markers, zoom) {
+  function TimmaMap(markers, _ref) {
+    var center = _ref.center;
+    var zoom = _ref.zoomLevel;
+
     _classCallCheck(this, TimmaMap);
 
     this.type = 'Widget';
     this.markers = markers;
     this.markersRendered = false;
     this.zoom = zoom;
+    this.center = center;
   }
 
   _createClass(TimmaMap, [{
@@ -22641,14 +22648,10 @@ var TimmaMap = (function () {
       google.maps.event.addListener(map, 'bounds_changed', function () {
         // 3 seconds after the center of the map has changed, pan back to the
         // marker.
-        var event = new CustomEvent('bounds_changed', { 'detail': map.getBounds() });
-        element.dispatchEvent(event);
-        var event = new CustomEvent('zoom_changed', { 'detail': map.getZoom() });
+        var event = new CustomEvent('bounds_changed', { 'detail': { bounds: map.getBounds(), zoomLevel: map.getZoom(), center: map.getCenter() } });
         element.dispatchEvent(event);
       });
-      var event = new CustomEvent('bounds_changed', { 'detail': map.getBounds() });
-      element.dispatchEvent(event);
-      var event = new CustomEvent('zoom_changed', { 'detail': map.getZoom() });
+      var event = new CustomEvent('bounds_changed', { 'detail': { bounds: map.getBounds(), zoomLevel: map.getZoom(), center: map.getCenter() } });
       element.dispatchEvent(event);
       // 3 seconds after the center of the map has changed, pan back to the
       // marker.
@@ -22670,6 +22673,10 @@ var TimmaMap = (function () {
       if (this.zoom !== domNode.officesMap.map.getZoom()) {
         domNode.officesMap.map.setZoom(this.zoom);
       }
+      if (this.center != null && this.center !== domNode.officesMap.map.getCenter()) {
+        domNode.officesMap.map.setCenter(this.center);
+      }
+
       if (this.markers.length > 0) this.markersRendered = true;
       // Let's be optimistic: ceil()
 
