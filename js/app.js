@@ -22015,6 +22015,10 @@ var _componentsListSlot = require('./components/list-slot');
 
 var _componentsListSlot2 = _interopRequireDefault(_componentsListSlot);
 
+var _componentsCityItem = require('./components/city-item');
+
+var _componentsCityItem2 = _interopRequireDefault(_componentsCityItem);
+
 var _componentsServiceItem = require('./components/service-item');
 
 var _componentsServiceItem2 = _interopRequireDefault(_componentsServiceItem);
@@ -22092,12 +22096,46 @@ _cycleCore2['default'].run(main, {
     'todo-item': _componentsTodoItem2['default'],
     'list-slot': _componentsListSlot2['default'],
     'service-item': _componentsServiceItem2['default'],
+    'city-item': _componentsCityItem2['default'],
     'main-map': _componentsGooglemapComponent2['default']
   }),
   HTTP: (0, _cycleHttp.makeHTTPDriver)()
 });
 
-},{"./components/googlemap-component":121,"./components/list-slot":122,"./components/service-item":123,"./components/todo-item":124,"./intents/todos":125,"./models/todos":126,"./sinks/local-storage.js":127,"./views/todos":129,"@cycle/core":1,"@cycle/http":4,"@cycle/web":10}],121:[function(require,module,exports){
+},{"./components/city-item":121,"./components/googlemap-component":122,"./components/list-slot":123,"./components/service-item":124,"./components/todo-item":125,"./intents/todos":126,"./models/todos":127,"./sinks/local-storage.js":128,"./views/todos":130,"@cycle/core":1,"@cycle/http":4,"@cycle/web":10}],121:[function(require,module,exports){
+'use strict';
+
+var _cycleCore = require('@cycle/core');
+
+var _cycleWeb = require('@cycle/web');
+
+function cityItemComponent(drivers) {
+  var intent = {
+    click$: drivers.DOM.get('.city-item', 'click')
+  };
+
+  var props$ = drivers.props.getAll().shareReplay(1);
+
+  var vtree$ = props$.map(function (_ref) {
+    var city = _ref.city;
+
+    return (0, _cycleWeb.h)('li.list-group-item.container', [(0, _cycleWeb.h)('div.col-sm-9', [(0, _cycleWeb.h)('h2', city.city)])]);
+  });
+
+  return {
+    DOM: vtree$,
+    events: {
+      clickCustom: intent.click$.withLatestFrom(props$, function (ev, _ref2) {
+        var city = _ref2.city;
+        return city;
+      })
+    }
+  };
+}
+
+module.exports = cityItemComponent;
+
+},{"@cycle/core":1,"@cycle/web":10}],122:[function(require,module,exports){
 'use strict';
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -22127,7 +22165,7 @@ function googleMapComponent(drivers) {
 
 module.exports = googleMapComponent;
 
-},{"../widgets/googlemap-widget":130,"@cycle/core":1,"@cycle/web":10}],122:[function(require,module,exports){
+},{"../widgets/googlemap-widget":131,"@cycle/core":1,"@cycle/web":10}],123:[function(require,module,exports){
 'use strict';
 
 var _cycleCore = require('@cycle/core');
@@ -22160,7 +22198,7 @@ function listSlotComponent(drivers) {
 
 module.exports = listSlotComponent;
 
-},{"@cycle/core":1,"@cycle/web":10}],123:[function(require,module,exports){
+},{"@cycle/core":1,"@cycle/web":10}],124:[function(require,module,exports){
 'use strict';
 
 var _cycleCore = require('@cycle/core');
@@ -22193,7 +22231,7 @@ function serviceItemComponent(drivers) {
 
 module.exports = serviceItemComponent;
 
-},{"@cycle/core":1,"@cycle/web":10}],124:[function(require,module,exports){
+},{"@cycle/core":1,"@cycle/web":10}],125:[function(require,module,exports){
 'use strict';
 
 var _cycleCore = require('@cycle/core');
@@ -22273,7 +22311,7 @@ function todoItemComponent(drivers) {
 
 module.exports = todoItemComponent;
 
-},{"../utils":128,"@cycle/core":1,"@cycle/web":10}],125:[function(require,module,exports){
+},{"../utils":129,"@cycle/core":1,"@cycle/web":10}],126:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -22301,7 +22339,7 @@ function intent(domDriver) {
 ;
 module.exports = exports['default'];
 
-},{"../utils":128,"@cycle/core":1}],126:[function(require,module,exports){
+},{"../utils":129,"@cycle/core":1}],127:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -22315,11 +22353,11 @@ function model(intent, _ref) {
   var provider$ = _ref.provider;
   var services$ = _ref.services;
 
-  var route$ = _cycleCore.Rx.Observable.merge(intent.thumbnailClick$.map(function (x) {
+  var route$ = _cycleCore.Rx.Observable.merge(intent.thumbnailClick$.map(function (_) {
     return 'thumbnail';
-  }), intent.serviceClick$.map(function (x) {
+  }), intent.serviceClick$.map(function (_) {
     return 'service';
-  }), intent.mapBoundsChanged$.map(function (x) {
+  }), intent.mapBoundsChanged$.map(function (_) {
     return 'bounds';
   })).scan('/landing', function (acc, elem) {
     switch (elem) {
@@ -22332,13 +22370,21 @@ function model(intent, _ref) {
       default:
         return '/landing';
     }
-  }).startWith('/landing');
+  }).startWith('/landing').map(function (_) {
+    return '/city_list';
+  });
 
   return _cycleCore.Rx.Observable.combineLatest(intent.mapBoundsChanged$, slots$, function (bounds, slots) {
 
     var filtered = _.filter(slots, function (slot) {
       return bounds != null ? bounds.detail.contains(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon)) : true;
     });
+
+    var cities = _.chain(filtered).uniq(function (s) {
+      return s.lastMinuteInfo.city;
+    }).map(function (s) {
+      return { city: s.lastMinuteInfo.city, lat: s.lastMinuteInfo.lat, lon: s.lastMinuteInfo.lon };
+    }).value();
 
     var filtered_services = _.chain(filtered).map(function (s) {
       return s.services;
@@ -22357,15 +22403,17 @@ function model(intent, _ref) {
     }).sortBy(function (x) {
       return -x.count;
     }).value();
-    return { slots: filtered, services: available_services };
+    return { slots: filtered, services: available_services, cities: cities };
   }).combineLatest(route$, provider$, services$, function (_ref2, route, provider, _) {
     var slots = _ref2.slots;
     var services = _ref2.services;
+    var cities = _ref2.cities;
 
     return {
       slots: slots,
       provider: provider,
       services: services,
+      cities: cities,
       route: route
     };
   });
@@ -22374,7 +22422,7 @@ function model(intent, _ref) {
 exports['default'] = model;
 module.exports = exports['default'];
 
-},{"@cycle/core":1}],127:[function(require,module,exports){
+},{"@cycle/core":1}],128:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22401,7 +22449,7 @@ let savedTodosData = {
 */
 //localStorage.setItem('todos-cycle', JSON.stringify(savedTodosData))
 
-},{}],128:[function(require,module,exports){
+},{}],129:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22440,7 +22488,7 @@ exports.propHook = propHook;
 exports.ENTER_KEY = ENTER_KEY;
 exports.ESC_KEY = ESC_KEY;
 
-},{}],129:[function(require,module,exports){
+},{}],130:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -22473,6 +22521,14 @@ function vrenderSlotList(slots) {
   }).value())]);
 }
 
+function vrenderCityList(cities) {
+  return (0, _cycleWeb.h)('section#main', {
+    style: { 'display': '' }
+  }, [(0, _cycleWeb.h)('ul.list-group', _.chain(cities).map(function (city) {
+    return (0, _cycleWeb.h)('city-item.city-item', { city: city });
+  }).value())]);
+}
+
 function vrenderServiceList(services) {
   return (0, _cycleWeb.h)('section#main', {
     style: { 'display': '' }
@@ -22492,6 +22548,7 @@ function vrenderMapSection(_ref) {
 
 function vrenderMainSection(_ref2) {
   var slots = _ref2.slots;
+  var cities = _ref2.cities;
   var provider = _ref2.provider;
   var services = _ref2.services;
   var route = _ref2.route;
@@ -22499,6 +22556,8 @@ function vrenderMainSection(_ref2) {
   switch (route) {
     case '/slot_list':
       return vrenderSlotList(slots);
+    case '/city_list':
+      return vrenderCityList(cities);
     case '/slot_id':
       return vrenderIndividualProvider(provider);
     case '/landing':
@@ -22519,7 +22578,7 @@ function view(todos$) {
 ;
 module.exports = exports['default'];
 
-},{"../utils":128,"@cycle/core":1,"@cycle/web":10}],130:[function(require,module,exports){
+},{"../utils":129,"@cycle/core":1,"@cycle/web":10}],131:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();

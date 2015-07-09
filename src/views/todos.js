@@ -44,6 +44,17 @@ function vrenderSlotList(slots) {
   )]);
 }
 
+function vrenderCityList(cities) {
+  return h('section#main', {
+    style: {'display': ''}
+  }, [ h('ul.list-group',
+    _.chain(cities)
+    .map((city) => {
+      return h('city-item.city-item', {city: city});
+    }).value()
+  )]);
+}
+
 function vrenderServiceList(services) {
   return h('section#main', {
     style: {'display': ''}
@@ -64,9 +75,10 @@ function vrenderMapSection({slots: slots}) {
 }
 
 
-function vrenderMainSection({slots: slots, provider: provider, services:services, route: route}) {
+function vrenderMainSection({slots: slots, cities: cities, provider: provider, services:services, route: route}) {
   switch(route) {
     case '/slot_list': return vrenderSlotList(slots);
+    case '/city_list': return vrenderCityList(cities);
     case '/slot_id': return vrenderIndividualProvider(provider);
     case '/landing': return vrenderServiceList(services);
     default: return vrenderSlotList(slots);

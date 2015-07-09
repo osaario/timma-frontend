@@ -4,6 +4,7 @@ import {Rx} from '@cycle/core';
 import todoItemComponent from './components/todo-item';
 import googleMapComponent from './components/googlemap-component';
 import listSlotComponent from './components/list-slot';
+import cityItemComponent from './components/city-item';
 import serviceItemComponent from './components/service-item';
 import intent from './intents/todos';
 import model from './models/todos';
@@ -64,6 +65,7 @@ Cycle.run(main, {
     'todo-item': todoItemComponent,
     'list-slot': listSlotComponent,
     'service-item': serviceItemComponent,
+    'city-item': cityItemComponent,
     'main-map': googleMapComponent
   }),
   HTTP: makeHTTPDriver()

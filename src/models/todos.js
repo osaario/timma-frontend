@@ -1,9 +1,9 @@
 import {Rx} from '@cycle/core';
 
 function model(intent, {slots: slots$, provider: provider$, services: services$}) {
-  let route$ = Rx.Observable.merge(intent.thumbnailClick$.map(x => 'thumbnail'),
-  intent.serviceClick$.map(x => 'service'),
-  intent.mapBoundsChanged$.map(x => 'bounds')).scan('/landing',
+  let route$ = Rx.Observable.merge(intent.thumbnailClick$.map(_ => 'thumbnail'),
+  intent.serviceClick$.map(_ => 'service'),
+  intent.mapBoundsChanged$.map(_ => 'bounds')).scan('/landing',
   (acc, elem) => {
     switch(elem) {
       case 'bounds':
@@ -13,14 +13,22 @@ function model(intent, {slots: slots$, provider: provider$, services: services$}
       case 'thumbnail': return '/slot_id';
       default: return '/landing';
     }
-  }).startWith('/landing');
+  }).startWith('/landing').map(_ => '/city_list');
 
   return Rx.Observable.combineLatest(intent.mapBoundsChanged$, slots$, (bounds, slots) => {
+
 
       let filtered = _.filter(slots, (slot) => {
          return bounds != null ? bounds.detail.contains(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon))
          : true;
       });
+
+      let cities = _.chain(filtered)
+      .uniq(s => s.lastMinuteInfo.city)
+      .map((s) => {
+        return {city: s.lastMinuteInfo.city, lat: s.lastMinuteInfo.lat, lon: s.lastMinuteInfo.lon};
+      })
+      .value();
 
       let filtered_services = _.chain(filtered)
       .map(s => s.services)
@@ -36,12 +44,13 @@ function model(intent, {slots: slots$, provider: provider$, services: services$}
       .map(x => _.assign(x, {count: counts[x.serviceId]}))
       .sortBy(x => -x.count)
       .value();
-      return  {slots: filtered, services: available_services};
-  }).combineLatest(route$, provider$, services$, ({slots: slots, services: services}, route, provider, _) => {
+      return  {slots: filtered, services: available_services, cities: cities};
+  }).combineLatest(route$, provider$, services$, ({slots: slots, services: services, cities: cities}, route, provider, _) => {
       return {
         slots: slots,
         provider: provider,
         services: services,
+        cities: cities,
         route: route
       };
   });
