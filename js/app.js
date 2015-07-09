@@ -22038,9 +22038,9 @@ var _sinksLocalStorageJs = require('./sinks/local-storage.js');
 var _sinksLocalStorageJs2 = _interopRequireDefault(_sinksLocalStorageJs);
 
 function main(drivers) {
-  var SLOT_URL = 'https://timma.fi/api/public/lastminuteslots/service/101?city=Helsinki';
+  var SLOT_URL = 'https://timma.fi/api/public/lastminuteslots';
   var PROVIDER_URL = 'https://timma.fi/api/public/customers/';
-  var SERVICES_URL = 'https://timma.fi/api/public/services';
+  var SERVICES_URL = 'https://timma.fi/api/public/services/app';
 
   var intents = (0, _intentsTodos2['default'])(drivers.DOM);
 
@@ -22335,13 +22335,32 @@ function model(intent, _ref) {
 
   return _cycleCore.Rx.Observable.combineLatest(intent.mapBoundsChanged$, slots$, function (bounds, slots) {
 
-    if (bounds != null) {
-      return _.filter(slots, function (slot) {
-        return bounds.detail.contains(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon));
-      });
-    }
-    return slots;
-  }).combineLatest(route$, provider$, services$, function (slots, route, provider, services) {
+    var filtered = _.filter(slots, function (slot) {
+      return bounds != null ? bounds.detail.contains(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon)) : true;
+    });
+
+    var filtered_services = _.chain(filtered).map(function (s) {
+      return s.services;
+    }).flatten().value();
+
+    var counts = _.chain(filtered_services).groupBy(function (s) {
+      return s.serviceId;
+    }).map(function (s) {
+      return s.length;
+    }).value();
+
+    var available_services = _.chain(filtered_services).uniq(function (x) {
+      return x.serviceId;
+    }).map(function (x) {
+      return _.assign(x, { count: counts[x.serviceId] });
+    }).sort(function (x) {
+      return x.count;
+    }).value();
+    return { slots: filtered, services: available_services };
+  }).combineLatest(route$, provider$, services$, function (_ref2, route, provider, _) {
+    var slots = _ref2.slots;
+    var services = _ref2.services;
+
     return {
       slots: slots,
       provider: provider,

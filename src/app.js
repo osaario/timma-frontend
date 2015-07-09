@@ -12,9 +12,9 @@ import {makeHTTPDriver} from '@cycle/http';
 import localStorageSink from './sinks/local-storage.js';
 
 function main(drivers) {
-  let SLOT_URL = 'https://timma.fi/api/public/lastminuteslots/service/101?city=Helsinki';
+  let SLOT_URL = 'https://timma.fi/api/public/lastminuteslots';
   let PROVIDER_URL = 'https://timma.fi/api/public/customers/';
-  let SERVICES_URL = 'https://timma.fi/api/public/services';
+  let SERVICES_URL = 'https://timma.fi/api/public/services/app';
 
   let intents = intent(drivers.DOM);
 
