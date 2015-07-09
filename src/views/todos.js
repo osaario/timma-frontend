@@ -44,6 +44,17 @@ function vrenderSlotList(slots) {
   )]);
 }
 
+function vrenderServiceList(services) {
+  return h('section#main', {
+    style: {'display': ''}
+  }, [ h('ul.list-group',
+    _.chain(services)
+    .map((service) => {
+      return h('service-item.service-item', {service: service});
+    }).value()
+  )]);
+}
+
 function vrenderMapSection({slots: slots}) {
   return h('main-map', {markers:
       slots.map((x) =>  {
@@ -53,10 +64,11 @@ function vrenderMapSection({slots: slots}) {
 }
 
 
-function vrenderMainSection({slots: slots, provider: provider, route: route}) {
+function vrenderMainSection({slots: slots, provider: provider, services:services, route: route}) {
   switch(route) {
-    case '/': return vrenderSlotList(slots);
+    case '/slot_list': return vrenderSlotList(slots);
     case '/slot_id': return vrenderIndividualProvider(provider);
+    case '/landing': return vrenderServiceList(services);
     default: return vrenderSlotList(slots);
   }
 }

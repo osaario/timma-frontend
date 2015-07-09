@@ -22015,6 +22015,10 @@ var _componentsListSlot = require('./components/list-slot');
 
 var _componentsListSlot2 = _interopRequireDefault(_componentsListSlot);
 
+var _componentsServiceItem = require('./components/service-item');
+
+var _componentsServiceItem2 = _interopRequireDefault(_componentsServiceItem);
+
 var _intentsTodos = require('./intents/todos');
 
 var _intentsTodos2 = _interopRequireDefault(_intentsTodos);
@@ -22036,12 +22040,19 @@ var _sinksLocalStorageJs2 = _interopRequireDefault(_sinksLocalStorageJs);
 function main(drivers) {
   var SLOT_URL = 'https://timma.fi/api/public/lastminuteslots/service/101?city=Helsinki';
   var PROVIDER_URL = 'https://timma.fi/api/public/customers/';
+  var SERVICES_URL = 'https://timma.fi/api/public/services';
+
+  var intents = (0, _intentsTodos2['default'])(drivers.DOM);
+
   var slot_req$ = _cycleCore.Rx.Observable.just({
     url: SLOT_URL,
     method: 'GET'
   });
 
-  var intents = (0, _intentsTodos2['default'])(drivers.DOM);
+  var services_req$ = _cycleCore.Rx.Observable.just({
+    url: SERVICES_URL,
+    method: 'GET'
+  });
 
   var provider_req$ = intents.thumbnailClick$.map(function (slot) {
     return {
@@ -22062,11 +22073,17 @@ function main(drivers) {
     return res.body;
   }).startWith(null);
 
-  var todos$ = (0, _modelsTodos2['default'])(intents, { slots: slots$, provider: provider$ });
+  var services$ = drivers.HTTP.filter(function (res$) {
+    return res$.request.url.indexOf(SERVICES_URL) === 0;
+  }).mergeAll().map(function (res) {
+    return res.body;
+  }).startWith([]);
+
+  var todos$ = (0, _modelsTodos2['default'])(intents, { slots: slots$, provider: provider$, services: services$ });
 
   return {
     DOM: (0, _viewsTodos2['default'])(todos$),
-    HTTP: _cycleCore.Rx.Observable.merge(slot_req$, provider_req$)
+    HTTP: _cycleCore.Rx.Observable.merge(slot_req$, provider_req$, services_req$)
   };
 }
 
@@ -22074,12 +22091,13 @@ _cycleCore2['default'].run(main, {
   DOM: _cycleWeb2['default'].makeDOMDriver('#todoapp', {
     'todo-item': _componentsTodoItem2['default'],
     'list-slot': _componentsListSlot2['default'],
+    'service-item': _componentsServiceItem2['default'],
     'main-map': _componentsGooglemapComponent2['default']
   }),
   HTTP: (0, _cycleHttp.makeHTTPDriver)()
 });
 
-},{"./components/googlemap-component":121,"./components/list-slot":122,"./components/todo-item":123,"./intents/todos":124,"./models/todos":125,"./sinks/local-storage.js":126,"./views/todos":128,"@cycle/core":1,"@cycle/http":4,"@cycle/web":10}],121:[function(require,module,exports){
+},{"./components/googlemap-component":121,"./components/list-slot":122,"./components/service-item":123,"./components/todo-item":124,"./intents/todos":125,"./models/todos":126,"./sinks/local-storage.js":127,"./views/todos":129,"@cycle/core":1,"@cycle/http":4,"@cycle/web":10}],121:[function(require,module,exports){
 'use strict';
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -22109,7 +22127,7 @@ function googleMapComponent(drivers) {
 
 module.exports = googleMapComponent;
 
-},{"../widgets/googlemap-widget":129,"@cycle/core":1,"@cycle/web":10}],122:[function(require,module,exports){
+},{"../widgets/googlemap-widget":130,"@cycle/core":1,"@cycle/web":10}],122:[function(require,module,exports){
 'use strict';
 
 var _cycleCore = require('@cycle/core');
@@ -22143,6 +22161,39 @@ function listSlotComponent(drivers) {
 module.exports = listSlotComponent;
 
 },{"@cycle/core":1,"@cycle/web":10}],123:[function(require,module,exports){
+'use strict';
+
+var _cycleCore = require('@cycle/core');
+
+var _cycleWeb = require('@cycle/web');
+
+function serviceItemComponent(drivers) {
+  var intent = {
+    click$: drivers.DOM.get('.service-item', 'click')
+  };
+
+  var props$ = drivers.props.getAll().shareReplay(1);
+
+  var vtree$ = props$.map(function (_ref) {
+    var service = _ref.service;
+
+    return (0, _cycleWeb.h)('li.list-group-item.container', [(0, _cycleWeb.h)('div.col-sm-9', [(0, _cycleWeb.h)('h3', service.name), (0, _cycleWeb.h)('div', service.description)])]);
+  });
+
+  return {
+    DOM: vtree$,
+    events: {
+      clickCustom: intent.click$.withLatestFrom(props$, function (ev, _ref2) {
+        var service = _ref2.service;
+        return service;
+      })
+    }
+  };
+}
+
+module.exports = serviceItemComponent;
+
+},{"@cycle/core":1,"@cycle/web":10}],124:[function(require,module,exports){
 'use strict';
 
 var _cycleCore = require('@cycle/core');
@@ -22222,7 +22273,7 @@ function todoItemComponent(drivers) {
 
 module.exports = todoItemComponent;
 
-},{"../utils":127,"@cycle/core":1,"@cycle/web":10}],124:[function(require,module,exports){
+},{"../utils":128,"@cycle/core":1,"@cycle/web":10}],125:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -22239,6 +22290,9 @@ function intent(domDriver) {
     mapBoundsChanged$: domDriver.get('#timma-map', 'bounds_changed').startWith(null).shareReplay(1),
     thumbnailClick$: domDriver.get('.list-slot', 'clickCustom').map(function (ev) {
       return ev.detail;
+    }).shareReplay(1),
+    serviceClick$: domDriver.get('.service-item', 'clickCustom').map(function (ev) {
+      return ev.detail;
     }).shareReplay(1)
   };
 }
@@ -22246,7 +22300,7 @@ function intent(domDriver) {
 ;
 module.exports = exports['default'];
 
-},{"../utils":127,"@cycle/core":1}],125:[function(require,module,exports){
+},{"../utils":128,"@cycle/core":1}],126:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -22258,10 +22312,20 @@ var _cycleCore = require('@cycle/core');
 function model(intent, _ref) {
   var slots$ = _ref.slots;
   var provider$ = _ref.provider;
+  var services$ = _ref.services;
 
-  var route$ = intent.thumbnailClick$.timestamp().combineLatest(intent.mapBoundsChanged$.timestamp(), function (click, bounds) {
-    return bounds.timestamp > click.timestamp ? '/' : '/slot_id';
-  }).startWith('/');
+  var route$ = _cycleCore.Rx.Observable.combineLatest(intent.thumbnailClick$.timestamp().map(function (x) {
+    return _.assign(x, { route: '/slot_id' });
+  }), intent.serviceClick$.timestamp().map(function (x) {
+    return _.assign(x, { route: '/slot_list' });
+  }), intent.mapBoundsChanged$.timestamp().map(function (x) {
+    return _.assign(x, { route: '/slot_list' });
+  }), function (tnClick, sClick, boundsC) {
+    _.sort([tnClick, sClick, boundsC], function (xx) {
+      return xx.timestamp;
+    })[0].route;
+  }).startWith('/landing');
+
   return _cycleCore.Rx.Observable.combineLatest(intent.mapBoundsChanged$, slots$, function (bounds, slots) {
 
     if (bounds != null) {
@@ -22270,10 +22334,11 @@ function model(intent, _ref) {
       });
     }
     return slots;
-  }).combineLatest(route$, provider$, function (slots, route, provider) {
+  }).combineLatest(route$, provider$, services$, function (slots, route, provider, services) {
     return {
       slots: slots,
       provider: provider,
+      services: services,
       route: route
     };
   });
@@ -22282,7 +22347,7 @@ function model(intent, _ref) {
 exports['default'] = model;
 module.exports = exports['default'];
 
-},{"@cycle/core":1}],126:[function(require,module,exports){
+},{"@cycle/core":1}],127:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22309,7 +22374,7 @@ let savedTodosData = {
 */
 //localStorage.setItem('todos-cycle', JSON.stringify(savedTodosData))
 
-},{}],127:[function(require,module,exports){
+},{}],128:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22348,7 +22413,7 @@ exports.propHook = propHook;
 exports.ENTER_KEY = ENTER_KEY;
 exports.ESC_KEY = ESC_KEY;
 
-},{}],128:[function(require,module,exports){
+},{}],129:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -22381,6 +22446,14 @@ function vrenderSlotList(slots) {
   }).value())]);
 }
 
+function vrenderServiceList(services) {
+  return (0, _cycleWeb.h)('section#main', {
+    style: { 'display': '' }
+  }, [(0, _cycleWeb.h)('ul.list-group', _.chain(services).map(function (service) {
+    return (0, _cycleWeb.h)('service-item.service-item', { service: service });
+  }).value())]);
+}
+
 function vrenderMapSection(_ref) {
   var slots = _ref.slots;
 
@@ -22393,13 +22466,16 @@ function vrenderMapSection(_ref) {
 function vrenderMainSection(_ref2) {
   var slots = _ref2.slots;
   var provider = _ref2.provider;
+  var services = _ref2.services;
   var route = _ref2.route;
 
   switch (route) {
-    case '/':
+    case '/slot_list':
       return vrenderSlotList(slots);
     case '/slot_id':
       return vrenderIndividualProvider(provider);
+    case '/landing':
+      return vrenderServiceList(services);
     default:
       return vrenderSlotList(slots);
   }
@@ -22416,7 +22492,7 @@ function view(todos$) {
 ;
 module.exports = exports['default'];
 
-},{"../utils":127,"@cycle/core":1,"@cycle/web":10}],129:[function(require,module,exports){
+},{"../utils":128,"@cycle/core":1,"@cycle/web":10}],130:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
