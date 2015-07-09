@@ -3,7 +3,8 @@ import {Rx} from '@cycle/core';
 function model(intent, {slots: slots$, provider: provider$, services: services$}) {
   let route$ = Rx.Observable.merge(intent.thumbnailClick$.map(_ => 'thumbnail'),
   intent.serviceClick$.map(_ => 'service'),
-  intent.mapBoundsChanged$.map(_ => 'bounds')).scan('/landing',
+  intent.mapBoundsChanged$.map(_ => 'bounds'))
+  .scan('/landing',
   (acc, elem) => {
     switch(elem) {
       case 'bounds':
@@ -13,8 +14,11 @@ function model(intent, {slots: slots$, provider: provider$, services: services$}
       case 'thumbnail': return '/slot_id';
       default: return '/landing';
     }
-  }).startWith('/landing').map(_ => '/city_list');
-
+  }).startWith('/landing')
+  .combineLatest(intent.mapZoomChanged$.map(x => x.detail < 10).distinctUntilChanged(),
+  (click, showCities) => {
+    return showCities ? '/city_list' : click;
+  });
   return Rx.Observable.combineLatest(intent.mapBoundsChanged$, slots$, (bounds, slots) => {
 
 

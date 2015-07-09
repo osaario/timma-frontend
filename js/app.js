@@ -22325,8 +22325,8 @@ var _utils = require('../utils');
 
 function intent(domDriver) {
   return {
-    mapBoundsChanged$: domDriver.get('#timma-map', 'bounds_changed').throttle(1000).startWith(null).shareReplay(1),
-    mapZoomChanged$: domDriver.get('#timma-map', 'zoom_changed').throttle(1000).startWith(null).shareReplay(1),
+    mapBoundsChanged$: domDriver.get('#timma-map', 'bounds_changed').throttle(500).startWith(null).shareReplay(1),
+    mapZoomChanged$: domDriver.get('#timma-map', 'zoom_changed').throttle(500).startWith(0).shareReplay(1),
     thumbnailClick$: domDriver.get('.list-slot', 'clickCustom').map(function (ev) {
       return ev.detail;
     }).shareReplay(1),
@@ -22370,10 +22370,11 @@ function model(intent, _ref) {
       default:
         return '/landing';
     }
-  }).startWith('/landing').map(function (_) {
-    return '/city_list';
+  }).startWith('/landing').combineLatest(intent.mapZoomChanged$.map(function (x) {
+    return x.detail < 10;
+  }).distinctUntilChanged(), function (click, showCities) {
+    return showCities ? '/city_list' : click;
   });
-
   return _cycleCore.Rx.Observable.combineLatest(intent.mapBoundsChanged$, slots$, function (bounds, slots) {
 
     var filtered = _.filter(slots, function (slot) {
