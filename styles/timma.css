@@ -18,7 +18,8 @@ html, body, #todoapp, #app-div, #timma-map {
   float: left;
   position: absolute;
   margin-left: 50%;
-  overflow: scroll;
-  width: 100%;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  width: 50%;
   height: 100%;
 }

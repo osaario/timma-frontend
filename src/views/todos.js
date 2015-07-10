@@ -8,27 +8,13 @@ function vrenderIndividualProvider(provider) {
       h('h1', 'Loading provider')
     ]);
   }
-  return h('section.right-panel', {
-    style: {'display': ''}
-  }, [ h('div.container', [
-        h('div.row', [
-          h('div.col-sm-3', [
+  return h('section.right-panel', [
             h('a.thumbnail', [
               h('img', {"src": provider.images[0].url})
             ]),
-          ]),
-          h('div.col-sm-9', [
             h('h3', provider.name),
-            h('div', provider.district)
-          ]),
-        ]),
-        h('div.row', [
-          h('div.col-sm-12', [
+            h('div', provider.district),
             h('p', provider.description)
-          ]),
-        ])
-      ]
-    )
   ]);
 }
 

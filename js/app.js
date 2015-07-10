@@ -22526,9 +22526,7 @@ function vrenderIndividualProvider(provider) {
   if (provider == null) {
     return (0, _cycleWeb.h)('div')[(0, _cycleWeb.h)('h1', 'Loading provider')];
   }
-  return (0, _cycleWeb.h)('section.right-panel', {
-    style: { 'display': '' }
-  }, [(0, _cycleWeb.h)('div.container', [(0, _cycleWeb.h)('div.row', [(0, _cycleWeb.h)('div.col-sm-3', [(0, _cycleWeb.h)('a.thumbnail', [(0, _cycleWeb.h)('img', { 'src': provider.images[0].url })])]), (0, _cycleWeb.h)('div.col-sm-9', [(0, _cycleWeb.h)('h3', provider.name), (0, _cycleWeb.h)('div', provider.district)])]), (0, _cycleWeb.h)('div.row', [(0, _cycleWeb.h)('div.col-sm-12', [(0, _cycleWeb.h)('p', provider.description)])])])]);
+  return (0, _cycleWeb.h)('section.right-panel', [(0, _cycleWeb.h)('a.thumbnail', [(0, _cycleWeb.h)('img', { 'src': provider.images[0].url })]), (0, _cycleWeb.h)('h3', provider.name), (0, _cycleWeb.h)('div', provider.district), (0, _cycleWeb.h)('p', provider.description)]);
 }
 
 function vrenderSlotList(slots) {
