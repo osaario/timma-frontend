@@ -22526,13 +22526,13 @@ function vrenderIndividualProvider(provider) {
   if (provider == null) {
     return (0, _cycleWeb.h)('div')[(0, _cycleWeb.h)('h1', 'Loading provider')];
   }
-  return (0, _cycleWeb.h)('section#main', {
+  return (0, _cycleWeb.h)('section.right-panel', {
     style: { 'display': '' }
   }, [(0, _cycleWeb.h)('div.container', [(0, _cycleWeb.h)('div.row', [(0, _cycleWeb.h)('div.col-sm-3', [(0, _cycleWeb.h)('a.thumbnail', [(0, _cycleWeb.h)('img', { 'src': provider.images[0].url })])]), (0, _cycleWeb.h)('div.col-sm-9', [(0, _cycleWeb.h)('h3', provider.name), (0, _cycleWeb.h)('div', provider.district)])]), (0, _cycleWeb.h)('div.row', [(0, _cycleWeb.h)('div.col-sm-12', [(0, _cycleWeb.h)('p', provider.description)])])])]);
 }
 
 function vrenderSlotList(slots) {
-  return (0, _cycleWeb.h)('section#main', {
+  return (0, _cycleWeb.h)('section.right-panel', {
     style: { 'display': '' }
   }, [(0, _cycleWeb.h)('ul.list-group', _.chain(slots).groupBy(function (x) {
     return x.customerId;
@@ -22542,7 +22542,7 @@ function vrenderSlotList(slots) {
 }
 
 function vrenderCityList(cities) {
-  return (0, _cycleWeb.h)('section#main', {
+  return (0, _cycleWeb.h)('section.right-panel', {
     style: { 'display': '' }
   }, [(0, _cycleWeb.h)('ul.list-group', _.chain(cities).map(function (city) {
     return (0, _cycleWeb.h)('city-item.city-item', { city: city });
@@ -22550,7 +22550,7 @@ function vrenderCityList(cities) {
 }
 
 function vrenderServiceList(services) {
-  return (0, _cycleWeb.h)('section#main', {
+  return (0, _cycleWeb.h)('section.right-panel', {
     style: { 'display': '' }
   }, [(0, _cycleWeb.h)('ul.list-group', _.chain(services).map(function (service) {
     return (0, _cycleWeb.h)('service-item.service-item', { service: service });
@@ -22596,7 +22596,7 @@ function vrenderMainSection(_ref2) {
 
 function view(todos$) {
   return todos$.map(function (todos) {
-    return (0, _cycleWeb.h)('div', [vrenderNav(), vrenderMapSection(todos), vrenderMainSection(todos)
+    return (0, _cycleWeb.h)('div.app-div', [vrenderNav(), vrenderMapSection(todos), vrenderMainSection(todos)
     //vrenderFooter(todos)
     ]);
   });
@@ -22635,8 +22635,6 @@ var TimmaMap = (function () {
     value: function init() {
       var element = document.createElement('div');
       element.id = 'timma-map';
-      element.style.height = '400px';
-      element.style.width = '100%';
 
       var mapOptions = {
         zoom: 14,

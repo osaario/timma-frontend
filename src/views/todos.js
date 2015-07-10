@@ -8,7 +8,7 @@ function vrenderIndividualProvider(provider) {
       h('h1', 'Loading provider')
     ]);
   }
-  return h('section#main', {
+  return h('section.right-panel', {
     style: {'display': ''}
   }, [ h('div.container', [
         h('div.row', [
@@ -33,7 +33,7 @@ function vrenderIndividualProvider(provider) {
 }
 
 function vrenderSlotList(slots) {
-  return h('section#main', {
+  return h('section.right-panel', {
     style: {'display': ''}
   }, [ h('ul.list-group',
     _.chain(slots)
@@ -45,7 +45,7 @@ function vrenderSlotList(slots) {
 }
 
 function vrenderCityList(cities) {
-  return h('section#main', {
+  return h('section.right-panel', {
     style: {'display': ''}
   }, [ h('ul.list-group',
     _.chain(cities)
@@ -56,7 +56,7 @@ function vrenderCityList(cities) {
 }
 
 function vrenderServiceList(services) {
-  return h('section#main', {
+  return h('section.right-panel', {
     style: {'display': ''}
   }, [ h('ul.list-group',
     _.chain(services)
@@ -96,7 +96,7 @@ function vrenderMainSection({slots: slots, cities: cities, provider: provider, s
 
 export default function view(todos$) {
   return todos$.map(todos =>
-      h('div', [
+      h('div.app-div', [
         vrenderNav(),
         vrenderMapSection(todos),
         vrenderMainSection(todos)
