@@ -11,7 +11,7 @@ class TimmaMap {
   init() {
     let element = document.createElement('div');
     element.id = 'timma-map'
-    element.style.height = '500px';
+    element.style.height = '400px';
     element.style.width = '100%';
 
     let mapOptions = {

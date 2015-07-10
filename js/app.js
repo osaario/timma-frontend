@@ -22557,6 +22557,10 @@ function vrenderServiceList(services) {
   }).value())]);
 }
 
+function vrenderNav() {
+  return (0, _cycleWeb.h)('nav.navbar.navbar-default', [(0, _cycleWeb.h)('div.container-fluid', [(0, _cycleWeb.h)('div.navbar-header', [(0, _cycleWeb.h)('a.navbar-brand', 'Timma')])])]);
+}
+
 function vrenderMapSection(_ref) {
   var slots = _ref.slots;
   var setBounds = _ref.setBounds;
@@ -22592,7 +22596,7 @@ function vrenderMainSection(_ref2) {
 
 function view(todos$) {
   return todos$.map(function (todos) {
-    return (0, _cycleWeb.h)('div', [vrenderMapSection(todos), vrenderMainSection(todos)
+    return (0, _cycleWeb.h)('div', [vrenderNav(), vrenderMapSection(todos), vrenderMainSection(todos)
     //vrenderFooter(todos)
     ]);
   });
@@ -22631,7 +22635,7 @@ var TimmaMap = (function () {
     value: function init() {
       var element = document.createElement('div');
       element.id = 'timma-map';
-      element.style.height = '500px';
+      element.style.height = '400px';
       element.style.width = '100%';
 
       var mapOptions = {

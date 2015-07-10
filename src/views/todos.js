@@ -66,6 +66,16 @@ function vrenderServiceList(services) {
   )]);
 }
 
+function vrenderNav() {
+  return h('nav.navbar.navbar-default', [
+      h('div.container-fluid', [
+        h('div.navbar-header', [
+            h('a.navbar-brand', 'Timma')
+        ])
+      ])
+  ]);
+}
+
 function vrenderMapSection({slots: slots, setBounds: setBounds}) {
   return h('main-map', {
     markers: slots.map(x => new google.maps.LatLng(x.lastMinuteInfo.lat, x.lastMinuteInfo.lon))
@@ -87,6 +97,7 @@ function vrenderMainSection({slots: slots, cities: cities, provider: provider, s
 export default function view(todos$) {
   return todos$.map(todos =>
       h('div', [
+        vrenderNav(),
         vrenderMapSection(todos),
         vrenderMainSection(todos)
         //vrenderFooter(todos)
