@@ -9,18 +9,12 @@ function listSlotComponent(drivers) {
   let props$ = drivers.props.getAll().shareReplay(1);
 
   let vtree$ = props$.map(({slot: slot}) => {
-    return h('li.list-group-item.container', [
-      h('div.row', [
-        h('div.col-sm-3', [
-          h('a.thumbnail.list-slot-clickable', [
-            h('img', {"src": slot[0].lastMinuteInfo.imageUrl})
-          ]),
-        ]),
-        h('div.col-sm-9', [
-          h('h3', slot[0].lastMinuteInfo.customerName),
-          h('div', slot[0].lastMinuteInfo.district)
-        ]),
-      ])
+    return h('li.list-group-item', [
+      h('a.thumbnail.slot-thumbnail.list-slot-clickable', [
+        h('img.slot-img', {"src": slot[0].lastMinuteInfo.imageUrl})
+      ]),
+      h('h3', slot[0].lastMinuteInfo.customerName),
+      h('div', slot[0].lastMinuteInfo.district)
     ]);
   });
 

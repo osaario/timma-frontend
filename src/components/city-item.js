@@ -9,10 +9,9 @@ function cityItemComponent(drivers) {
   let props$ = drivers.props.getAll().shareReplay(1);
 
   let vtree$ = props$.map(({city: city}) => {
-    return h('li.list-group-item.container', [
-        h('div.col-sm-9', [
+    return h('li.list-group-item', [
+          h('img.slot-img', {"src":"http://www.noroadsentertainment.com/wp-content/uploads/2015/03/helsinki-finland.jpg" }),
           h('h2', city.city)
-        ])
     ]);
   });
 

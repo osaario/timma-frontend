@@ -22119,7 +22119,7 @@ function cityItemComponent(drivers) {
   var vtree$ = props$.map(function (_ref) {
     var city = _ref.city;
 
-    return (0, _cycleWeb.h)('li.list-group-item.container', [(0, _cycleWeb.h)('div.col-sm-9', [(0, _cycleWeb.h)('h2', city.city)])]);
+    return (0, _cycleWeb.h)('li.list-group-item', [(0, _cycleWeb.h)('img.slot-img', { 'src': 'http://www.noroadsentertainment.com/wp-content/uploads/2015/03/helsinki-finland.jpg' }), (0, _cycleWeb.h)('h2', city.city)]);
   });
 
   return {
@@ -22182,7 +22182,7 @@ function listSlotComponent(drivers) {
   var vtree$ = props$.map(function (_ref) {
     var slot = _ref.slot;
 
-    return (0, _cycleWeb.h)('li.list-group-item.container', [(0, _cycleWeb.h)('div.row', [(0, _cycleWeb.h)('div.col-sm-3', [(0, _cycleWeb.h)('a.thumbnail.list-slot-clickable', [(0, _cycleWeb.h)('img', { 'src': slot[0].lastMinuteInfo.imageUrl })])]), (0, _cycleWeb.h)('div.col-sm-9', [(0, _cycleWeb.h)('h3', slot[0].lastMinuteInfo.customerName), (0, _cycleWeb.h)('div', slot[0].lastMinuteInfo.district)])])]);
+    return (0, _cycleWeb.h)('li.list-group-item', [(0, _cycleWeb.h)('a.thumbnail.slot-thumbnail.list-slot-clickable', [(0, _cycleWeb.h)('img.slot-img', { 'src': slot[0].lastMinuteInfo.imageUrl })]), (0, _cycleWeb.h)('h3', slot[0].lastMinuteInfo.customerName), (0, _cycleWeb.h)('div', slot[0].lastMinuteInfo.district)]);
   });
 
   return {
@@ -22363,7 +22363,7 @@ function model(intent, _ref) {
     return 'service';
   }), intent.mapBoundsChanged$.map(function (_) {
     return 'bounds';
-  })).scan('/landing', function (acc, elem) {
+  })).scan('/slot_list', function (acc, elem) {
     switch (elem) {
       case 'bounds':
         if (acc !== '/slot_id') return acc;else return '/slot_list';
@@ -22374,7 +22374,7 @@ function model(intent, _ref) {
       default:
         return '/landing';
     }
-  }).startWith('/landing').combineLatest(intent.mapBoundsChanged$.map(function (x) {
+  }).startWith('/slot_list').combineLatest(intent.mapBoundsChanged$.map(function (x) {
     return x.zoomLevel;
   }).map(function (x) {
     return x < 10;

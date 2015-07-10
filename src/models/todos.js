@@ -4,7 +4,7 @@ function model(intent, {slots: slots$, provider: provider$, services: services$}
   let route$ = Rx.Observable.merge(intent.thumbnailClick$.map(_ => 'thumbnail'),
   intent.serviceClick$.map(_ => 'service'),
   intent.mapBoundsChanged$.map(_ => 'bounds'))
-  .scan('/landing',
+  .scan('/slot_list',
   (acc, elem) => {
     switch(elem) {
       case 'bounds':
@@ -14,7 +14,7 @@ function model(intent, {slots: slots$, provider: provider$, services: services$}
       case 'thumbnail': return '/slot_id';
       default: return '/landing';
     }
-  }).startWith('/landing')
+  }).startWith('/slot_list')
   .combineLatest(intent.mapBoundsChanged$.map(x => x.zoomLevel).map(x => x < 10).distinctUntilChanged(),
   (click, showCities) => {
     return showCities ? '/city_list' : click;
