@@ -2,11 +2,16 @@ import {Rx} from '@cycle/core';
 import {h} from '@cycle/web';
 import {propHook} from '../utils';
 
+function vrenderLoading() {
+  return h('section.right-panel', [
+            h('h3', 'Ladataaan')
+  ]);
+
+}
+
 function vrenderIndividualProvider(provider) {
   if(provider == null) {
-    return(h('div')[
-      h('h1', 'Loading provider')
-    ]);
+    return vrenderLoading();
   }
   return h('section.right-panel', [
             h('a.thumbnail', [

@@ -22031,9 +22031,9 @@ var _modelsTodos = require('./models/todos');
 
 var _modelsTodos2 = _interopRequireDefault(_modelsTodos);
 
-var _viewsTodos = require('./views/todos');
+var _viewsLanding = require('./views/landing');
 
-var _viewsTodos2 = _interopRequireDefault(_viewsTodos);
+var _viewsLanding2 = _interopRequireDefault(_viewsLanding);
 
 var _cycleHttp = require('@cycle/http');
 
@@ -22086,7 +22086,7 @@ function main(drivers) {
   var todos$ = (0, _modelsTodos2['default'])(intents, { slots: slots$, provider: provider$, services: services$ });
 
   return {
-    DOM: (0, _viewsTodos2['default'])(todos$),
+    DOM: (0, _viewsLanding2['default'])(todos$),
     HTTP: _cycleCore.Rx.Observable.merge(slot_req$, provider_req$, services_req$)
   };
 }
@@ -22102,7 +22102,7 @@ _cycleCore2['default'].run(main, {
   HTTP: (0, _cycleHttp.makeHTTPDriver)()
 });
 
-},{"./components/city-item":121,"./components/googlemap-component":122,"./components/list-slot":123,"./components/service-item":124,"./components/todo-item":125,"./intents/todos":126,"./models/todos":127,"./sinks/local-storage.js":128,"./views/todos":130,"@cycle/core":1,"@cycle/http":4,"@cycle/web":10}],121:[function(require,module,exports){
+},{"./components/city-item":121,"./components/googlemap-component":122,"./components/list-slot":123,"./components/service-item":124,"./components/todo-item":125,"./intents/todos":126,"./models/todos":127,"./sinks/local-storage.js":128,"./views/landing":131,"@cycle/core":1,"@cycle/http":4,"@cycle/web":10}],121:[function(require,module,exports){
 'use strict';
 
 var _cycleCore = require('@cycle/core');
@@ -22165,7 +22165,7 @@ function googleMapComponent(drivers) {
 
 module.exports = googleMapComponent;
 
-},{"../widgets/googlemap-widget":131,"@cycle/core":1,"@cycle/web":10}],123:[function(require,module,exports){
+},{"../widgets/googlemap-widget":132,"@cycle/core":1,"@cycle/web":10}],123:[function(require,module,exports){
 'use strict';
 
 var _cycleCore = require('@cycle/core');
@@ -22311,7 +22311,7 @@ function todoItemComponent(drivers) {
 
 module.exports = todoItemComponent;
 
-},{"../utils":129,"@cycle/core":1,"@cycle/web":10}],126:[function(require,module,exports){
+},{"../utils":130,"@cycle/core":1,"@cycle/web":10}],126:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -22343,7 +22343,7 @@ function intent(domDriver) {
 ;
 module.exports = exports['default'];
 
-},{"../utils":129,"@cycle/core":1}],127:[function(require,module,exports){
+},{"../utils":130,"@cycle/core":1}],127:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -22470,6 +22470,27 @@ let savedTodosData = {
 //localStorage.setItem('todos-cycle', JSON.stringify(savedTodosData))
 
 },{}],129:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
+function stringsFi() {
+  return {
+    'landing_header_1': 'SINUA VARTEN',
+    'landing_caption_1': 'Sovita salonkipalvelusi aikataulut uudella tavalla',
+    'landing_city_search_placeholder': 'Hae kaupunkia',
+    'search': 'Hae'
+  };
+}
+
+exports['default'] = {
+  strings: stringsFi()
+};
+module.exports = exports['default'];
+
+},{}],130:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22508,7 +22529,7 @@ exports.propHook = propHook;
 exports.ENTER_KEY = ENTER_KEY;
 exports.ESC_KEY = ESC_KEY;
 
-},{}],130:[function(require,module,exports){
+},{}],131:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -22522,88 +22543,41 @@ var _cycleWeb = require('@cycle/web');
 
 var _utils = require('../utils');
 
-function vrenderIndividualProvider(provider) {
-  if (provider == null) {
-    return (0, _cycleWeb.h)('div')[(0, _cycleWeb.h)('h1', 'Loading provider')];
-  }
-  return (0, _cycleWeb.h)('section.right-panel', [(0, _cycleWeb.h)('a.thumbnail', [(0, _cycleWeb.h)('img', { 'src': provider.images[0].url })]), (0, _cycleWeb.h)('h3', provider.name), (0, _cycleWeb.h)('div', provider.district), (0, _cycleWeb.h)('p', provider.description)]);
-}
-
-function vrenderSlotList(slots) {
-  return (0, _cycleWeb.h)('section.right-panel', {
-    style: { 'display': '' }
-  }, [(0, _cycleWeb.h)('ul.list-group', _.chain(slots).groupBy(function (x) {
-    return x.customerId;
-  }).map(function (todoData) {
-    return (0, _cycleWeb.h)('list-slot.list-slot', { slot: todoData });
-  }).value())]);
-}
-
-function vrenderCityList(cities) {
-  return (0, _cycleWeb.h)('section.right-panel', {
-    style: { 'display': '' }
-  }, [(0, _cycleWeb.h)('ul.list-group', _.chain(cities).map(function (city) {
-    return (0, _cycleWeb.h)('city-item.city-item', { city: city });
-  }).value())]);
-}
-
-function vrenderServiceList(services) {
-  return (0, _cycleWeb.h)('section.right-panel', {
-    style: { 'display': '' }
-  }, [(0, _cycleWeb.h)('ul.list-group', _.chain(services).map(function (service) {
-    return (0, _cycleWeb.h)('service-item.service-item', { service: service });
-  }).value())]);
-}
+var _stringsStrings = require('../strings/strings');
 
 function vrenderNav() {
   return (0, _cycleWeb.h)('nav.navbar.navbar-default', [(0, _cycleWeb.h)('div.container-fluid', [(0, _cycleWeb.h)('div.navbar-header', [(0, _cycleWeb.h)('a.navbar-brand', 'Timma')])])]);
 }
 
-function vrenderMapSection(_ref) {
-  var slots = _ref.slots;
-  var setBounds = _ref.setBounds;
-
-  return (0, _cycleWeb.h)('main-map', {
-    markers: slots.map(function (x) {
-      return new google.maps.LatLng(x.lastMinuteInfo.lat, x.lastMinuteInfo.lon);
-    }),
-    setBounds: setBounds
-  });
-}
-
-function vrenderMainSection(_ref2) {
-  var slots = _ref2.slots;
-  var cities = _ref2.cities;
-  var provider = _ref2.provider;
-  var services = _ref2.services;
-  var route = _ref2.route;
-
-  switch (route) {
-    case '/slot_list':
-      return vrenderSlotList(slots);
-    case '/city_list':
-      return vrenderCityList(cities);
-    case '/slot_id':
-      return vrenderIndividualProvider(provider);
-    case '/landing':
-      return vrenderServiceList(services);
-    default:
-      return vrenderSlotList(slots);
-  }
+function vRenderImageSearch() {
+  return (0, _cycleWeb.h)('div.jumbotron', { style: {
+      'background-image': 'url(\'http://peruutusaika.fi/img/timma_default.png\')'
+    } }, [(0, _cycleWeb.h)('div.container', [(0, _cycleWeb.h)('h1', _stringsStrings.strings.landing_header_1), (0, _cycleWeb.h)('p', _stringsStrings.strings.landing_caption_1), (0, _cycleWeb.h)('div.input-group', [(0, _cycleWeb.h)('input.form-control', { 'type': 'text', 'placeholder': _stringsStrings.strings.landing_city_search_placeholder }), (0, _cycleWeb.h)('span.input-group-btn', [(0, _cycleWeb.h)('button.btn.btn-default', { 'type': 'button' }, _stringsStrings.strings.search)])])])])
+  /*
+  <div class="input-group">
+      <input type="text" class="form-control" placeholder="Search for...">
+      <span class="input-group-btn">
+        <button class="btn btn-default" type="button">Go!</button>
+      </span>
+    </div><!-- /input-group -->
+  <div class="input-group">
+  <span class="input-group-addon" id="basic-addon1">@</span>
+  <input type="text" class="form-control" placeholder="Username" aria-describedby="basic-addon1">
+  </div>
+  */
+  ;
 }
 
 function view(todos$) {
   return todos$.map(function (todos) {
-    return (0, _cycleWeb.h)('div.app-div', [vrenderNav(), vrenderMapSection(todos), vrenderMainSection(todos)
-    //vrenderFooter(todos)
-    ]);
+    return (0, _cycleWeb.h)('div.app-div', [vrenderNav(), vRenderImageSearch()]);
   });
 }
 
 ;
 module.exports = exports['default'];
 
-},{"../utils":129,"@cycle/core":1,"@cycle/web":10}],131:[function(require,module,exports){
+},{"../strings/strings":129,"../utils":130,"@cycle/core":1,"@cycle/web":10}],132:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();

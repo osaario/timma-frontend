@@ -8,7 +8,7 @@ import cityItemComponent from './components/city-item';
 import serviceItemComponent from './components/service-item';
 import intent from './intents/todos';
 import model from './models/todos';
-import view from './views/todos';
+import view from './views/landing';
 import {makeHTTPDriver} from '@cycle/http';
 import localStorageSink from './sinks/local-storage.js';
 
