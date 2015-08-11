@@ -10,6 +10,19 @@ module.exports = function(grunt) {
         dest: 'js/app.min.js'
       }
     },
+    postcss: {
+           options: {
+               map: true,
+               processors: [
+                   require('autoprefixer-core')({
+                       browsers: ['last 2 versions']
+                   })
+               ]
+           },
+           dist: {
+               src: 'styles/timma.css'
+           }
+         },
     less: {
       style: {
         files: {
@@ -45,7 +58,7 @@ module.exports = function(grunt) {
       },
       css: {
         files: ['styles/less/*.less'],
-        tasks: ['less:style'],
+        tasks: ['less:style', 'postcss'],
         options: {
           livereload: true,
         }
@@ -59,8 +72,9 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-postcss');
 
-  grunt.registerTask('default', ['jshint', 'browserify']);
-  grunt.registerTask('build-release', ['jshint', 'browserify', 'uglify']);
+  grunt.registerTask('default', ['jshint', 'browserify', 'less', 'postcss']);
+  grunt.registerTask('build-release', ['jshint', 'browserify', 'less', 'postcss', 'uglify']);
 
 };
