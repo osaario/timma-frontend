@@ -19,8 +19,8 @@ function vRenderImageSearch() {
     'background-image': "url('../static/images/landing.jpg')"
   }}, [
     h('div.container', [
-      h('h1', strings.landing_header_1),
-      h('p', strings.landing_caption_1),
+      h('h1.landing_text', strings.landing_header_1),
+      h('p.landing_text', strings.landing_caption_1),
       h('div.input-group', [
         h('input.form-control', {'type':'text', 'placeholder': strings.landing_city_search_placeholder}),
         h('span.input-group-btn', [

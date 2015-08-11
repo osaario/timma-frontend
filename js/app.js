@@ -23500,7 +23500,7 @@ function vrenderNav() {
 function vRenderImageSearch() {
   return (0, _cycleDom.h)('div.jumbotron', { style: {
       'background-image': "url('../static/images/landing.jpg')"
-    } }, [(0, _cycleDom.h)('div.container', [(0, _cycleDom.h)('h1', _stringsStrings.strings.landing_header_1), (0, _cycleDom.h)('p', _stringsStrings.strings.landing_caption_1), (0, _cycleDom.h)('div.input-group', [(0, _cycleDom.h)('input.form-control', { 'type': 'text', 'placeholder': _stringsStrings.strings.landing_city_search_placeholder }), (0, _cycleDom.h)('span.input-group-btn', [(0, _cycleDom.h)('button.btn.btn-default', { 'type': 'button' }, _stringsStrings.strings.search)])])])]);
+    } }, [(0, _cycleDom.h)('div.container', [(0, _cycleDom.h)('h1.landing_text', _stringsStrings.strings.landing_header_1), (0, _cycleDom.h)('p.landing_text', _stringsStrings.strings.landing_caption_1), (0, _cycleDom.h)('div.input-group', [(0, _cycleDom.h)('input.form-control', { 'type': 'text', 'placeholder': _stringsStrings.strings.landing_city_search_placeholder }), (0, _cycleDom.h)('span.input-group-btn', [(0, _cycleDom.h)('button.btn.btn-default', { 'type': 'button' }, _stringsStrings.strings.search)])])])]);
   /*
   <div class="input-group">
       <input type="text" class="form-control" placeholder="Search for...">
