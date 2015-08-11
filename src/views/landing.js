@@ -1,5 +1,5 @@
 import {Rx} from '@cycle/core';
-import {h} from '@cycle/web';
+import {h} from '@cycle/dom';
 import {propHook} from '../utils';
 import {strings} from '../strings/strings';
 
@@ -16,7 +16,7 @@ function vrenderNav() {
 
 function vRenderImageSearch() {
   return h('div.jumbotron', { style: {
-    'background-image': "url('http://peruutusaika.fi/img/timma_default.png')"
+    'background-image': "url('../static/images/landing.jpg')"
   }}, [
     h('div.container', [
       h('h1', strings.landing_header_1),

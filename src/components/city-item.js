@@ -1,5 +1,5 @@
 import {Rx} from '@cycle/core';
-import {h} from '@cycle/web';
+import {h} from '@cycle/dom';
 
 function cityItemComponent(drivers) {
   let intent = {

@@ -1,5 +1,5 @@
 import Cycle from '@cycle/core';
-import CycleWeb from '@cycle/web';
+import CycleWeb from '@cycle/dom';
 import {Rx} from '@cycle/core';
 import todoItemComponent from './components/todo-item';
 import googleMapComponent from './components/googlemap-component';
