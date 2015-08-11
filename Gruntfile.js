@@ -28,7 +28,14 @@ module.exports = function(grunt) {
     },
     watch: {
       files: ['<%= jshint.files %>'],
-      tasks: ['jshint']
+      tasks: ['jshint'],
+      js: {
+        files: ['src/**/*.js'],
+        tasks: ['jshint', 'browserify'],
+        options: {
+          livereload: true,
+        }
+      }
     }
   });
 

@@ -8,4 +8,4 @@ export default function intent(domDriver) {
     cityClick$: domDriver.get('.city-item', 'clickCustom').map((ev) => ev.detail).shareReplay(1),
     serviceClick$: domDriver.get('.service-item', 'clickCustom').map((ev) => ev.detail).shareReplay(1)
   };
-};
+}

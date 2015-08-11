@@ -28,7 +28,7 @@ function vRenderImageSearch() {
         ])
       ])
     ])
-  ])
+  ]);
   /*
   <div class="input-group">
       <input type="text" class="form-control" placeholder="Search for...">
@@ -50,4 +50,4 @@ export default function view(todos$) {
         vRenderImageSearch()
       ])
     );
-};
+}

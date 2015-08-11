@@ -5,7 +5,7 @@ function stringsFi() {
     'landing_caption_1': 'Sovita salonkipalvelusi aikataulut uudella tavalla',
     'landing_city_search_placeholder': 'Hae kaupunkia',
     'search': 'Hae'
-  }
+  };
 }
 
 export default {

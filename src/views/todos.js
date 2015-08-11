@@ -10,7 +10,7 @@ function vrenderLoading() {
 }
 
 function vrenderIndividualProvider(provider) {
-  if(provider == null) {
+  if(provider === null) {
     return vrenderLoading();
   }
   return h('section.right-panel', [
@@ -69,8 +69,7 @@ function vrenderNav() {
 
 function vrenderMapSection({slots: slots, setBounds: setBounds}) {
   return h('main-map', {
-    markers: slots.map(x => new google.maps.LatLng(x.lastMinuteInfo.lat, x.lastMinuteInfo.lon))
-      , setBounds: setBounds
+    markers: slots.map(x => new google.maps.LatLng(x.lastMinuteInfo.lat, x.lastMinuteInfo.lon)), setBounds: setBounds
     });
 }
 
@@ -94,4 +93,4 @@ export default function view(todos$) {
         //vrenderFooter(todos)
       ])
     );
-};
+}

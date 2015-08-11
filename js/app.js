@@ -23274,7 +23274,6 @@ function intent(domDriver) {
   };
 }
 
-;
 module.exports = exports['default'];
 
 },{"../utils":133,"@cycle/core":1}],129:[function(require,module,exports){
@@ -23301,6 +23300,7 @@ function model(intent, _ref) {
     switch (elem) {
       case 'bounds':
         if (acc !== '/slot_id') return acc;else return '/slot_list';
+        break;
       case 'service':
         return '/slot_list';
       case 'thumbnail':
@@ -23326,7 +23326,7 @@ function model(intent, _ref) {
     var bounds = _ref2.bounds;
 
     var filtered = _.filter(slots, function (slot) {
-      return bounds != null ? bounds.contains(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon)) : true;
+      return bounds !== null ? bounds.contains(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon)) : true;
     });
 
     var cities = _.chain(filtered).groupBy(function (s) {
@@ -23400,7 +23400,6 @@ function localStorageSink(todosData) {
   //localStorage.setItem('todos-cycle', JSON.stringify(savedTodosData))
 }
 
-;
 module.exports = exports["default"];
 
 },{}],131:[function(require,module,exports){
@@ -23522,7 +23521,6 @@ function view(todos$) {
   });
 }
 
-;
 module.exports = exports['default'];
 
 },{"../strings/strings":132,"../utils":133,"@cycle/core":1,"@cycle/dom":5}],135:[function(require,module,exports){
@@ -23544,7 +23542,7 @@ function vrenderLoading() {
 }
 
 function vrenderIndividualProvider(provider) {
-  if (provider == null) {
+  if (provider === null) {
     return vrenderLoading();
   }
   return (0, _cycleDom.h)('section.right-panel', [(0, _cycleDom.h)('a.thumbnail', [(0, _cycleDom.h)('img', { "src": provider.images[0].url })]), (0, _cycleDom.h)('h3', provider.name), (0, _cycleDom.h)('div', provider.district), (0, _cycleDom.h)('p', provider.description)]);
@@ -23587,8 +23585,7 @@ function vrenderMapSection(_ref) {
   return (0, _cycleDom.h)('main-map', {
     markers: slots.map(function (x) {
       return new google.maps.LatLng(x.lastMinuteInfo.lat, x.lastMinuteInfo.lon);
-    }),
-    setBounds: setBounds
+    }), setBounds: setBounds
   });
 }
 
@@ -23621,7 +23618,6 @@ function view(todos$) {
   });
 }
 
-;
 module.exports = exports['default'];
 
 },{"../utils":133,"@cycle/core":1,"@cycle/dom":5}],136:[function(require,module,exports){
@@ -23686,7 +23682,7 @@ var TimmaMap = (function () {
     key: 'update',
     value: function update(previous, domNode) {
       //Epic diffing function for now since we only render markers once atm
-      if (this.markersRendered == true) return;
+      if (this.markersRendered === true) return;
       this.markers.forEach(function (m) {
         var _ = new google.maps.Marker({
           position: m,
@@ -23695,7 +23691,7 @@ var TimmaMap = (function () {
           zIndex: 0
         });
       });
-      if (this.bounds != null && this.bounds !== domNode.officesMap.map.getBounds()) {
+      if (this.bounds !== null && this.bounds !== domNode.officesMap.map.getBounds()) {
         domNode.officesMap.map.fitBounds(this.bounds);
         this.bounds = null;
       }

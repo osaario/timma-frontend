@@ -10,6 +10,7 @@ function model(intent, {slots: slots$, provider: provider$, services: services$}
       case 'bounds':
         if(acc !== '/slot_id') return acc;
         else return '/slot_list';
+        break;
       case 'service': return '/slot_list';
       case 'thumbnail': return '/slot_id';
       default: return '/landing';
@@ -28,7 +29,7 @@ function model(intent, {slots: slots$, provider: provider$, services: services$}
 
   return Rx.Observable.combineLatest(intent.mapBoundsChanged$, slots$, ({bounds: bounds}, slots) => {
       let filtered = _.filter(slots, (slot) => {
-         return bounds != null ? bounds.contains(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon))
+         return bounds !== null ? bounds.contains(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon))
          : true;
       });
 
@@ -38,7 +39,7 @@ function model(intent, {slots: slots$, provider: provider$, services: services$}
         var bounds = new google.maps.LatLngBounds();
         slots.forEach((slot) =>
         {
-          bounds.extend(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon))
+          bounds.extend(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon));
         });
         return {city: slots[0].lastMinuteInfo.city, bounds: bounds, lat: bounds.getCenter().lat(), lon: bounds.getCenter().lng()};
       })

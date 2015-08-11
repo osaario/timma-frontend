@@ -10,7 +10,7 @@ class TimmaMap {
 
   init() {
     let element = document.createElement('div');
-    element.id = 'timma-map'
+    element.id = 'timma-map';
 
     let mapOptions = {
       zoom: 14,
@@ -36,7 +36,7 @@ class TimmaMap {
       // marker.
       var event = new CustomEvent('bounds_changed', {'detail': {bounds: map.getBounds(), zoomLevel: map.getZoom(), center: map.getCenter()}});
       element.dispatchEvent(event);
-    })
+    });
       var event = new CustomEvent('bounds_changed', {'detail': {bounds: map.getBounds(), zoomLevel: map.getZoom(), center: map.getCenter()}});
       element.dispatchEvent(event);
       // 3 seconds after the center of the map has changed, pan back to the
@@ -46,7 +46,7 @@ class TimmaMap {
 
   update(previous, domNode) {
     //Epic diffing function for now since we only render markers once atm
-    if(this.markersRendered == true) return;
+    if(this.markersRendered === true) return;
     this.markers.forEach((m) => {
       var _ = new google.maps.Marker({
         position: m,
@@ -55,7 +55,7 @@ class TimmaMap {
         zIndex: 0
       });
     });
-    if(this.bounds != null && this.bounds !== domNode.officesMap.map.getBounds()) {
+    if(this.bounds !== null && this.bounds !== domNode.officesMap.map.getBounds()) {
         domNode.officesMap.map.fitBounds(this.bounds);
         this.bounds = null;
     }
