@@ -1,15 +1,16 @@
 module.exports = function(grunt) {
 
   grunt.initConfig({
-  concat: {
-        options: {
-          separator: ';'
-        },
-        dist: {
-          src: ['src/**/*.js'],
-          dest: 'js/app.js'
-        }
-      },
+    browserify: {
+     dist: {
+       options: {
+         transform: [["babelify", { "stage": 0 }]]
+       },
+      files: {
+        'js/app.js': 'src/**/*.js'
+      }
+     }
+   },
     jshint: {
       files: ['Gruntfile.js', 'src/**/*.js', 'test/**/*.js'],
       options: {
@@ -27,6 +28,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-shell');
 
-  grunt.registerTask('default', ['jshint']);
+  grunt.registerTask('default', ['browserify']);
 
 };

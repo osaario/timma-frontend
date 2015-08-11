@@ -11,6 +11,7 @@
     "babel": "^5.1.13",
     "babelify": "^6.0.2",
     "browserify": "^10.0.0",
+    "grunt-babel": "^5.0.1",
     "grunt-browserify": "^4.0.0",
     "grunt-contrib-jshint": "^0.11.2",
     "grunt-contrib-watch": "^0.6.1",

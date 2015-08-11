@@ -23036,7 +23036,7 @@ _cycleCore2['default'].run(main, {
   HTTP: (0, _cycleHttp.makeHTTPDriver)()
 });
 
-},{"./components/city-item":123,"./components/googlemap-component":124,"./components/list-slot":125,"./components/service-item":126,"./components/todo-item":127,"./intents/todos":128,"./models/todos":129,"./sinks/local-storage.js":130,"./views/landing":133,"@cycle/core":1,"@cycle/dom":5,"@cycle/http":115}],123:[function(require,module,exports){
+},{"./components/city-item":123,"./components/googlemap-component":124,"./components/list-slot":125,"./components/service-item":126,"./components/todo-item":127,"./intents/todos":128,"./models/todos":129,"./sinks/local-storage.js":130,"./views/landing":134,"@cycle/core":1,"@cycle/dom":5,"@cycle/http":115}],123:[function(require,module,exports){
 'use strict';
 
 var _cycleCore = require('@cycle/core');
@@ -23099,7 +23099,7 @@ function googleMapComponent(drivers) {
 
 module.exports = googleMapComponent;
 
-},{"../widgets/googlemap-widget":134,"@cycle/core":1,"@cycle/dom":5}],125:[function(require,module,exports){
+},{"../widgets/googlemap-widget":136,"@cycle/core":1,"@cycle/dom":5}],125:[function(require,module,exports){
 'use strict';
 
 var _cycleCore = require('@cycle/core');
@@ -23245,7 +23245,7 @@ function todoItemComponent(drivers) {
 
 module.exports = todoItemComponent;
 
-},{"../utils":132,"@cycle/core":1,"@cycle/dom":5}],128:[function(require,module,exports){
+},{"../utils":133,"@cycle/core":1,"@cycle/dom":5}],128:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -23277,7 +23277,7 @@ function intent(domDriver) {
 ;
 module.exports = exports['default'];
 
-},{"../utils":132,"@cycle/core":1}],129:[function(require,module,exports){
+},{"../utils":133,"@cycle/core":1}],129:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -23410,6 +23410,21 @@ Object.defineProperty(exports, '__esModule', {
   value: true
 });
 
+var _cycleCore = require('@cycle/core');
+
+// get serviceslots from backend
+exports['default'] = {
+  //  serviceSlots$: Rx.Observable.fromPromise(getServiceSlots)
+};
+module.exports = exports['default'];
+
+},{"@cycle/core":1}],132:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+
 function stringsFi() {
   return {
     'landing_header_1': 'SINUA VARTEN',
@@ -23424,7 +23439,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}],132:[function(require,module,exports){
+},{}],133:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23463,7 +23478,7 @@ exports.propHook = propHook;
 exports.ENTER_KEY = ENTER_KEY;
 exports.ESC_KEY = ESC_KEY;
 
-},{}],133:[function(require,module,exports){
+},{}],134:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -23510,7 +23525,106 @@ function view(todos$) {
 ;
 module.exports = exports['default'];
 
-},{"../strings/strings":131,"../utils":132,"@cycle/core":1,"@cycle/dom":5}],134:[function(require,module,exports){
+},{"../strings/strings":132,"../utils":133,"@cycle/core":1,"@cycle/dom":5}],135:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+exports['default'] = view;
+
+var _cycleCore = require('@cycle/core');
+
+var _cycleDom = require('@cycle/dom');
+
+var _utils = require('../utils');
+
+function vrenderLoading() {
+  return (0, _cycleDom.h)('section.right-panel', [(0, _cycleDom.h)('h3', 'Ladataaan')]);
+}
+
+function vrenderIndividualProvider(provider) {
+  if (provider == null) {
+    return vrenderLoading();
+  }
+  return (0, _cycleDom.h)('section.right-panel', [(0, _cycleDom.h)('a.thumbnail', [(0, _cycleDom.h)('img', { "src": provider.images[0].url })]), (0, _cycleDom.h)('h3', provider.name), (0, _cycleDom.h)('div', provider.district), (0, _cycleDom.h)('p', provider.description)]);
+}
+
+function vrenderSlotList(slots) {
+  return (0, _cycleDom.h)('section.right-panel', {
+    style: { 'display': '' }
+  }, [(0, _cycleDom.h)('ul.list-group', _.chain(slots).groupBy(function (x) {
+    return x.customerId;
+  }).map(function (todoData) {
+    return (0, _cycleDom.h)('list-slot.list-slot', { slot: todoData });
+  }).value())]);
+}
+
+function vrenderCityList(cities) {
+  return (0, _cycleDom.h)('section.right-panel', {
+    style: { 'display': '' }
+  }, [(0, _cycleDom.h)('ul.list-group', _.chain(cities).map(function (city) {
+    return (0, _cycleDom.h)('city-item.city-item', { city: city });
+  }).value())]);
+}
+
+function vrenderServiceList(services) {
+  return (0, _cycleDom.h)('section.right-panel', {
+    style: { 'display': '' }
+  }, [(0, _cycleDom.h)('ul.list-group', _.chain(services).map(function (service) {
+    return (0, _cycleDom.h)('service-item.service-item', { service: service });
+  }).value())]);
+}
+
+function vrenderNav() {
+  return (0, _cycleDom.h)('nav.navbar.navbar-default', [(0, _cycleDom.h)('div.container-fluid', [(0, _cycleDom.h)('div.navbar-header', [(0, _cycleDom.h)('a.navbar-brand', 'Timma')])])]);
+}
+
+function vrenderMapSection(_ref) {
+  var slots = _ref.slots;
+  var setBounds = _ref.setBounds;
+
+  return (0, _cycleDom.h)('main-map', {
+    markers: slots.map(function (x) {
+      return new google.maps.LatLng(x.lastMinuteInfo.lat, x.lastMinuteInfo.lon);
+    }),
+    setBounds: setBounds
+  });
+}
+
+function vrenderMainSection(_ref2) {
+  var slots = _ref2.slots;
+  var cities = _ref2.cities;
+  var provider = _ref2.provider;
+  var services = _ref2.services;
+  var route = _ref2.route;
+
+  switch (route) {
+    case '/slot_list':
+      return vrenderSlotList(slots);
+    case '/city_list':
+      return vrenderCityList(cities);
+    case '/slot_id':
+      return vrenderIndividualProvider(provider);
+    case '/landing':
+      return vrenderServiceList(services);
+    default:
+      return vrenderSlotList(slots);
+  }
+}
+
+function view(todos$) {
+  return todos$.map(function (todos) {
+    return (0, _cycleDom.h)('div.app-div', [vrenderNav(), vrenderMapSection(todos), vrenderMainSection(todos)
+    //vrenderFooter(todos)
+    ]);
+  });
+}
+
+;
+module.exports = exports['default'];
+
+},{"../utils":133,"@cycle/core":1,"@cycle/dom":5}],136:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -23601,4 +23715,4 @@ var TimmaMap = (function () {
 
 module.exports = TimmaMap;
 
-},{"immutable":121}]},{},[122]);
+},{"immutable":121}]},{},[122,123,124,125,126,127,128,129,130,131,132,133,134,135,136]);
