@@ -23121,7 +23121,8 @@ function landingServiceItemComponent(drivers) {
   var props$ = drivers.props.getAll().shareReplay(1);
 
   var vtree$ = props$.map(function (serviceType) {
-    return (0, _cycleDom.h)('div.container', [(0, _cycleDom.h)('img', { "src": serviceType.imageURL }), (0, _cycleDom.h)('h3', serviceType.name)]);
+
+    return (0, _cycleDom.h)('div', [(0, _cycleDom.h)('img', { "src": serviceType.imageURL }), (0, _cycleDom.h)('div.container', [(0, _cycleDom.h)('h3', serviceType.name)])]);
   });
 
   return {
@@ -23557,7 +23558,7 @@ function vrenderNav() {
 
 function vRenderServices(services) {
   return (0, _cycleDom.h)('div#services.container', services.map(function (service) {
-    return (0, _cycleDom.h)('div.row', [(0, _cycleDom.h)('div.col-md-12', [(0, _cycleDom.h)('landing-service-item.landing-service-item', service)])]);
+    return (0, _cycleDom.h)('landing-service-item.landing-service-item', service);
   }));
 }
 

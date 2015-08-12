@@ -9,9 +9,12 @@ function landingServiceItemComponent(drivers) {
   let props$ = drivers.props.getAll().shareReplay(1);
 
   let vtree$ = props$.map(serviceType => {
-    return h('div.container', [
+
+    return h('div', [
       h('img', {"src": serviceType.imageURL}),
-      h('h3', serviceType.name)
+      h('div.container', [
+        h('h3', serviceType.name)
+      ])
     ]);
   });
 

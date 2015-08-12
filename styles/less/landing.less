@@ -1,4 +1,6 @@
-@textgray: #222;
+@textgray: #fff;
+@basemargin: 10px;
+@baseradius: 5px;
 
 .jumbotron {
   height: 600px;
@@ -23,35 +25,32 @@
 
 #services {
   display:flex;
-  background-color: #666;
   flex-direction: column;
-  .services-row {
-    display:flex;
-    flex-direction: row;
-    background-color: #123;
-    align-self: stretch;
-    p {
-      display:flex;
-      align-self: center;
-      flex-grow: 1;
-      background-color: #531;
-    }
-
-  }
 }
 
 .landing-service-item {
-  .container {
-    display:flex;
-    flex-direction: column;
+  position: relative;
+  border-radius: @baseradius;
+  margin: @basemargin;
     img {
-    display:flex;
+      position: relative;
+      left: 0;
+      right: 0;
+      border-radius: @baseradius;
+      height: 100%;
       width: 100%;
+      object-fit: cover;
       overflow: hidden;
-      height: 200px;
     }
-
-  }
-  display:flex;
+    .container {
+      
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 10;
+    }
+  width: auto;
   height: 300px
 }

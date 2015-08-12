@@ -17,11 +17,7 @@ function vrenderNav() {
 function vRenderServices(services) {
     return h('div#services.container',
       services.map(service => {
-        return h('div.row', [
-          h('div.col-md-12', [
-            h('landing-service-item.landing-service-item', service)
-          ]),
-        ]);
+        return h('landing-service-item.landing-service-item', service);
       })
     );
 }
