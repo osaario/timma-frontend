@@ -22953,6 +22953,10 @@ var _componentsCityItem = require('./components/city-item');
 
 var _componentsCityItem2 = _interopRequireDefault(_componentsCityItem);
 
+var _componentsLandingLandingServiceItem = require('./components/landing/landing-service-item');
+
+var _componentsLandingLandingServiceItem2 = _interopRequireDefault(_componentsLandingLandingServiceItem);
+
 var _componentsServiceItem = require('./components/service-item');
 
 var _componentsServiceItem2 = _interopRequireDefault(_componentsServiceItem);
@@ -23030,6 +23034,7 @@ function main(drivers) {
 _cycleCore2['default'].run(main, {
   DOM: _cycleDom2['default'].makeDOMDriver('#todoapp', {
     'todo-item': _componentsTodoItem2['default'],
+    'landing-service-item': _componentsLandingLandingServiceItem2['default'],
     'list-slot': _componentsListSlot2['default'],
     'service-item': _componentsServiceItem2['default'],
     'city-item': _componentsCityItem2['default'],
@@ -23038,7 +23043,7 @@ _cycleCore2['default'].run(main, {
   HTTP: (0, _cycleHttp.makeHTTPDriver)()
 });
 
-},{"./components/city-item":123,"./components/googlemap-component":124,"./components/list-slot":126,"./components/service-item":127,"./components/todo-item":128,"./intents/landing":129,"./intents/todos":130,"./models/todos":131,"./sinks/local-storage.js":132,"./views/landing":136,"@cycle/core":1,"@cycle/dom":5,"@cycle/http":115}],123:[function(require,module,exports){
+},{"./components/city-item":123,"./components/googlemap-component":124,"./components/landing/landing-service-item":125,"./components/list-slot":126,"./components/service-item":127,"./components/todo-item":128,"./intents/landing":129,"./intents/todos":130,"./models/todos":131,"./sinks/local-storage.js":132,"./views/landing":136,"@cycle/core":1,"@cycle/dom":5,"@cycle/http":115}],123:[function(require,module,exports){
 'use strict';
 
 var _cycleCore = require('@cycle/core');
@@ -23115,24 +23120,22 @@ function landingServiceItemComponent(drivers) {
 
   var props$ = drivers.props.getAll().shareReplay(1);
 
-  var vtree$ = props$.map(function (_ref) {
-    var serviceType = _ref.serviceType;
-
-    return (0, _cycleDom.h)('.landing-service-item', [(0, _cycleDom.h)('a.thumbnail', [(0, _cycleDom.h)('img', { "src": serviceType.imageUrl })]), (0, _cycleDom.h)('h3', slot[0].serviceType.name)]);
+  var vtree$ = props$.map(function (serviceType) {
+    return (0, _cycleDom.h)('div.container', [(0, _cycleDom.h)('img', { "src": serviceType.imageURL }), (0, _cycleDom.h)('h3', serviceType.name)]);
   });
 
   return {
     DOM: vtree$,
     events: {
-      clickCustom: intent.click$.withLatestFrom(props$, function (ev, _ref2) {
-        var serviceType = _ref2.serviceType;
+      clickCustom: intent.click$.withLatestFrom(props$, function (ev, _ref) {
+        var serviceType = _ref.serviceType;
         return serviceType;
       })
     }
   };
 }
 
-module.exports = listSlotComponent;
+module.exports = landingServiceItemComponent;
 
 },{"@cycle/core":1,"@cycle/dom":5}],126:[function(require,module,exports){
 'use strict';
@@ -23552,8 +23555,10 @@ function vrenderNav() {
   return (0, _cycleDom.h)('nav.navbar.navbar-default', [(0, _cycleDom.h)('div.container-fluid', [(0, _cycleDom.h)('div.navbar-header', [(0, _cycleDom.h)('a.navbar-brand', 'Timma')])])]);
 }
 
-function vRenderServices() {
-  return (0, _cycleDom.h)('div#services.container', [(0, _cycleDom.h)('div.row', [(0, _cycleDom.h)('div.col-md-6', "gkaeogeokkoaegokgea"), (0, _cycleDom.h)('div.col-md-6', "gkaeogeokkoaegokgea")]), (0, _cycleDom.h)('div.row', [(0, _cycleDom.h)('div.col-md-6', "gkaeogeokkoaegokgea"), (0, _cycleDom.h)('div.col-md-6', "gkaeogeokkoaegokgea")])]);
+function vRenderServices(services) {
+  return (0, _cycleDom.h)('div#services.container', services.map(function (service) {
+    return (0, _cycleDom.h)('div.row', [(0, _cycleDom.h)('div.col-md-12', [(0, _cycleDom.h)('landing-service-item.landing-service-item', service)])]);
+  }));
 }
 
 function vRenderImageSearch() {
@@ -23576,7 +23581,7 @@ function vRenderImageSearch() {
 
 function view(todos$) {
   return todos$.map(function (todos) {
-    return (0, _cycleDom.h)('div.app-div', [vrenderNav(), vRenderImageSearch(), vRenderServices()]);
+    return (0, _cycleDom.h)('div.app-div', [vrenderNav(), vRenderImageSearch(), vRenderServices(todos)]);
   });
 }
 

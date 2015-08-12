@@ -5,6 +5,7 @@ import todoItemComponent from './components/todo-item';
 import googleMapComponent from './components/googlemap-component';
 import listSlotComponent from './components/list-slot';
 import cityItemComponent from './components/city-item';
+import landingServiceItemComponent from './components/landing/landing-service-item';
 import serviceItemComponent from './components/service-item';
 import intent from './intents/todos' ;
 import  { intent as landingIntent } from './intents/landing';
@@ -64,6 +65,7 @@ function main(drivers) {
 Cycle.run(main, {
   DOM: CycleWeb.makeDOMDriver('#todoapp', {
     'todo-item': todoItemComponent,
+    'landing-service-item': landingServiceItemComponent,
     'list-slot': listSlotComponent,
     'service-item': serviceItemComponent,
     'city-item': cityItemComponent,

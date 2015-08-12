@@ -14,17 +14,16 @@ function vrenderNav() {
   ]);
 }
 
-function vRenderServices() {
-  return h('div#services.container', [
-      h('div.row', [
-          h('div.col-md-6', "gkaeogeokkoaegokgea"),
-          h('div.col-md-6', "gkaeogeokkoaegokgea")
-      ]),
-      h('div.row', [
-          h('div.col-md-6', "gkaeogeokkoaegokgea"),
-          h('div.col-md-6', "gkaeogeokkoaegokgea")
-      ])
-  ]);
+function vRenderServices(services) {
+    return h('div#services.container',
+      services.map(service => {
+        return h('div.row', [
+          h('div.col-md-12', [
+            h('landing-service-item.landing-service-item', service)
+          ]),
+        ]);
+      })
+    );
 }
 
 function vRenderImageSearch() {
@@ -61,7 +60,7 @@ export default function view(todos$) {
       h('div.app-div', [
         vrenderNav(),
         vRenderImageSearch(),
-        vRenderServices()
+        vRenderServices(todos)
       ])
     );
 }

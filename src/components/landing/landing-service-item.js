@@ -8,12 +8,10 @@ function landingServiceItemComponent(drivers) {
 
   let props$ = drivers.props.getAll().shareReplay(1);
 
-  let vtree$ = props$.map(({serviceType: serviceType}) => {
-    return h('.landing-service-item', [
-      h('a.thumbnail', [
-        h('img', {"src": serviceType.imageUrl})
-      ]),
-      h('h3', slot[0].serviceType.name)
+  let vtree$ = props$.map(serviceType => {
+    return h('div.container', [
+      h('img', {"src": serviceType.imageURL}),
+      h('h3', serviceType.name)
     ]);
   });
 
@@ -25,4 +23,4 @@ function landingServiceItemComponent(drivers) {
   };
 }
 
-module.exports = listSlotComponent;
+module.exports = landingServiceItemComponent;
