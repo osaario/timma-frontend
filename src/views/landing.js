@@ -14,6 +14,19 @@ function vrenderNav() {
   ]);
 }
 
+function vRenderServices() {
+  return h('div#services.container', [
+      h('div.row', [
+          h('div.col-md-6', "gkaeogeokkoaegokgea"),
+          h('div.col-md-6', "gkaeogeokkoaegokgea")
+      ]),
+      h('div.row', [
+          h('div.col-md-6', "gkaeogeokkoaegokgea"),
+          h('div.col-md-6', "gkaeogeokkoaegokgea")
+      ])
+  ]);
+}
+
 function vRenderImageSearch() {
   return h('div.jumbotron', { style: {
     'background-image': "url('../static/images/landing.jpg')"
@@ -47,7 +60,8 @@ export default function view(todos$) {
   return todos$.map(todos =>
       h('div.app-div', [
         vrenderNav(),
-        vRenderImageSearch()
+        vRenderImageSearch(),
+        vRenderServices()
       ])
     );
 }

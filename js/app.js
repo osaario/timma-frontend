@@ -23497,6 +23497,10 @@ function vrenderNav() {
   return (0, _cycleDom.h)('nav.navbar.navbar-default', [(0, _cycleDom.h)('div.container-fluid', [(0, _cycleDom.h)('div.navbar-header', [(0, _cycleDom.h)('a.navbar-brand', 'Timma')])])]);
 }
 
+function vRenderServices() {
+  return (0, _cycleDom.h)('div#services.container', [(0, _cycleDom.h)('div.row', [(0, _cycleDom.h)('div.col-md-6', "gkaeogeokkoaegokgea"), (0, _cycleDom.h)('div.col-md-6', "gkaeogeokkoaegokgea")]), (0, _cycleDom.h)('div.row', [(0, _cycleDom.h)('div.col-md-6', "gkaeogeokkoaegokgea"), (0, _cycleDom.h)('div.col-md-6', "gkaeogeokkoaegokgea")])]);
+}
+
 function vRenderImageSearch() {
   return (0, _cycleDom.h)('div.jumbotron', { style: {
       'background-image': "url('../static/images/landing.jpg')"
@@ -23517,7 +23521,7 @@ function vRenderImageSearch() {
 
 function view(todos$) {
   return todos$.map(function (todos) {
-    return (0, _cycleDom.h)('div.app-div', [vrenderNav(), vRenderImageSearch()]);
+    return (0, _cycleDom.h)('div.app-div', [vrenderNav(), vRenderImageSearch(), vRenderServices()]);
   });
 }
 

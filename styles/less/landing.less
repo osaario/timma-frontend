@@ -1,6 +1,41 @@
+@textgray: #222;
 
-.landing_text {
-  display: flex;
-  text-align: center;
-  color: white;
+.jumbotron {
+  height: 600px;
+  display:flex;
+  h1 {
+    color:@textgray;
+    display:flex;
+    align-self: center;
+  }
+  p {
+    display:flex;
+    align-self: center;
+    color:@textgray;
+  }
+  .container {
+    display:flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    flex-align: stretch;
+  }
+}
+
+#services {
+  height: 600px;
+  display:flex;
+  background-color: #666;
+  flex-direction: column;
+  .services-row {
+    display:flex;
+    flex-direction: row;
+    background-color: #123;
+    align-self: stretch;
+    p {
+      display:flex;
+      align-self: center;
+      flex-grow: 1;
+      background-color: #531;
+    }
+  }
 }
