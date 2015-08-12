@@ -22961,6 +22961,8 @@ var _intentsTodos = require('./intents/todos');
 
 var _intentsTodos2 = _interopRequireDefault(_intentsTodos);
 
+var _intentsLanding = require('./intents/landing');
+
 var _modelsTodos = require('./models/todos');
 
 var _modelsTodos2 = _interopRequireDefault(_modelsTodos);
@@ -23020,7 +23022,7 @@ function main(drivers) {
   var todos$ = (0, _modelsTodos2['default'])(intents, { slots: slots$, provider: provider$, services: services$ });
 
   return {
-    DOM: (0, _viewsLanding2['default'])(todos$),
+    DOM: (0, _viewsLanding2['default'])(services$),
     HTTP: _cycleCore.Rx.Observable.merge(slot_req$, provider_req$, services_req$)
   };
 }
@@ -23036,7 +23038,7 @@ _cycleCore2['default'].run(main, {
   HTTP: (0, _cycleHttp.makeHTTPDriver)()
 });
 
-},{"./components/city-item":123,"./components/googlemap-component":124,"./components/list-slot":125,"./components/service-item":126,"./components/todo-item":127,"./intents/todos":128,"./models/todos":129,"./sinks/local-storage.js":130,"./views/landing":134,"@cycle/core":1,"@cycle/dom":5,"@cycle/http":115}],123:[function(require,module,exports){
+},{"./components/city-item":123,"./components/googlemap-component":124,"./components/list-slot":126,"./components/service-item":127,"./components/todo-item":128,"./intents/landing":129,"./intents/todos":130,"./models/todos":131,"./sinks/local-storage.js":132,"./views/landing":136,"@cycle/core":1,"@cycle/dom":5,"@cycle/http":115}],123:[function(require,module,exports){
 'use strict';
 
 var _cycleCore = require('@cycle/core');
@@ -23099,7 +23101,40 @@ function googleMapComponent(drivers) {
 
 module.exports = googleMapComponent;
 
-},{"../widgets/googlemap-widget":136,"@cycle/core":1,"@cycle/dom":5}],125:[function(require,module,exports){
+},{"../widgets/googlemap-widget":138,"@cycle/core":1,"@cycle/dom":5}],125:[function(require,module,exports){
+'use strict';
+
+var _cycleCore = require('@cycle/core');
+
+var _cycleDom = require('@cycle/dom');
+
+function landingServiceItemComponent(drivers) {
+  var intent = {
+    click$: drivers.DOM.get('.landing-service-item', 'click')
+  };
+
+  var props$ = drivers.props.getAll().shareReplay(1);
+
+  var vtree$ = props$.map(function (_ref) {
+    var serviceType = _ref.serviceType;
+
+    return (0, _cycleDom.h)('.landing-service-item', [(0, _cycleDom.h)('a.thumbnail', [(0, _cycleDom.h)('img', { "src": serviceType.imageUrl })]), (0, _cycleDom.h)('h3', slot[0].serviceType.name)]);
+  });
+
+  return {
+    DOM: vtree$,
+    events: {
+      clickCustom: intent.click$.withLatestFrom(props$, function (ev, _ref2) {
+        var serviceType = _ref2.serviceType;
+        return serviceType;
+      })
+    }
+  };
+}
+
+module.exports = listSlotComponent;
+
+},{"@cycle/core":1,"@cycle/dom":5}],126:[function(require,module,exports){
 'use strict';
 
 var _cycleCore = require('@cycle/core');
@@ -23132,7 +23167,7 @@ function listSlotComponent(drivers) {
 
 module.exports = listSlotComponent;
 
-},{"@cycle/core":1,"@cycle/dom":5}],126:[function(require,module,exports){
+},{"@cycle/core":1,"@cycle/dom":5}],127:[function(require,module,exports){
 'use strict';
 
 var _cycleCore = require('@cycle/core');
@@ -23165,7 +23200,7 @@ function serviceItemComponent(drivers) {
 
 module.exports = serviceItemComponent;
 
-},{"@cycle/core":1,"@cycle/dom":5}],127:[function(require,module,exports){
+},{"@cycle/core":1,"@cycle/dom":5}],128:[function(require,module,exports){
 'use strict';
 
 var _cycleCore = require('@cycle/core');
@@ -23245,7 +23280,27 @@ function todoItemComponent(drivers) {
 
 module.exports = todoItemComponent;
 
-},{"../utils":133,"@cycle/core":1,"@cycle/dom":5}],128:[function(require,module,exports){
+},{"../utils":135,"@cycle/core":1,"@cycle/dom":5}],129:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+exports['default'] = intent;
+
+var _cycleCore = require('@cycle/core');
+
+function intent(domDriver) {
+  return {
+    serviceClick$: domDriver.get('.landing-service-item', 'clickCustom').map(function (ev) {
+      return ev.detail;
+    }).shareReplay(1)
+  };
+}
+
+module.exports = exports['default'];
+
+},{"@cycle/core":1}],130:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -23276,7 +23331,7 @@ function intent(domDriver) {
 
 module.exports = exports['default'];
 
-},{"../utils":133,"@cycle/core":1}],129:[function(require,module,exports){
+},{"../utils":135,"@cycle/core":1}],131:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -23376,7 +23431,7 @@ function model(intent, _ref) {
 exports['default'] = model;
 module.exports = exports['default'];
 
-},{"@cycle/core":1}],130:[function(require,module,exports){
+},{"@cycle/core":1}],132:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23402,7 +23457,7 @@ function localStorageSink(todosData) {
 
 module.exports = exports["default"];
 
-},{}],131:[function(require,module,exports){
+},{}],133:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -23417,7 +23472,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{"@cycle/core":1}],132:[function(require,module,exports){
+},{"@cycle/core":1}],134:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -23438,7 +23493,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}],133:[function(require,module,exports){
+},{}],135:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23477,7 +23532,7 @@ exports.propHook = propHook;
 exports.ENTER_KEY = ENTER_KEY;
 exports.ESC_KEY = ESC_KEY;
 
-},{}],134:[function(require,module,exports){
+},{}],136:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -23527,7 +23582,7 @@ function view(todos$) {
 
 module.exports = exports['default'];
 
-},{"../strings/strings":132,"../utils":133,"@cycle/core":1,"@cycle/dom":5}],135:[function(require,module,exports){
+},{"../strings/strings":134,"../utils":135,"@cycle/core":1,"@cycle/dom":5}],137:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -23624,7 +23679,7 @@ function view(todos$) {
 
 module.exports = exports['default'];
 
-},{"../utils":133,"@cycle/core":1,"@cycle/dom":5}],136:[function(require,module,exports){
+},{"../utils":135,"@cycle/core":1,"@cycle/dom":5}],138:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -23715,4 +23770,4 @@ var TimmaMap = (function () {
 
 module.exports = TimmaMap;
 
-},{"immutable":121}]},{},[122,123,124,125,126,127,128,129,130,131,132,133,134,135,136]);
+},{"immutable":121}]},{},[122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138]);

@@ -6,7 +6,8 @@ import googleMapComponent from './components/googlemap-component';
 import listSlotComponent from './components/list-slot';
 import cityItemComponent from './components/city-item';
 import serviceItemComponent from './components/service-item';
-import intent from './intents/todos';
+import intent from './intents/todos' ;
+import  { intent as landingIntent } from './intents/landing';
 import model from './models/todos';
 import view from './views/landing';
 import {makeHTTPDriver} from '@cycle/http';
@@ -55,7 +56,7 @@ function main(drivers) {
   let todos$ = model(intents,  {slots: slots$, provider: provider$, services: services$});
 
   return {
-    DOM: view(todos$),
+    DOM: view(services$),
     HTTP:  Rx.Observable.merge(slot_req$, provider_req$, services_req$)
   };
 }
