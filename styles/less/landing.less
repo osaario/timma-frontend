@@ -57,6 +57,7 @@
     flex-grow: 1;
     display: flex;
     border-radius: @baseradius;
+    background-color: #000;
     margin: @basemargin;
     img {
       position: relative;
@@ -64,17 +65,31 @@
       right: 0;
       border-radius: @baseradius;
       height: 100%;
+      opacity: 0.65;
       width: 100%;
       object-fit: cover;
       overflow: hidden;
     }
     .container {
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
       position: absolute;
       left: 0;
-      right: 0;
       top: 0;
-      bottom: 0;
+      width: 100%;
+      height: 100%;
       z-index: 10;
+      p {
+        color:white;
+        align-self: center;
+        display: flex;
+      }
+      h2 {
+        color:white;
+        align-self: center;
+        display: flex;
+      }
     }
     height: 300px
   }

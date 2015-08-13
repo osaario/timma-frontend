@@ -13,7 +13,8 @@ function landingServiceItemComponent(drivers) {
     return h('div', [
       h('img', {"src": serviceType.imageURL}),
       h('div.container', [
-        h('h3', serviceType.name)
+        h('h2', serviceType.name),
+        h('p', serviceType.description)
       ])
     ]);
   });

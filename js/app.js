@@ -23122,7 +23122,7 @@ function landingServiceItemComponent(drivers) {
 
   var vtree$ = props$.map(function (serviceType) {
 
-    return (0, _cycleDom.h)('div', [(0, _cycleDom.h)('img', { "src": serviceType.imageURL }), (0, _cycleDom.h)('div.container', [(0, _cycleDom.h)('h3', serviceType.name)])]);
+    return (0, _cycleDom.h)('div', [(0, _cycleDom.h)('img', { "src": serviceType.imageURL }), (0, _cycleDom.h)('div.container', [(0, _cycleDom.h)('h2', serviceType.name), (0, _cycleDom.h)('p', serviceType.description)])]);
   });
 
   return {
