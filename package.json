@@ -30,6 +30,7 @@
   "dependencies": {
     "bootstrap": "^3.3.5",
     "connect": "^3.4.0",
+    "cycle-director": "^0.2.0",
     "grunt": "^0.4.5",
     "immutable": "^3.7.4",
     "jquery": "^2.1.4",

@@ -84,13 +84,11 @@ function vrenderMainSection({slots: slots, cities: cities, provider: provider, s
   }
 }
 
-export default function view(todos$) {
-  return todos$.map(todos =>
-      h('div.app-div', [
+export default function mapView(todos) {
+      return h('div.app-div', [
         vrenderNav(),
         vrenderMapSection(todos),
         vrenderMainSection(todos)
         //vrenderFooter(todos)
-      ])
-    );
+      ]);
 }

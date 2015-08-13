@@ -10,14 +10,40 @@ import serviceItemComponent from './components/service-item';
 import intent from './intents/todos' ;
 import  { intent as landingIntent } from './intents/landing';
 import model from './models/todos';
-import view from './views/landing';
+import landingView from './views/landing';
+import mapView from './views/todos';
 import {makeHTTPDriver} from '@cycle/http';
+import makeRouterDriver from 'cycle-director';
 import localStorageSink from './sinks/local-storage.js';
+
+let home_route =  {
+  url: '/',
+  before: ()=>{console.log("Going home...");},
+  on: ()=>{console.log("Welcome home");},
+  after: ()=>{console.log("Leaving home...");},
+  view: (data) => {
+    return landingView(data);
+  }
+};
+
+let map_route = {
+  url: "/map",
+  on: ()=>{console.log("About this page...");},
+  view: (data) => {
+    return mapView(data);
+  }
+};
+
+let routes = [
+  home_route,
+  map_route
+];
 
 function main(drivers) {
   let SLOT_URL = 'https://timma.fi/api/public/lastminuteslots';
   let PROVIDER_URL = 'https://timma.fi/api/public/customers/';
   let SERVICES_URL = 'https://timma.fi/api/public/services/app';
+
 
   let intents = intent(drivers.DOM);
 
@@ -54,10 +80,31 @@ function main(drivers) {
    .mergeAll()
    .map(res => res.body).startWith([]);
 
-  let todos$ = model(intents,  {slots: slots$, provider: provider$, services: services$});
+  let data$ = model(intents,  {slots: slots$, provider: provider$, services: services$});
+
+/*
+  let view$ = ongoingContext$.combineLatest(services$, data$, (url, services, data) => {
+    switch (url) {
+      case '/': return landingView(services);
+      default: return mapView(data);
+    }
+  });
+  */
+
+  let route$ = Rx.Observable.from(routes);
+
+  let view$ = drivers.Router
+  .combineLatest(services$, data$, (currentRoute, services, data) => {
+    let view;
+      switch (currentRoute) {
+        case '/': return landingView(services);
+        case '/map': return mapView(data);
+      }
+  });
 
   return {
-    DOM: view(services$),
+    DOM: view$,
+    Router: route$,
     HTTP:  Rx.Observable.merge(slot_req$, provider_req$, services_req$)
   };
 }
@@ -71,5 +118,8 @@ Cycle.run(main, {
     'city-item': cityItemComponent,
     'main-map': googleMapComponent
   }),
-  HTTP: makeHTTPDriver()
+  HTTP: makeHTTPDriver(),
+  Router: makeRouterDriver({
+    html5history: true // Remember to setup your server to handle this
+  })
 });

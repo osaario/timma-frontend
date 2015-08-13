@@ -57,12 +57,10 @@ function vRenderImageSearch() {
 */
 }
 
-export default function view(todos$) {
-  return todos$.map(todos =>
-      h('div.app-div', [
+export default function landingView(todos) {
+      return h('div.app-div', [
         vrenderNav(),
         vRenderImageSearch(),
         vRenderServices(todos)
-      ])
-    );
+      ]);
 }
