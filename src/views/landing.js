@@ -8,23 +8,29 @@ function vrenderNav() {
   return h('nav.navbar.navbar-default', [
       h('div.container-fluid', [
         h('div.navbar-header', [
-            h('a.navbar-brand', 'Timma')
+              h('img', {'src': '../static/images/logo-vihreä.png' })
         ])
       ])
   ]);
 }
 
 function vRenderServices(services) {
-    return h('div#services.container',
+  return h('div', [
+    h('div.landing-heading.container', [
+      h('h1.landing_text', strings.landing_header_2),
+      h('p.landing_text', strings.landing_caption_2)
+    ]),
+    h('div#services.container',
       services.map(service => {
         return h('landing-service-item.landing-service-item', service);
       })
-    );
+    )
+  ]);
 }
 
 function vRenderImageSearch() {
   return h('div.jumbotron', { style: {
-    'background-image': "url('../static/images/landing.jpg')"
+    'background-image': "url('../static/images/web-tausta.png')"
   }}, [
     h('div.container', [
       h('h1.landing_text', strings.landing_header_1),

@@ -23487,6 +23487,8 @@ function stringsFi() {
   return {
     'landing_header_1': 'SINUA VARTEN',
     'landing_caption_1': 'Sovita salonkipalvelusi aikataulut uudella tavalla',
+    'landing_header_2': 'PARTURIIN HUOMENNA?',
+    'landing_caption_2': 'Valitse laajasta palveluvalikoimastamme',
     'landing_city_search_placeholder': 'Hae kaupunkia',
     'search': 'Hae'
   };
@@ -23553,18 +23555,18 @@ var _utils = require('../utils');
 var _stringsStrings = require('../strings/strings');
 
 function vrenderNav() {
-  return (0, _cycleDom.h)('nav.navbar.navbar-default', [(0, _cycleDom.h)('div.container-fluid', [(0, _cycleDom.h)('div.navbar-header', [(0, _cycleDom.h)('a.navbar-brand', 'Timma')])])]);
+  return (0, _cycleDom.h)('nav.navbar.navbar-default', [(0, _cycleDom.h)('div.container-fluid', [(0, _cycleDom.h)('div.navbar-header', [(0, _cycleDom.h)('img', { 'src': '../static/images/logo-vihreä.png' })])])]);
 }
 
 function vRenderServices(services) {
-  return (0, _cycleDom.h)('div#services.container', services.map(function (service) {
+  return (0, _cycleDom.h)('div', [(0, _cycleDom.h)('div.landing-heading.container', [(0, _cycleDom.h)('h1.landing_text', _stringsStrings.strings.landing_header_2), (0, _cycleDom.h)('p.landing_text', _stringsStrings.strings.landing_caption_2)]), (0, _cycleDom.h)('div#services.container', services.map(function (service) {
     return (0, _cycleDom.h)('landing-service-item.landing-service-item', service);
-  }));
+  }))]);
 }
 
 function vRenderImageSearch() {
   return (0, _cycleDom.h)('div.jumbotron', { style: {
-      'background-image': "url('../static/images/landing.jpg')"
+      'background-image': "url('../static/images/web-tausta.png')"
     } }, [(0, _cycleDom.h)('div.container', [(0, _cycleDom.h)('h1.landing_text', _stringsStrings.strings.landing_header_1), (0, _cycleDom.h)('p.landing_text', _stringsStrings.strings.landing_caption_1), (0, _cycleDom.h)('div.input-group', [(0, _cycleDom.h)('input.form-control', { 'type': 'text', 'placeholder': _stringsStrings.strings.landing_city_search_placeholder }), (0, _cycleDom.h)('span.input-group-btn', [(0, _cycleDom.h)('button.btn.btn-default', { 'type': 'button' }, _stringsStrings.strings.search)])])])]);
   /*
   <div class="input-group">
