@@ -20,18 +20,12 @@ let home_route =  {
   url: '/',
   before: ()=>{console.log("Going home...");},
   on: ()=>{console.log("Welcome home");},
-  after: ()=>{console.log("Leaving home...");},
-  view: (data) => {
-    return landingView(data);
-  }
+  after: ()=>{console.log("Leaving home...");}
 };
 
 let map_route = {
-  url: "/map",
-  on: ()=>{console.log("About this page...");},
-  view: (data) => {
-    return mapView(data);
-  }
+  url: '/map',
+  on: ()=>{console.log("About this page...");}
 };
 
 let routes = [

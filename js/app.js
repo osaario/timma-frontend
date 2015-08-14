@@ -34199,19 +34199,13 @@ var home_route = {
   },
   after: function after() {
     console.log("Leaving home...");
-  },
-  view: function view(data) {
-    return (0, _viewsLanding2['default'])(data);
   }
 };
 
 var map_route = {
-  url: "/map",
+  url: '/map',
   on: function on() {
     console.log("About this page...");
-  },
-  view: function view(data) {
-    return (0, _viewsTodos2['default'])(data);
   }
 };
 
