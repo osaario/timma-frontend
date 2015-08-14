@@ -12,28 +12,9 @@ import  { intent as landingIntent } from './intents/landing';
 import model from './models/todos';
 import landingView from './views/landing';
 import mapView from './views/todos';
-import {makeHTTPDriver} from '@cycle/http';
-import makeRouterDriver from 'cycle-director';
 import localStorageSink from './sinks/local-storage.js';
 
-let home_route =  {
-  url: '/',
-  before: ()=>{console.log("Going home...");},
-  on: ()=>{console.log("Welcome home");},
-  after: ()=>{console.log("Leaving home...");}
-};
-
-let map_route = {
-  url: '/map',
-  on: ()=>{console.log("About this page...");}
-};
-
-let routes = [
-  home_route,
-  map_route
-];
-
-function main(drivers) {
+function app(drivers) {
   let SLOT_URL = 'https://timma.fi/api/public/lastminuteslots';
   let PROVIDER_URL = 'https://timma.fi/api/public/customers/';
   let SERVICES_URL = 'https://timma.fi/api/public/services/app';
@@ -85,8 +66,7 @@ function main(drivers) {
   });
   */
 
-  let route$ = Rx.Observable.from(routes);
-
+/*
   let view$ = drivers.Router
   .combineLatest(services$, data$, (currentRoute, services, data) => {
     let view;
@@ -95,25 +75,44 @@ function main(drivers) {
         case '/map': return mapView(data);
       }
   });
+  */
 
+  let routeFromClick$ = drivers.DOM.get('.link', 'click')
+    .doOnNext(ev => ev.preventDefault())
+    .map(ev => ev.currentTarget.attributes.href.value);
+
+  let ongoingContext$ = drivers.context
+    .merge(routeFromClick$).scan((acc, x) => {
+      acc.route = x;
+      return acc;
+    });
+
+/*
+  let vtree$ = ongoingContext$
+    .combineLatest(services$, ({route}, services ) => {
+      if (typeof window !== 'undefined') {
+        window.history.pushState(null, '', route);
+      }
+      return landingView([]);
+      /*
+      switch (route) {
+        case '/': return landingView(services);
+        case '/map': return mapView(data);
+        default: return h('div', 'Unknown page');
+      }
+    });
+    */
+    let vtree$ = ongoingContext$.map((_) =>
+    {
+      return landingView([]);
+    });
   return {
-    DOM: view$,
-    Router: route$,
+    DOM: vtree$,
     HTTP:  Rx.Observable.merge(slot_req$, provider_req$, services_req$)
   };
 }
 
-Cycle.run(main, {
-  DOM: CycleWeb.makeDOMDriver('#todoapp', {
-    'todo-item': todoItemComponent,
-    'landing-service-item': landingServiceItemComponent,
-    'list-slot': listSlotComponent,
-    'service-item': serviceItemComponent,
-    'city-item': cityItemComponent,
-    'main-map': googleMapComponent
-  }),
-  HTTP: makeHTTPDriver(),
-  Router: makeRouterDriver({
-    html5history: true // Remember to setup your server to handle this
-  })
-});
+
+module.exports = {
+  app
+};

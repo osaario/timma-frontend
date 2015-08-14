@@ -8,7 +8,7 @@ function vrenderNav() {
   return h('nav.navbar.navbar-default', [
       h('div.container-fluid', [
         h('div.navbar-header', [
-              h('img', {'src': '../static/images/logo-vihreä.png' })
+              h('img', {'src': '/static/images/logo-vihreä.png' })
         ])
       ])
   ]);
