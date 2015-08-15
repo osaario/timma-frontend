@@ -1,18 +1,31 @@
 import Cycle from '@cycle/core';
 import CycleWeb from '@cycle/dom';
 import {Rx} from '@cycle/core';
-import todoItemComponent from './components/todo-item';
-import googleMapComponent from './components/googlemap-component';
-import listSlotComponent from './components/list-slot';
-import cityItemComponent from './components/city-item';
-import landingServiceItemComponent from './components/landing/landing-service-item';
-import serviceItemComponent from './components/service-item';
+import {h} from '@cycle/dom';
 import intent from './intents/todos' ;
 import  { intent as landingIntent } from './intents/landing';
 import model from './models/todos';
 import landingView from './views/landing';
 import mapView from './views/todos';
 import localStorageSink from './sinks/local-storage.js';
+import todoItemComponent from './components/todo-item';
+import googleMapComponent from './components/googlemap-component';
+import listSlotComponent from './components/list-slot';
+import cityItemComponent from './components/city-item';
+import landingServiceItemComponent from './components/landing/landing-service-item';
+import serviceItemComponent from './components/service-item';
+
+
+function components() {
+  return {
+    'todo-item': todoItemComponent,
+    'landing-service-item': landingServiceItemComponent,
+    'list-slot': listSlotComponent,
+    'service-item': serviceItemComponent,
+    'city-item': cityItemComponent,
+    'main-map': googleMapComponent
+  };
+}
 
 function app(drivers) {
   let SLOT_URL = 'https://timma.fi/api/public/lastminuteslots';
@@ -22,23 +35,27 @@ function app(drivers) {
 
   let intents = intent(drivers.DOM);
 
+/*
   let slot_req$ = Rx.Observable.just({
     url: SLOT_URL,
     method: 'GET'
   });
-
+*/
   let services_req$ = Rx.Observable.just({
     url: SERVICES_URL,
     method: 'GET'
   });
 
+/*
   let provider_req$ = intents.thumbnailClick$.map((slot) => {
     return {
       url: PROVIDER_URL + slot.customerId,
       method: 'GET'
     };
   });
+  */
 
+/*
   let slots$ = drivers.HTTP
    .filter(res$ => res$.request.url.indexOf(SLOT_URL) === 0)
    .mergeAll()
@@ -49,13 +66,15 @@ function app(drivers) {
    .filter(res$ => res$.request.url.indexOf(PROVIDER_URL) === 0)
    .mergeAll()
    .map(res => res.body).startWith(null);
+   */
 
+ console.log(drivers.HTTP);
   let services$ = drivers.HTTP
    .filter(res$ => res$.request.url.indexOf(SERVICES_URL) === 0)
    .mergeAll()
-   .map(res => res.body).startWith([]);
-
-  let data$ = model(intents,  {slots: slots$, provider: provider$, services: services$});
+   .map(res => res.body);
+//let services$ = Rx.Observable.just(0);
+//  let data$ = model(intents,  {slots: slots$, provider: provider$, services: services$});
 
 /*
   let view$ = ongoingContext$.combineLatest(services$, data$, (url, services, data) => {
@@ -102,17 +121,19 @@ function app(drivers) {
       }
     });
     */
-    let vtree$ = ongoingContext$.map((_) =>
+    let vtree$ = Rx.Observable.combineLatest(ongoingContext$, services$, (route, services) =>
     {
-      return landingView([]);
+      console.log(services);
+      return landingView(services);
     });
   return {
     DOM: vtree$,
-    HTTP:  Rx.Observable.merge(slot_req$, provider_req$, services_req$)
+    HTTP: services_req$
   };
 }
 
 
 module.exports = {
-  app
+  app,
+  components
 };

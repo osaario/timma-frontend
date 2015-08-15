@@ -2,13 +2,7 @@
 let Cycle = require('@cycle/core');
 let {makeDOMDriver} = require('@cycle/dom');
 let {makeHTTPDriver} = require('@cycle/http');
-let {app} = require('./src/app');
-import todoItemComponent from './src/components/todo-item';
-import googleMapComponent from './src/components/googlemap-component';
-import listSlotComponent from './src/components/list-slot';
-import cityItemComponent from './src/components/city-item';
-import landingServiceItemComponent from './src/components/landing/landing-service-item';
-import serviceItemComponent from './src/components/service-item';
+let {app, components} = require('./src/app');
 
 function clientSideApp(responses) {
   let requests = app(responses);
@@ -17,14 +11,7 @@ function clientSideApp(responses) {
 }
 
 Cycle.run(clientSideApp, {
-  DOM: makeDOMDriver('.app-container', {
-    'todo-item': todoItemComponent,
-    'landing-service-item': landingServiceItemComponent,
-    'list-slot': listSlotComponent,
-    'service-item': serviceItemComponent,
-    'city-item': cityItemComponent,
-    'main-map': googleMapComponent
-  }),
+  DOM: makeDOMDriver('.app-container', components() ),
   HTTP: makeHTTPDriver(),
   context: () => Cycle.Rx.Observable.just(window.appContext)
 });

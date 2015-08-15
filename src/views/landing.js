@@ -14,6 +14,16 @@ function vrenderNav() {
   ]);
 }
 
+function vrenderServiceItem(serviceType) {
+  return h('div.landing-service-item', [
+    h('img', {"src": serviceType.imageURL}),
+    h('a.container', {href: '/map'}, [
+      h('h2', serviceType.name),
+      h('p', serviceType.description)
+    ])
+  ]);
+}
+
 function vRenderServices(services) {
   return h('div', [
     h('div.landing-heading.container', [
@@ -22,7 +32,7 @@ function vRenderServices(services) {
     ]),
     h('div#services.container',
       services.map(service => {
-        return h('landing-service-item.landing-service-item', service);
+        return vrenderServiceItem(service);
       })
     )
   ]);

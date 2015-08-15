@@ -21422,6 +21422,28 @@ var _cycleDom = require('@cycle/dom');
 
 var _cycleDom2 = _interopRequireDefault(_cycleDom);
 
+var _intentsTodos = require('./intents/todos');
+
+var _intentsTodos2 = _interopRequireDefault(_intentsTodos);
+
+var _intentsLanding = require('./intents/landing');
+
+var _modelsTodos = require('./models/todos');
+
+var _modelsTodos2 = _interopRequireDefault(_modelsTodos);
+
+var _viewsLanding = require('./views/landing');
+
+var _viewsLanding2 = _interopRequireDefault(_viewsLanding);
+
+var _viewsTodos = require('./views/todos');
+
+var _viewsTodos2 = _interopRequireDefault(_viewsTodos);
+
+var _sinksLocalStorageJs = require('./sinks/local-storage.js');
+
+var _sinksLocalStorageJs2 = _interopRequireDefault(_sinksLocalStorageJs);
+
 var _componentsTodoItem = require('./components/todo-item');
 
 var _componentsTodoItem2 = _interopRequireDefault(_componentsTodoItem);
@@ -21446,27 +21468,16 @@ var _componentsServiceItem = require('./components/service-item');
 
 var _componentsServiceItem2 = _interopRequireDefault(_componentsServiceItem);
 
-var _intentsTodos = require('./intents/todos');
-
-var _intentsTodos2 = _interopRequireDefault(_intentsTodos);
-
-var _intentsLanding = require('./intents/landing');
-
-var _modelsTodos = require('./models/todos');
-
-var _modelsTodos2 = _interopRequireDefault(_modelsTodos);
-
-var _viewsLanding = require('./views/landing');
-
-var _viewsLanding2 = _interopRequireDefault(_viewsLanding);
-
-var _viewsTodos = require('./views/todos');
-
-var _viewsTodos2 = _interopRequireDefault(_viewsTodos);
-
-var _sinksLocalStorageJs = require('./sinks/local-storage.js');
-
-var _sinksLocalStorageJs2 = _interopRequireDefault(_sinksLocalStorageJs);
+function components() {
+  return {
+    'todo-item': _componentsTodoItem2['default'],
+    'landing-service-item': _componentsLandingLandingServiceItem2['default'],
+    'list-slot': _componentsListSlot2['default'],
+    'service-item': _componentsServiceItem2['default'],
+    'city-item': _componentsCityItem2['default'],
+    'main-map': _componentsGooglemapComponent2['default']
+  };
+}
 
 function app(drivers) {
   var SLOT_URL = 'https://timma.fi/api/public/lastminuteslots';
@@ -21475,42 +21486,47 @@ function app(drivers) {
 
   var intents = (0, _intentsTodos2['default'])(drivers.DOM);
 
-  var slot_req$ = _cycleCore.Rx.Observable.just({
-    url: SLOT_URL,
-    method: 'GET'
-  });
-
+  /*
+    let slot_req$ = Rx.Observable.just({
+      url: SLOT_URL,
+      method: 'GET'
+    });
+  */
   var services_req$ = _cycleCore.Rx.Observable.just({
     url: SERVICES_URL,
     method: 'GET'
   });
 
-  var provider_req$ = intents.thumbnailClick$.map(function (slot) {
-    return {
-      url: PROVIDER_URL + slot.customerId,
-      method: 'GET'
-    };
-  });
+  /*
+    let provider_req$ = intents.thumbnailClick$.map((slot) => {
+      return {
+        url: PROVIDER_URL + slot.customerId,
+        method: 'GET'
+      };
+    });
+    */
 
-  var slots$ = drivers.HTTP.filter(function (res$) {
-    return res$.request.url.indexOf(SLOT_URL) === 0;
-  }).mergeAll().map(function (res) {
-    return res.body;
-  }).startWith([]);
+  /*
+    let slots$ = drivers.HTTP
+     .filter(res$ => res$.request.url.indexOf(SLOT_URL) === 0)
+     .mergeAll()
+     .map(res => res.body)
+     .startWith([]);
+  
+    let provider$ = drivers.HTTP
+     .filter(res$ => res$.request.url.indexOf(PROVIDER_URL) === 0)
+     .mergeAll()
+     .map(res => res.body).startWith(null);
+     */
 
-  var provider$ = drivers.HTTP.filter(function (res$) {
-    return res$.request.url.indexOf(PROVIDER_URL) === 0;
-  }).mergeAll().map(function (res) {
-    return res.body;
-  }).startWith(null);
-
+  console.log(drivers.HTTP);
   var services$ = drivers.HTTP.filter(function (res$) {
     return res$.request.url.indexOf(SERVICES_URL) === 0;
   }).mergeAll().map(function (res) {
     return res.body;
-  }).startWith([]);
-
-  var data$ = (0, _modelsTodos2['default'])(intents, { slots: slots$, provider: provider$, services: services$ });
+  });
+  //let services$ = Rx.Observable.just(0);
+  //  let data$ = model(intents,  {slots: slots$, provider: provider$, services: services$});
 
   /*
     let view$ = ongoingContext$.combineLatest(services$, data$, (url, services, data) => {
@@ -21558,17 +21574,19 @@ function app(drivers) {
         }
       });
       */
-  var vtree$ = ongoingContext$.map(function (_) {
-    return (0, _viewsLanding2['default'])([]);
+  var vtree$ = _cycleCore.Rx.Observable.combineLatest(ongoingContext$, services$, function (route, services) {
+    console.log(services);
+    return (0, _viewsLanding2['default'])(services);
   });
   return {
     DOM: vtree$,
-    HTTP: _cycleCore.Rx.Observable.merge(slot_req$, provider_req$, services_req$)
+    HTTP: services_req$
   };
 }
 
 module.exports = {
-  app: app
+  app: app,
+  components: components
 };
 
 },{"./components/city-item":118,"./components/googlemap-component":119,"./components/landing/landing-service-item":120,"./components/list-slot":121,"./components/service-item":122,"./components/todo-item":123,"./intents/landing":124,"./intents/todos":125,"./models/todos":126,"./sinks/local-storage.js":127,"./views/landing":131,"./views/todos":132,"@cycle/core":1,"@cycle/dom":5}],118:[function(require,module,exports){
@@ -22086,9 +22104,13 @@ function vrenderNav() {
   return (0, _cycleDom.h)('nav.navbar.navbar-default', [(0, _cycleDom.h)('div.container-fluid', [(0, _cycleDom.h)('div.navbar-header', [(0, _cycleDom.h)('img', { 'src': '/static/images/logo-vihreä.png' })])])]);
 }
 
+function vrenderServiceItem(serviceType) {
+  return (0, _cycleDom.h)('div.landing-service-item', [(0, _cycleDom.h)('img', { "src": serviceType.imageURL }), (0, _cycleDom.h)('a.container', { href: '/map' }, [(0, _cycleDom.h)('h2', serviceType.name), (0, _cycleDom.h)('p', serviceType.description)])]);
+}
+
 function vRenderServices(services) {
   return (0, _cycleDom.h)('div', [(0, _cycleDom.h)('div.landing-heading.container', [(0, _cycleDom.h)('h1.landing_text', _stringsStrings.strings.landing_header_2), (0, _cycleDom.h)('p.landing_text', _stringsStrings.strings.landing_caption_2)]), (0, _cycleDom.h)('div#services.container', services.map(function (service) {
-    return (0, _cycleDom.h)('landing-service-item.landing-service-item', service);
+    return vrenderServiceItem(service);
   }))]);
 }
 

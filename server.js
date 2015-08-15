@@ -7,7 +7,7 @@ let serialize = require('serialize-javascript');
 let {Rx} = Cycle;
 let {h, makeHTMLDriver} = require('@cycle/dom');
 let {makeHTTPDriver} = require('@cycle/http');
-let {app} = require('./src/app');
+let {app, components} = require('./src/app');
 
 /*
 var connect = require('connect');
@@ -40,12 +40,15 @@ function prependHTML5Doctype(html) {
 
 function wrapAppResultWithBoilerplate(appFn, context$, bundle$) {
   return function wrappedAppFn(ext) {
-    let vtree$ = appFn(ext).DOM;
+    let app = appFn(ext);
+    let vtree$ = app.DOM;
+    let http$ = app.HTTP;
     let wrappedVTree$ = Rx.Observable.combineLatest(vtree$, context$, bundle$,
       wrapVTreeWithHTMLBoilerplate
     );
     return {
-      DOM: wrappedVTree$
+      DOM: wrappedVTree$,
+      HTTP: http$
     };
   };
 }
@@ -83,15 +86,23 @@ server.use(function (req, res) {
     res.end();
     return;
   }
+
   console.log(`req: ${req.method} ${req.url}`);
+  /*
+  let httpDriver = makeHTTPDriver();
+  var response$$ = httpDriver(services_req$);
+       response$$.mergeAll().subscribe(
+         _ => console.log(_)
+       );
+       */
+
 
   let context$ = Rx.Observable.just({route: req.url});
   let wrappedAppFn = wrapAppResultWithBoilerplate(app, context$, clientBundle$);
   let [requests, responses] = Cycle.run(wrappedAppFn, {
-    DOM: makeHTMLDriver(),
+    DOM: makeHTMLDriver(components()),
     context: () => context$,
     HTTP: makeHTTPDriver()
-
   });
   let html$ = responses.DOM.get(':root').map(prependHTML5Doctype);
   html$.subscribe(html => res.send(html));
