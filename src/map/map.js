@@ -8,11 +8,19 @@ function vrenderSlotList(slots) {
   return h('section.right-panel', {
     style: {'display': ''}
   }, [ h('ul.list-group',
+  /*
   Immutable.List(slots)
   .groupBy(x => x.customerId)
-    .map((todoData) => {
-      return h('list-slot.list-slot', {slot: todoData});
-    })
+  */
+  slots.map((slot) => {
+    return h('li.list-group-item', [
+      h('a.thumbnail.slot-thumbnail.list-slot-clickable', [
+        h('img.slot-img', {"src": slot.lastMinuteInfo.imageUrl})
+      ]),
+      h('h3', slot.lastMinuteInfo.customerName),
+      h('div', slot.lastMinuteInfo.district)
+    ]);
+  })
   )]);
 }
 
@@ -43,7 +51,7 @@ function vrenderMapSection(slots) {
 }
 
 
-function vrenderMainSection({slots: slots, cities: cities, provider: provider, services:services, route: route}) {
+function vrenderMainSection(slots) {
     return vrenderSlotList(slots);
     /*
   switch(route) {
@@ -71,7 +79,7 @@ export default function map(drivers) {
 
    let dom$ = slots$.map((slots) => {
       return h('section#map', [
-        vrenderMapSection(slots),
+      //  vrenderMapSection(slots),
         vrenderMainSection(slots)
         //vrenderFooter(todos)
       ]);

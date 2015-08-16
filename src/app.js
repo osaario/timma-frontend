@@ -10,7 +10,6 @@ import map from './map/map';
 import localStorageSink from './sinks/local-storage.js';
 import todoItemComponent from './components/todo-item';
 import googleMapComponent from './components/googlemap-component';
-import listSlotComponent from './components/list-slot';
 import cityItemComponent from './components/city-item';
 import landingServiceItemComponent from './components/landing/landing-service-item';
 import serviceItemComponent from './components/service-item';
@@ -30,7 +29,6 @@ function components() {
   return {
     'todo-item': todoItemComponent,
     'landing-service-item': landingServiceItemComponent,
-    'list-slot': listSlotComponent,
     'service-item': serviceItemComponent,
     'city-item': cityItemComponent,
     'main-map': googleMapComponent
