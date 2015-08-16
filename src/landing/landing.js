@@ -4,15 +4,6 @@ import {propHook} from '../utils';
 import {strings} from '../strings/strings';
 
 
-function vrenderNav() {
-  return h('nav.navbar.navbar-default', [
-      h('div.container-fluid', [
-        h('div.navbar-header', [
-              h('img', {'src': '/static/images/logo-vihreä.png' })
-        ])
-      ])
-  ]);
-}
 
 function vrenderServiceItem(serviceType) {
   return h('div.landing-service-item', [
@@ -79,11 +70,10 @@ export default function landing(drivers) {
   .filter(res$ => res$.request.url.indexOf(SERVICES_URL) === 0)
   .mergeAll()
   .map(res => res.body);
-  
+
   let vtree$ = services$.map((services) =>
   {
-    return h('div.app-div', [
-      vrenderNav(),
+    return h('section#services', [
       vRenderImageSearch(),
       vRenderServices(services)
     ]);

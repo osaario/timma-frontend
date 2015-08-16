@@ -6,7 +6,7 @@ import intent from './intents/todos' ;
 import  { intent as landingIntent } from './intents/landing';
 import model from './models/todos';
 import landing from './landing/landing';
-import mapView from './views/todos';
+import map from './map/map';
 import localStorageSink from './sinks/local-storage.js';
 import todoItemComponent from './components/todo-item';
 import googleMapComponent from './components/googlemap-component';
@@ -15,6 +15,16 @@ import cityItemComponent from './components/city-item';
 import landingServiceItemComponent from './components/landing/landing-service-item';
 import serviceItemComponent from './components/service-item';
 
+
+function vrenderNav() {
+  return h('nav.navbar.navbar-default', [
+      h('div.container-fluid', [
+        h('div.navbar-header', [
+              h('img', {'src': '/static/images/logo-vihreä.png' })
+        ])
+      ])
+  ]);
+}
 
 function components() {
   return {
@@ -55,36 +65,7 @@ function app(drivers) {
    .map(res => res.body)
    .startWith([]);
 
-/*
-  let provider$ = drivers.HTTP
-   .filter(res$ => res$.request.url.indexOf(PROVIDER_URL) === 0)
-   .mergeAll()
-   .map(res => res.body).startWith(null);
-   */
-
  console.log(drivers.HTTP);
-//let services$ = Rx.Observable.just(0);
-//  let data$ = model(intents,  {slots: slots$, provider: provider$, services: services$});
-
-/*
-  let view$ = ongoingContext$.combineLatest(services$, data$, (url, services, data) => {
-    switch (url) {
-      case '/': return landingView(services);
-      default: return mapView(data);
-    }
-  });
-  */
-
-/*
-  let view$ = drivers.Router
-  .combineLatest(services$, data$, (currentRoute, services, data) => {
-    let view;
-      switch (currentRoute) {
-        case '/': return landingView(services);
-        case '/map': return mapView(data);
-      }
-  });
-  */
 
   let routeFromClick$ = drivers.DOM.get('.link', 'click')
     .doOnNext(ev => ev.preventDefault())
@@ -96,24 +77,34 @@ function app(drivers) {
       return acc;
     });
 
-/*
-  let vtree$ = ongoingContext$
-    .combineLatest(services$, ({route}, services ) => {
+
+    let mapApp = map(drivers);
+    let mapHttp$ = mapApp.HTTP;
+    let mapVtree$ = mapApp.DOM;
+
+    let landingApp = landing(drivers);
+    let landingHttp$ = landingApp.HTTP;
+    let landingVtree$ = landingApp.DOM;
+
+    let http$ = Rx.Observable.merge(landingHttp$, mapHttp$);
+
+    let vtree$ = ongoingContext$
+    .combineLatest(landingVtree$, mapVtree$,  ({route}, landingVtree, mapVtree ) => {
       if (typeof window !== 'undefined') {
         window.history.pushState(null, '', route);
       }
-      return landingView([]);
-      /*
-      switch (route) {
-        case '/': return landingView(services);
-        case '/map': return mapView(data);
-        default: return h('div', 'Unknown page');
-      }
+      return h('div.app-div', [
+        vrenderNav(),
+        (() => {
+          switch (route) {
+            case '/': return landingVtree;
+            case '/map': return mapVtree;
+            default: return h('div', 'Unknown page');
+          }
+        }
+      )()
+      ]);
     });
-    */
-    let landingApp = landing(drivers);
-    let http$ = landingApp.HTTP;
-    let vtree$ = landingApp.DOM;
     /*
     let vtree$ = Rx.Observable.combineLatest(ongoingContext$, services$, (route, services) =>
     {

@@ -21436,9 +21436,9 @@ var _landingLanding = require('./landing/landing');
 
 var _landingLanding2 = _interopRequireDefault(_landingLanding);
 
-var _viewsTodos = require('./views/todos');
+var _mapMap = require('./map/map');
 
-var _viewsTodos2 = _interopRequireDefault(_viewsTodos);
+var _mapMap2 = _interopRequireDefault(_mapMap);
 
 var _sinksLocalStorageJs = require('./sinks/local-storage.js');
 
@@ -21467,6 +21467,10 @@ var _componentsLandingLandingServiceItem2 = _interopRequireDefault(_componentsLa
 var _componentsServiceItem = require('./components/service-item');
 
 var _componentsServiceItem2 = _interopRequireDefault(_componentsServiceItem);
+
+function vrenderNav() {
+  return (0, _cycleDom.h)('nav.navbar.navbar-default', [(0, _cycleDom.h)('div.container-fluid', [(0, _cycleDom.h)('div.navbar-header', [(0, _cycleDom.h)('img', { 'src': '/static/images/logo-vihreä.png' })])])]);
+}
 
 function components() {
   return {
@@ -21506,36 +21510,7 @@ function app(drivers) {
     return res.body;
   }).startWith([]);
 
-  /*
-    let provider$ = drivers.HTTP
-     .filter(res$ => res$.request.url.indexOf(PROVIDER_URL) === 0)
-     .mergeAll()
-     .map(res => res.body).startWith(null);
-     */
-
   console.log(drivers.HTTP);
-  //let services$ = Rx.Observable.just(0);
-  //  let data$ = model(intents,  {slots: slots$, provider: provider$, services: services$});
-
-  /*
-    let view$ = ongoingContext$.combineLatest(services$, data$, (url, services, data) => {
-      switch (url) {
-        case '/': return landingView(services);
-        default: return mapView(data);
-      }
-    });
-    */
-
-  /*
-    let view$ = drivers.Router
-    .combineLatest(services$, data$, (currentRoute, services, data) => {
-      let view;
-        switch (currentRoute) {
-          case '/': return landingView(services);
-          case '/map': return mapView(data);
-        }
-    });
-    */
 
   var routeFromClick$ = drivers.DOM.get('.link', 'click').doOnNext(function (ev) {
     return ev.preventDefault();
@@ -21548,24 +21523,33 @@ function app(drivers) {
     return acc;
   });
 
-  /*
-    let vtree$ = ongoingContext$
-      .combineLatest(services$, ({route}, services ) => {
-        if (typeof window !== 'undefined') {
-          window.history.pushState(null, '', route);
-        }
-        return landingView([]);
-        /*
-        switch (route) {
-          case '/': return landingView(services);
-          case '/map': return mapView(data);
-          default: return h('div', 'Unknown page');
-        }
-      });
-      */
+  var mapApp = (0, _mapMap2['default'])(drivers);
+  var mapHttp$ = mapApp.HTTP;
+  var mapVtree$ = mapApp.DOM;
+
   var landingApp = (0, _landingLanding2['default'])(drivers);
-  var http$ = landingApp.HTTP;
-  var vtree$ = landingApp.DOM;
+  var landingHttp$ = landingApp.HTTP;
+  var landingVtree$ = landingApp.DOM;
+
+  var http$ = _cycleCore.Rx.Observable.merge(landingHttp$, mapHttp$);
+
+  var vtree$ = ongoingContext$.combineLatest(landingVtree$, mapVtree$, function (_ref, landingVtree, mapVtree) {
+    var route = _ref.route;
+
+    if (typeof window !== 'undefined') {
+      window.history.pushState(null, '', route);
+    }
+    return (0, _cycleDom.h)('div.app-div', [vrenderNav(), (function () {
+      switch (route) {
+        case '/':
+          return landingVtree;
+        case '/map':
+          return mapVtree;
+        default:
+          return (0, _cycleDom.h)('div', 'Unknown page');
+      }
+    })()]);
+  });
   /*
   let vtree$ = Rx.Observable.combineLatest(ongoingContext$, services$, (route, services) =>
   {
@@ -21584,7 +21568,7 @@ module.exports = {
   components: components
 };
 
-},{"./components/city-item":118,"./components/googlemap-component":119,"./components/landing/landing-service-item":120,"./components/list-slot":121,"./components/service-item":122,"./components/todo-item":123,"./intents/landing":124,"./intents/todos":125,"./landing/landing":126,"./models/todos":127,"./sinks/local-storage.js":128,"./views/todos":133,"@cycle/core":1,"@cycle/dom":5}],118:[function(require,module,exports){
+},{"./components/city-item":118,"./components/googlemap-component":119,"./components/landing/landing-service-item":120,"./components/list-slot":121,"./components/service-item":122,"./components/todo-item":123,"./intents/landing":124,"./intents/todos":125,"./landing/landing":126,"./map/map":127,"./models/todos":128,"./sinks/local-storage.js":129,"@cycle/core":1,"@cycle/dom":5}],118:[function(require,module,exports){
 'use strict';
 
 var _cycleCore = require('@cycle/core');
@@ -21825,7 +21809,7 @@ function todoItemComponent(drivers) {
 
 module.exports = todoItemComponent;
 
-},{"../utils":131,"@cycle/core":1,"@cycle/dom":5}],124:[function(require,module,exports){
+},{"../utils":132,"@cycle/core":1,"@cycle/dom":5}],124:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -21876,7 +21860,7 @@ function intent(domDriver) {
 
 module.exports = exports['default'];
 
-},{"../utils":131,"@cycle/core":1}],126:[function(require,module,exports){
+},{"../utils":132,"@cycle/core":1}],126:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -21891,10 +21875,6 @@ var _cycleDom = require('@cycle/dom');
 var _utils = require('../utils');
 
 var _stringsStrings = require('../strings/strings');
-
-function vrenderNav() {
-  return (0, _cycleDom.h)('nav.navbar.navbar-default', [(0, _cycleDom.h)('div.container-fluid', [(0, _cycleDom.h)('div.navbar-header', [(0, _cycleDom.h)('img', { 'src': '/static/images/logo-vihreä.png' })])])]);
-}
 
 function vrenderServiceItem(serviceType) {
   return (0, _cycleDom.h)('div.landing-service-item', [(0, _cycleDom.h)('img', { "src": serviceType.imageURL }), (0, _cycleDom.h)('a.container', { href: '/map' }, [(0, _cycleDom.h)('h2', serviceType.name), (0, _cycleDom.h)('p', serviceType.description)])]);
@@ -21939,7 +21919,7 @@ function landing(drivers) {
   });
 
   var vtree$ = services$.map(function (services) {
-    return (0, _cycleDom.h)('div.app-div', [vrenderNav(), vRenderImageSearch(), vRenderServices(services)]);
+    return (0, _cycleDom.h)('section#services', [vRenderImageSearch(), vRenderServices(services)]);
   });
 
   return {
@@ -21950,7 +21930,109 @@ function landing(drivers) {
 
 module.exports = exports['default'];
 
-},{"../strings/strings":130,"../utils":131,"@cycle/core":1,"@cycle/dom":5}],127:[function(require,module,exports){
+},{"../strings/strings":131,"../utils":132,"@cycle/core":1,"@cycle/dom":5}],127:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+exports['default'] = map;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _cycleCore = require('@cycle/core');
+
+var _cycleDom = require('@cycle/dom');
+
+var _immutable = require('immutable');
+
+var _immutable2 = _interopRequireDefault(_immutable);
+
+var _utils = require('../utils');
+
+var _widgetsGooglemapWidget = require('../widgets/googlemap-widget');
+
+var _widgetsGooglemapWidget2 = _interopRequireDefault(_widgetsGooglemapWidget);
+
+function vrenderSlotList(slots) {
+  return (0, _cycleDom.h)('section.right-panel', {
+    style: { 'display': '' }
+  }, [(0, _cycleDom.h)('ul.list-group', _immutable2['default'].List(slots).groupBy(function (x) {
+    return x.customerId;
+  }).map(function (todoData) {
+    return (0, _cycleDom.h)('list-slot.list-slot', { slot: todoData });
+  }))]);
+}
+
+function vrenderCityList(cities) {
+  return (0, _cycleDom.h)('section.right-panel', {
+    style: { 'display': '' }
+  }, [(0, _cycleDom.h)('ul.list-group', _.chain(cities).map(function (city) {
+    return (0, _cycleDom.h)('city-item.city-item', { city: city });
+  }).value())]);
+}
+
+function vrenderServiceList(services) {
+  return (0, _cycleDom.h)('section.right-panel', {
+    style: { 'display': '' }
+  }, [(0, _cycleDom.h)('ul.list-group', _.chain(services).map(function (service) {
+    return (0, _cycleDom.h)('service-item.service-item', { service: service });
+  }).value())]);
+}
+
+function vrenderMapSection(slots) {
+  return new _widgetsGooglemapWidget2['default'](slots, null);
+}
+
+function vrenderMainSection(_ref) {
+  var slots = _ref.slots;
+  var cities = _ref.cities;
+  var provider = _ref.provider;
+  var services = _ref.services;
+  var route = _ref.route;
+
+  return vrenderSlotList(slots);
+  /*
+  switch(route) {
+  case '/city_list': return vrenderCityList(cities);
+  case '/slot_id': return vrenderIndividualProvider(provider);
+  case '/landing': return vrenderServiceList(services);
+  default: return vrenderSlotList(slots);
+  }
+  */
+}
+
+function map(drivers) {
+
+  var SLOT_URL = 'https://timma.fi/api/public/lastminuteslots';
+
+  var slot_req$ = _cycleCore.Rx.Observable.just({
+    url: SLOT_URL,
+    method: 'GET'
+  });
+
+  var slots$ = drivers.HTTP.filter(function (res$) {
+    return res$.request.url.indexOf(SLOT_URL) === 0;
+  }).mergeAll().map(function (res) {
+    return res.body;
+  });
+
+  var dom$ = slots$.map(function (slots) {
+    return (0, _cycleDom.h)('section#map', [vrenderMapSection(slots), vrenderMainSection(slots)
+    //vrenderFooter(todos)
+    ]);
+  });
+  var http$ = slot_req$;
+
+  return {
+    DOM: dom$,
+    HTTP: http$
+  };
+}
+
+module.exports = exports['default'];
+
+},{"../utils":132,"../widgets/googlemap-widget":134,"@cycle/core":1,"@cycle/dom":5,"immutable":116}],128:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -22050,7 +22132,7 @@ function model(intent, _ref) {
 exports['default'] = model;
 module.exports = exports['default'];
 
-},{"@cycle/core":1}],128:[function(require,module,exports){
+},{"@cycle/core":1}],129:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22076,7 +22158,7 @@ function localStorageSink(todosData) {
 
 module.exports = exports["default"];
 
-},{}],129:[function(require,module,exports){
+},{}],130:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -22091,7 +22173,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{"@cycle/core":1}],130:[function(require,module,exports){
+},{"@cycle/core":1}],131:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -22114,7 +22196,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}],131:[function(require,module,exports){
+},{}],132:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22153,61 +22235,7 @@ exports.propHook = propHook;
 exports.ENTER_KEY = ENTER_KEY;
 exports.ESC_KEY = ESC_KEY;
 
-},{}],132:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
-exports['default'] = landingView;
-
-var _cycleCore = require('@cycle/core');
-
-var _cycleDom = require('@cycle/dom');
-
-var _utils = require('../utils');
-
-var _stringsStrings = require('../strings/strings');
-
-function vrenderNav() {
-  return (0, _cycleDom.h)('nav.navbar.navbar-default', [(0, _cycleDom.h)('div.container-fluid', [(0, _cycleDom.h)('div.navbar-header', [(0, _cycleDom.h)('img', { 'src': '/static/images/logo-vihreä.png' })])])]);
-}
-
-function vrenderServiceItem(serviceType) {
-  return (0, _cycleDom.h)('div.landing-service-item', [(0, _cycleDom.h)('img', { "src": serviceType.imageURL }), (0, _cycleDom.h)('a.container', { href: '/map' }, [(0, _cycleDom.h)('h2', serviceType.name), (0, _cycleDom.h)('p', serviceType.description)])]);
-}
-
-function vRenderServices(services) {
-  return (0, _cycleDom.h)('div', [(0, _cycleDom.h)('div.landing-heading.container', [(0, _cycleDom.h)('h1.landing_text', _stringsStrings.strings.landing_header_2), (0, _cycleDom.h)('p.landing_text', _stringsStrings.strings.landing_caption_2)]), (0, _cycleDom.h)('div#services.container', services.map(function (service) {
-    return vrenderServiceItem(service);
-  }))]);
-}
-
-function vRenderImageSearch() {
-  return (0, _cycleDom.h)('div.jumbotron', { style: {
-      'background-image': "url('../static/images/web-tausta.png')"
-    } }, [(0, _cycleDom.h)('div.container', [(0, _cycleDom.h)('h1.landing_text', _stringsStrings.strings.landing_header_1), (0, _cycleDom.h)('p.landing_text', _stringsStrings.strings.landing_caption_1), (0, _cycleDom.h)('div.input-group', [(0, _cycleDom.h)('input.form-control', { 'type': 'text', 'placeholder': _stringsStrings.strings.landing_city_search_placeholder }), (0, _cycleDom.h)('span.input-group-btn', [(0, _cycleDom.h)('button.btn.btn-default', { 'type': 'button' }, _stringsStrings.strings.search)])])])]);
-  /*
-  <div class="input-group">
-      <input type="text" class="form-control" placeholder="Search for...">
-      <span class="input-group-btn">
-        <button class="btn btn-default" type="button">Go!</button>
-      </span>
-    </div><!-- /input-group -->
-  <div class="input-group">
-  <span class="input-group-addon" id="basic-addon1">@</span>
-  <input type="text" class="form-control" placeholder="Username" aria-describedby="basic-addon1">
-  </div>
-  */
-}
-
-function landingView(todos) {
-  return (0, _cycleDom.h)('div.app-div', [vrenderNav(), vRenderImageSearch(), vRenderServices(todos)]);
-}
-
-module.exports = exports['default'];
-
-},{"../strings/strings":130,"../utils":131,"@cycle/core":1,"@cycle/dom":5}],133:[function(require,module,exports){
+},{}],133:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -22302,7 +22330,7 @@ function mapView(todos) {
 
 module.exports = exports['default'];
 
-},{"../utils":131,"@cycle/core":1,"@cycle/dom":5}],134:[function(require,module,exports){
+},{"../utils":132,"@cycle/core":1,"@cycle/dom":5}],134:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -22316,20 +22344,22 @@ var _immutable = require('immutable');
 var _immutable2 = _interopRequireDefault(_immutable);
 
 var TimmaMap = (function () {
-  function TimmaMap(markers, _ref) {
-    var bounds = _ref.bounds;
-
+  function TimmaMap(markers, bounds) {
     _classCallCheck(this, TimmaMap);
 
     this.type = 'Widget';
-    this.markers = markers;
+    /*
+    this.markers = markers.map(x => new google.maps.LatLng(x.lastMinuteInfo.lat, x.lastMinuteInfo.lon));
     this.markersRendered = false;
     this.bounds = bounds;
+    */
   }
 
   _createClass(TimmaMap, [{
     key: 'init',
     value: function init() {
+      //we are on server side
+      if (document === undefined) return;
       var element = document.createElement('div');
       element.id = 'timma-map';
 
@@ -22364,6 +22394,7 @@ var TimmaMap = (function () {
     key: 'update',
     value: function update(previous, domNode) {
       //Epic diffing function for now since we only render markers once atm
+      if (document === undefined) return;
       if (this.markersRendered === true) return;
       this.markers.forEach(function (m) {
         var _ = new google.maps.Marker({

@@ -1,14 +1,18 @@
 import Immutable from 'immutable';
 
 class TimmaMap {
-  constructor(markers, {bounds: bounds}) {
+  constructor(markers, bounds) {
     this.type = 'Widget';
-    this.markers = markers;
+    /*
+    this.markers = markers.map(x => new google.maps.LatLng(x.lastMinuteInfo.lat, x.lastMinuteInfo.lon));
     this.markersRendered = false;
     this.bounds = bounds;
+    */
   }
 
   init() {
+    //we are on server side
+    if(document === undefined) return;
     let element = document.createElement('div');
     element.id = 'timma-map';
 
@@ -46,6 +50,7 @@ class TimmaMap {
 
   update(previous, domNode) {
     //Epic diffing function for now since we only render markers once atm
+    if(document === undefined) return;
     if(this.markersRendered === true) return;
     this.markers.forEach((m) => {
       var _ = new google.maps.Marker({

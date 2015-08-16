@@ -28,7 +28,9 @@ function wrapVTreeWithHTMLBoilerplate(vtree, context, clientBundle) {
     ]),
     h('body', [
       h('div.app-container', [vtree]),
-      h('script', `window.appContext = ${serialize(context)};`),
+      h('script', 'window.appContext = ${serialize(context)};'),
+      h('script', {type:'text/javascript',
+       src:'https://maps.googleapis.com/maps/api/js?key=AIzaSyBm46fZQLUDMQVGMHPX4hBOq-pitEa6x6g'}),
       h('script', clientBundle)
     ])
   ]);
