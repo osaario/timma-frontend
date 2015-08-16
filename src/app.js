@@ -5,7 +5,7 @@ import {h} from '@cycle/dom';
 import intent from './intents/todos' ;
 import  { intent as landingIntent } from './intents/landing';
 import model from './models/todos';
-import landingView from './views/landing';
+import landing from './landing/landing';
 import mapView from './views/todos';
 import localStorageSink from './sinks/local-storage.js';
 import todoItemComponent from './components/todo-item';
@@ -35,14 +35,8 @@ function app(drivers) {
 
   let intents = intent(drivers.DOM);
 
-/*
   let slot_req$ = Rx.Observable.just({
     url: SLOT_URL,
-    method: 'GET'
-  });
-*/
-  let services_req$ = Rx.Observable.just({
-    url: SERVICES_URL,
     method: 'GET'
   });
 
@@ -55,13 +49,13 @@ function app(drivers) {
   });
   */
 
-/*
   let slots$ = drivers.HTTP
    .filter(res$ => res$.request.url.indexOf(SLOT_URL) === 0)
    .mergeAll()
    .map(res => res.body)
    .startWith([]);
 
+/*
   let provider$ = drivers.HTTP
    .filter(res$ => res$.request.url.indexOf(PROVIDER_URL) === 0)
    .mergeAll()
@@ -69,10 +63,6 @@ function app(drivers) {
    */
 
  console.log(drivers.HTTP);
-  let services$ = drivers.HTTP
-   .filter(res$ => res$.request.url.indexOf(SERVICES_URL) === 0)
-   .mergeAll()
-   .map(res => res.body);
 //let services$ = Rx.Observable.just(0);
 //  let data$ = model(intents,  {slots: slots$, provider: provider$, services: services$});
 
@@ -121,14 +111,19 @@ function app(drivers) {
       }
     });
     */
+    let landingApp = landing(drivers);
+    let http$ = landingApp.HTTP;
+    let vtree$ = landingApp.DOM;
+    /*
     let vtree$ = Rx.Observable.combineLatest(ongoingContext$, services$, (route, services) =>
     {
       console.log(services);
       return landingView(services);
     });
+    */
   return {
     DOM: vtree$,
-    HTTP: services_req$
+    HTTP: http$
   };
 }
 

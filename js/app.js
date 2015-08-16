@@ -21432,9 +21432,9 @@ var _modelsTodos = require('./models/todos');
 
 var _modelsTodos2 = _interopRequireDefault(_modelsTodos);
 
-var _viewsLanding = require('./views/landing');
+var _landingLanding = require('./landing/landing');
 
-var _viewsLanding2 = _interopRequireDefault(_viewsLanding);
+var _landingLanding2 = _interopRequireDefault(_landingLanding);
 
 var _viewsTodos = require('./views/todos');
 
@@ -21486,14 +21486,8 @@ function app(drivers) {
 
   var intents = (0, _intentsTodos2['default'])(drivers.DOM);
 
-  /*
-    let slot_req$ = Rx.Observable.just({
-      url: SLOT_URL,
-      method: 'GET'
-    });
-  */
-  var services_req$ = _cycleCore.Rx.Observable.just({
-    url: SERVICES_URL,
+  var slot_req$ = _cycleCore.Rx.Observable.just({
+    url: SLOT_URL,
     method: 'GET'
   });
 
@@ -21506,13 +21500,13 @@ function app(drivers) {
     });
     */
 
+  var slots$ = drivers.HTTP.filter(function (res$) {
+    return res$.request.url.indexOf(SLOT_URL) === 0;
+  }).mergeAll().map(function (res) {
+    return res.body;
+  }).startWith([]);
+
   /*
-    let slots$ = drivers.HTTP
-     .filter(res$ => res$.request.url.indexOf(SLOT_URL) === 0)
-     .mergeAll()
-     .map(res => res.body)
-     .startWith([]);
-  
     let provider$ = drivers.HTTP
      .filter(res$ => res$.request.url.indexOf(PROVIDER_URL) === 0)
      .mergeAll()
@@ -21520,11 +21514,6 @@ function app(drivers) {
      */
 
   console.log(drivers.HTTP);
-  var services$ = drivers.HTTP.filter(function (res$) {
-    return res$.request.url.indexOf(SERVICES_URL) === 0;
-  }).mergeAll().map(function (res) {
-    return res.body;
-  });
   //let services$ = Rx.Observable.just(0);
   //  let data$ = model(intents,  {slots: slots$, provider: provider$, services: services$});
 
@@ -21574,13 +21563,19 @@ function app(drivers) {
         }
       });
       */
-  var vtree$ = _cycleCore.Rx.Observable.combineLatest(ongoingContext$, services$, function (route, services) {
+  var landingApp = (0, _landingLanding2['default'])(drivers);
+  var http$ = landingApp.HTTP;
+  var vtree$ = landingApp.DOM;
+  /*
+  let vtree$ = Rx.Observable.combineLatest(ongoingContext$, services$, (route, services) =>
+  {
     console.log(services);
-    return (0, _viewsLanding2['default'])(services);
+    return landingView(services);
   });
+  */
   return {
     DOM: vtree$,
-    HTTP: services_req$
+    HTTP: http$
   };
 }
 
@@ -21589,7 +21584,7 @@ module.exports = {
   components: components
 };
 
-},{"./components/city-item":118,"./components/googlemap-component":119,"./components/landing/landing-service-item":120,"./components/list-slot":121,"./components/service-item":122,"./components/todo-item":123,"./intents/landing":124,"./intents/todos":125,"./models/todos":126,"./sinks/local-storage.js":127,"./views/landing":131,"./views/todos":132,"@cycle/core":1,"@cycle/dom":5}],118:[function(require,module,exports){
+},{"./components/city-item":118,"./components/googlemap-component":119,"./components/landing/landing-service-item":120,"./components/list-slot":121,"./components/service-item":122,"./components/todo-item":123,"./intents/landing":124,"./intents/todos":125,"./landing/landing":126,"./models/todos":127,"./sinks/local-storage.js":128,"./views/todos":133,"@cycle/core":1,"@cycle/dom":5}],118:[function(require,module,exports){
 'use strict';
 
 var _cycleCore = require('@cycle/core');
@@ -21652,7 +21647,7 @@ function googleMapComponent(drivers) {
 
 module.exports = googleMapComponent;
 
-},{"../widgets/googlemap-widget":133,"@cycle/core":1,"@cycle/dom":5}],120:[function(require,module,exports){
+},{"../widgets/googlemap-widget":134,"@cycle/core":1,"@cycle/dom":5}],120:[function(require,module,exports){
 'use strict';
 
 var _cycleCore = require('@cycle/core');
@@ -21830,7 +21825,7 @@ function todoItemComponent(drivers) {
 
 module.exports = todoItemComponent;
 
-},{"../utils":130,"@cycle/core":1,"@cycle/dom":5}],124:[function(require,module,exports){
+},{"../utils":131,"@cycle/core":1,"@cycle/dom":5}],124:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -21881,7 +21876,81 @@ function intent(domDriver) {
 
 module.exports = exports['default'];
 
-},{"../utils":130,"@cycle/core":1}],126:[function(require,module,exports){
+},{"../utils":131,"@cycle/core":1}],126:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+exports['default'] = landing;
+
+var _cycleCore = require('@cycle/core');
+
+var _cycleDom = require('@cycle/dom');
+
+var _utils = require('../utils');
+
+var _stringsStrings = require('../strings/strings');
+
+function vrenderNav() {
+  return (0, _cycleDom.h)('nav.navbar.navbar-default', [(0, _cycleDom.h)('div.container-fluid', [(0, _cycleDom.h)('div.navbar-header', [(0, _cycleDom.h)('img', { 'src': '/static/images/logo-vihreä.png' })])])]);
+}
+
+function vrenderServiceItem(serviceType) {
+  return (0, _cycleDom.h)('div.landing-service-item', [(0, _cycleDom.h)('img', { "src": serviceType.imageURL }), (0, _cycleDom.h)('a.container', { href: '/map' }, [(0, _cycleDom.h)('h2', serviceType.name), (0, _cycleDom.h)('p', serviceType.description)])]);
+}
+
+function vRenderServices(services) {
+  return (0, _cycleDom.h)('div', [(0, _cycleDom.h)('div.landing-heading.container', [(0, _cycleDom.h)('h1.landing_text', _stringsStrings.strings.landing_header_2), (0, _cycleDom.h)('p.landing_text', _stringsStrings.strings.landing_caption_2)]), (0, _cycleDom.h)('div#services.container', services.map(function (service) {
+    return vrenderServiceItem(service);
+  }))]);
+}
+
+function vRenderImageSearch() {
+  return (0, _cycleDom.h)('div.jumbotron', { style: {
+      'background-image': "url('../static/images/web-tausta.png')"
+    } }, [(0, _cycleDom.h)('div.container', [(0, _cycleDom.h)('h1.landing_text', _stringsStrings.strings.landing_header_1), (0, _cycleDom.h)('p.landing_text', _stringsStrings.strings.landing_caption_1), (0, _cycleDom.h)('div.input-group', [(0, _cycleDom.h)('input.form-control', { 'type': 'text', 'placeholder': _stringsStrings.strings.landing_city_search_placeholder }), (0, _cycleDom.h)('span.input-group-btn', [(0, _cycleDom.h)('button.btn.btn-default', { 'type': 'button' }, _stringsStrings.strings.search)])])])]);
+  /*
+  <div class="input-group">
+      <input type="text" class="form-control" placeholder="Search for...">
+      <span class="input-group-btn">
+        <button class="btn btn-default" type="button">Go!</button>
+      </span>
+    </div><!-- /input-group -->
+  <div class="input-group">
+  <span class="input-group-addon" id="basic-addon1">@</span>
+  <input type="text" class="form-control" placeholder="Username" aria-describedby="basic-addon1">
+  </div>
+  */
+}
+
+function landing(drivers) {
+  var SERVICES_URL = 'https://timma.fi/api/public/services/app';
+
+  var services_req$ = _cycleCore.Rx.Observable.just({
+    url: SERVICES_URL,
+    method: 'GET'
+  });
+
+  var services$ = drivers.HTTP.filter(function (res$) {
+    return res$.request.url.indexOf(SERVICES_URL) === 0;
+  }).mergeAll().map(function (res) {
+    return res.body;
+  });
+
+  var vtree$ = services$.map(function (services) {
+    return (0, _cycleDom.h)('div.app-div', [vrenderNav(), vRenderImageSearch(), vRenderServices(services)]);
+  });
+
+  return {
+    DOM: vtree$,
+    HTTP: services_req$
+  };
+}
+
+module.exports = exports['default'];
+
+},{"../strings/strings":130,"../utils":131,"@cycle/core":1,"@cycle/dom":5}],127:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -21981,7 +22050,7 @@ function model(intent, _ref) {
 exports['default'] = model;
 module.exports = exports['default'];
 
-},{"@cycle/core":1}],127:[function(require,module,exports){
+},{"@cycle/core":1}],128:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22007,7 +22076,7 @@ function localStorageSink(todosData) {
 
 module.exports = exports["default"];
 
-},{}],128:[function(require,module,exports){
+},{}],129:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -22022,7 +22091,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{"@cycle/core":1}],129:[function(require,module,exports){
+},{"@cycle/core":1}],130:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -22045,7 +22114,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}],130:[function(require,module,exports){
+},{}],131:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22084,7 +22153,7 @@ exports.propHook = propHook;
 exports.ENTER_KEY = ENTER_KEY;
 exports.ESC_KEY = ESC_KEY;
 
-},{}],131:[function(require,module,exports){
+},{}],132:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -22138,7 +22207,7 @@ function landingView(todos) {
 
 module.exports = exports['default'];
 
-},{"../strings/strings":129,"../utils":130,"@cycle/core":1,"@cycle/dom":5}],132:[function(require,module,exports){
+},{"../strings/strings":130,"../utils":131,"@cycle/core":1,"@cycle/dom":5}],133:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -22233,7 +22302,7 @@ function mapView(todos) {
 
 module.exports = exports['default'];
 
-},{"../utils":130,"@cycle/core":1,"@cycle/dom":5}],133:[function(require,module,exports){
+},{"../utils":131,"@cycle/core":1,"@cycle/dom":5}],134:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -22324,4 +22393,4 @@ var TimmaMap = (function () {
 
 module.exports = TimmaMap;
 
-},{"immutable":116}]},{},[117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133]);
+},{"immutable":116}]},{},[117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134]);
