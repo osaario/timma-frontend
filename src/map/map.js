@@ -47,7 +47,7 @@ function vrenderServiceList(services) {
 }
 
 function vrenderMapSection(slots) {
-    return new TimmaMap(slots, null);
+    return new TimmaMap(slots);
 }
 
 
@@ -84,12 +84,12 @@ export default function map(drivers) {
       return h('section#map', [
         (() => {
           if(isClient) {
-            vrenderMapSection(slots);
+            return vrenderMapSection(slots);
           }
-        })(),
+      })(),
         vrenderMainSection(slots)
       ]);
-   });
+   }).repeat(2);
    let http$ = slot_req$;
 
   return {

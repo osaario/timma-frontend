@@ -6,12 +6,12 @@ let {app, components} = require('./src/app');
 
 function clientSideApp(responses) {
   let requests = app(responses);
-  requests.DOM = requests.DOM.skip(1);
+  requests.DOM = requests.DOM;
   return requests;
 }
 
 Cycle.run(clientSideApp, {
   DOM: makeDOMDriver('.app-container', components() ),
   HTTP: makeHTTPDriver(),
-  context: () => Cycle.Rx.Observable.just(window.location.pathname)
+  context: () => Cycle.Rx.Observable.just(window.appContext)
 });

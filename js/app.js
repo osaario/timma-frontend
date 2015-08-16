@@ -21946,7 +21946,7 @@ function vrenderServiceList(services) {
 }
 
 function vrenderMapSection(slots) {
-  return new _widgetsGooglemapWidget2['default'](slots, null);
+  return new _widgetsGooglemapWidget2['default'](slots);
 }
 
 function vrenderMainSection(slots) {
@@ -21982,10 +21982,10 @@ function map(drivers) {
   var dom$ = _cycleCore.Rx.Observable.combineLatest(isClient$, slots$, function (isClient, slots) {
     return (0, _cycleDom.h)('section#map', [(function () {
       if (isClient) {
-        vrenderMapSection(slots);
+        return vrenderMapSection(slots);
       }
     })(), vrenderMainSection(slots)]);
-  });
+  }).repeat(2);
   var http$ = slot_req$;
 
   return {
@@ -22308,7 +22308,7 @@ var _immutable = require('immutable');
 var _immutable2 = _interopRequireDefault(_immutable);
 
 var TimmaMap = (function () {
-  function TimmaMap(markers, bounds) {
+  function TimmaMap(markers) {
     _classCallCheck(this, TimmaMap);
 
     this.type = 'Widget';
@@ -22316,7 +22316,6 @@ var TimmaMap = (function () {
       return new google.maps.LatLng(x.lastMinuteInfo.lat, x.lastMinuteInfo.lon);
     });
     this.markersRendered = false;
-    this.bounds = bounds;
   }
 
   _createClass(TimmaMap, [{
@@ -22325,31 +22324,37 @@ var TimmaMap = (function () {
       var element = document.createElement('div');
       element.id = 'timma-map';
 
-      var mapOptions = {
-        zoom: 14,
-        scrollwheel: true,
-        center: new google.maps.LatLng(60.1543, 24.9341),
-        draggable: true
-      };
-
-      var map = new google.maps.Map(element, mapOptions);
-
-      element.officesMap = {
-        map: map
-      };
-
-      this.update(null, element);
-
-      google.maps.event.addListener(map, 'bounds_changed', function () {
-        // 3 seconds after the center of the map has changed, pan back to the
-        // marker.
-        var event = new CustomEvent('bounds_changed', { 'detail': { bounds: map.getBounds(), zoomLevel: map.getZoom(), center: map.getCenter() } });
-        element.dispatchEvent(event);
-      });
-      var event = new CustomEvent('bounds_changed', { 'detail': { bounds: map.getBounds(), zoomLevel: map.getZoom(), center: map.getCenter() } });
-      element.dispatchEvent(event);
-      // 3 seconds after the center of the map has changed, pan back to the
-      // marker.
+      /*
+          let mapOptions = {
+            zoom: 14,
+            scrollwheel: true,
+            center: new google.maps.LatLng(
+              60.1543,
+              24.9341
+              ),
+            draggable: true,
+          };
+      
+          let map = new google.maps.Map(element, mapOptions);
+      
+          element.officesMap = {
+            map
+          };
+      
+          this.update(null, element);
+      
+      
+          google.maps.event.addListener(map, 'bounds_changed', function() {
+            // 3 seconds after the center of the map has changed, pan back to the
+            // marker.
+            var event = new CustomEvent('bounds_changed', {'detail': {bounds: map.getBounds(), zoomLevel: map.getZoom(), center: map.getCenter()}});
+            element.dispatchEvent(event);
+          });
+            var event = new CustomEvent('bounds_changed', {'detail': {bounds: map.getBounds(), zoomLevel: map.getZoom(), center: map.getCenter()}});
+            element.dispatchEvent(event);
+            // 3 seconds after the center of the map has changed, pan back to the
+            // marker.
+            */
       return element;
     }
   }, {
@@ -22365,10 +22370,12 @@ var TimmaMap = (function () {
           zIndex: 0
         });
       });
-      if (this.bounds !== null && this.bounds !== domNode.officesMap.map.getBounds()) {
-        domNode.officesMap.map.fitBounds(this.bounds);
-        this.bounds = null;
+      /*
+      if(this.bounds !== null && this.bounds !== domNode.officesMap.map.getBounds()) {
+          domNode.officesMap.map.fitBounds(this.bounds);
+          this.bounds = null;
       }
+      */
 
       if (this.markers.length > 0) this.markersRendered = true;
       // Let's be optimistic: ceil()

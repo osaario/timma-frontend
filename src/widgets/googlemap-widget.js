@@ -1,11 +1,8 @@
-import Immutable from 'immutable';
-
 class TimmaMap {
-  constructor(markers, bounds) {
+  constructor(markers) {
     this.type = 'Widget';
     this.markers = markers.map(x => new google.maps.LatLng(x.lastMinuteInfo.lat, x.lastMinuteInfo.lon));
     this.markersRendered = false;
-    this.bounds = bounds;
   }
 
   init() {
@@ -28,7 +25,6 @@ class TimmaMap {
       map
     };
 
-    this.update(null, element);
 
 
     google.maps.event.addListener(map, 'bounds_changed', function() {
@@ -41,6 +37,7 @@ class TimmaMap {
       element.dispatchEvent(event);
       // 3 seconds after the center of the map has changed, pan back to the
       // marker.
+    //this.update(null, element);
     return element;
   }
 
@@ -55,15 +52,18 @@ class TimmaMap {
         zIndex: 0
       });
     });
+    /*
     if(this.bounds !== null && this.bounds !== domNode.officesMap.map.getBounds()) {
         domNode.officesMap.map.fitBounds(this.bounds);
         this.bounds = null;
     }
+    */
 
     if(this.markers.length > 0) this.markersRendered = true;
     // Let's be optimistic: ceil()
 
     // How much we have traveled already
+    return null;
   }
 
   destroy(domNode) { }

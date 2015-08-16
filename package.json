@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@cycle/core": "2.0.x",
-    "@cycle/dom": "4.0.x",
+    "@cycle/dom": "4.1.x",
     "@cycle/http": "2.0.x",
     "bootstrap": "^3.3.5",
     "connect": "^3.4.0",
