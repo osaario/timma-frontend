@@ -21528,7 +21528,7 @@ function app(drivers) {
 
   var http$ = _cycleCore.Rx.Observable.merge(landingHttp$, mapHttp$);
 
-  var vtree$ = ongoingContext$.combineLatest(landingVtree$, mapVtree$, function (_ref, landingVtree, mapVtree) {
+  var vtree$ = _cycleCore.Rx.Observable.combineLatest(ongoingContext$, landingVtree$, mapVtree$, function (_ref, landingVtree, mapVtree) {
     var route = _ref.route;
 
     if (typeof window !== 'undefined') {
@@ -21965,6 +21965,9 @@ function map(drivers) {
 
   var SLOT_URL = 'https://timma.fi/api/public/lastminuteslots';
 
+  var isClient$ = _cycleCore.Rx.Observable.just(typeof window !== 'undefined' ? true : false);
+  //.map(ev => ev.target.value)
+
   var slot_req$ = _cycleCore.Rx.Observable.just({
     url: SLOT_URL,
     method: 'GET'
@@ -21976,12 +21979,12 @@ function map(drivers) {
     return res.body;
   });
 
-  var dom$ = slots$.map(function (slots) {
-    return (0, _cycleDom.h)('section#map', [
-    //  vrenderMapSection(slots),
-    vrenderMainSection(slots)
-    //vrenderFooter(todos)
-    ]);
+  var dom$ = _cycleCore.Rx.Observable.combineLatest(isClient$, slots$, function (isClient, slots) {
+    return (0, _cycleDom.h)('section#map', [(function () {
+      if (isClient) {
+        vrenderMapSection(slots);
+      }
+    })(), vrenderMainSection(slots)]);
   });
   var http$ = slot_req$;
 
@@ -22309,18 +22312,16 @@ var TimmaMap = (function () {
     _classCallCheck(this, TimmaMap);
 
     this.type = 'Widget';
-    /*
-    this.markers = markers.map(x => new google.maps.LatLng(x.lastMinuteInfo.lat, x.lastMinuteInfo.lon));
+    this.markers = markers.map(function (x) {
+      return new google.maps.LatLng(x.lastMinuteInfo.lat, x.lastMinuteInfo.lon);
+    });
     this.markersRendered = false;
     this.bounds = bounds;
-    */
   }
 
   _createClass(TimmaMap, [{
     key: 'init',
     value: function init() {
-      //we are on server side
-      if (document === undefined) return;
       var element = document.createElement('div');
       element.id = 'timma-map';
 
@@ -22355,7 +22356,6 @@ var TimmaMap = (function () {
     key: 'update',
     value: function update(previous, domNode) {
       //Epic diffing function for now since we only render markers once atm
-      if (document === undefined) return;
       if (this.markersRendered === true) return;
       this.markers.forEach(function (m) {
         var _ = new google.maps.Marker({

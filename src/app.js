@@ -86,8 +86,8 @@ function app(drivers) {
 
     let http$ = Rx.Observable.merge(landingHttp$, mapHttp$);
 
-    let vtree$ = ongoingContext$
-    .combineLatest(landingVtree$, mapVtree$,  ({route}, landingVtree, mapVtree ) => {
+    let vtree$ = Rx.Observable
+    .combineLatest(ongoingContext$, landingVtree$, mapVtree$,  ({route}, landingVtree, mapVtree ) => {
       if (typeof window !== 'undefined') {
         window.history.pushState(null, '', route);
       }

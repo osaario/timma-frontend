@@ -67,6 +67,9 @@ export default function map(drivers) {
 
   let SLOT_URL = 'https://timma.fi/api/public/lastminuteslots';
 
+  let isClient$ = Rx.Observable.just(typeof window !== 'undefined' ? true : false);
+    //.map(ev => ev.target.value)
+
   let slot_req$ = Rx.Observable.just({
     url: SLOT_URL,
     method: 'GET'
@@ -77,11 +80,14 @@ export default function map(drivers) {
    .mergeAll()
    .map(res => res.body);
 
-   let dom$ = slots$.map((slots) => {
+   let dom$ = Rx.Observable.combineLatest(isClient$, slots$, (isClient, slots) => {
       return h('section#map', [
-      //  vrenderMapSection(slots),
+        (() => {
+          if(isClient) {
+            vrenderMapSection(slots);
+          }
+        })(),
         vrenderMainSection(slots)
-        //vrenderFooter(todos)
       ]);
    });
    let http$ = slot_req$;

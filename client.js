@@ -13,5 +13,5 @@ function clientSideApp(responses) {
 Cycle.run(clientSideApp, {
   DOM: makeDOMDriver('.app-container', components() ),
   HTTP: makeHTTPDriver(),
-  context: () => Cycle.Rx.Observable.just(window.appContext)
+  context: () => Cycle.Rx.Observable.just(window.location.pathname)
 });
