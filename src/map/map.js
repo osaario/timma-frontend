@@ -68,7 +68,10 @@ function intent(drivers, isClient) {
     //mapBoundsChanged$: domDriver.get('#timma-map', 'bounds_changed').map(ev => ev.detail).throttle(500).startWith({bounds: null, zoomLevel: 14, center: null}).shareReplay(1),
     let bounds_change$ = drivers.DOM.get('#timma-map', 'bounds_changed').map(ev => ev.detail)
     .throttle(500)
-    .startWith({bounds: null, zoomLevel: 14, center: null});
+    .startWith({bounds: null, zoomLevel: 14, center: null})
+    .map(({bounds}) => {
+      return bounds;
+    });
   return {
     boundsChange$: bounds_change$
   };
@@ -80,9 +83,14 @@ function intent(drivers, isClient) {
 
 }
 
-function model(intent, data$) {
+function model(intent, data$, isClient) {
   return intent.boundsChange$.combineLatest(data$, (bounds, slots) => {
-    return slots;
+    if(!isClient || bounds === null) return slots;
+    return Immutable.Seq(slots)
+    .filter((slot) => {
+      //return true;
+      return bounds.contains(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon));
+    }).toArray();
   });
 }
 
@@ -101,7 +109,7 @@ export default function map(drivers) {
   let slots$ = model(intent(drivers, isClient), drivers.HTTP
    .filter(res$ => res$.request.url.indexOf(SLOT_URL) === 0)
    .mergeAll()
-   .map(res => res.body));
+   .map(res => res.body), isClient);
 
    let dom$ = slots$.map((slots) => {
       return h('section#map', [

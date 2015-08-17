@@ -21929,7 +21929,11 @@ function intent(drivers, isClient) {
     //mapBoundsChanged$: domDriver.get('#timma-map', 'bounds_changed').map(ev => ev.detail).throttle(500).startWith({bounds: null, zoomLevel: 14, center: null}).shareReplay(1),
     var bounds_change$ = drivers.DOM.get('#timma-map', 'bounds_changed').map(function (ev) {
       return ev.detail;
-    }).throttle(500).startWith({ bounds: null, zoomLevel: 14, center: null });
+    }).throttle(500).startWith({ bounds: null, zoomLevel: 14, center: null }).map(function (_ref) {
+      var bounds = _ref.bounds;
+
+      return bounds;
+    });
     return {
       boundsChange$: bounds_change$
     };
@@ -21940,9 +21944,13 @@ function intent(drivers, isClient) {
   }
 }
 
-function model(intent, data$) {
+function model(intent, data$, isClient) {
   return intent.boundsChange$.combineLatest(data$, function (bounds, slots) {
-    return slots;
+    if (!isClient || bounds === null) return slots;
+    return _immutable2['default'].Seq(slots).filter(function (slot) {
+      //return true;
+      return bounds.contains(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon));
+    }).toArray();
   });
 }
 
@@ -21962,7 +21970,7 @@ function map(drivers) {
     return res$.request.url.indexOf(SLOT_URL) === 0;
   }).mergeAll().map(function (res) {
     return res.body;
-  }));
+  }), isClient);
 
   var dom$ = slots$.map(function (slots) {
     return (0, _cycleDom.h)('section#map', [(function () {
