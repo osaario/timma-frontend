@@ -21511,7 +21511,7 @@ function app(drivers) {
   var ongoingContext$ = drivers.context.merge(routeFromClick$).scan(function (acc, x) {
     acc.route = x;
     return acc;
-  }).distinctUntilChanged();
+  });
 
   var mapApp = (0, _mapMap2['default'])(drivers);
   var mapHttp$ = mapApp.HTTP;
@@ -21953,7 +21953,7 @@ function model(intent, data$, isClient) {
     }).groupBy(function (slot) {
       return slot.customerId;
     }).map(function (kvPair) {
-      return kvPair.toArray().first();
+      return kvPair.toArray()[0];
     }).toArray();
   });
 }

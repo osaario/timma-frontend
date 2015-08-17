@@ -71,7 +71,7 @@ function app(drivers) {
     .merge(routeFromClick$).scan((acc, x) => {
       acc.route = x;
       return acc;
-    }).distinctUntilChanged();
+    });
 
 
     let mapApp = map(drivers);
