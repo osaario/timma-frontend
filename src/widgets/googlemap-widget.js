@@ -33,8 +33,8 @@ class TimmaMap {
       var event = new CustomEvent('bounds_changed', {'detail': {bounds: map.getBounds(), zoomLevel: map.getZoom(), center: map.getCenter()}});
       element.dispatchEvent(event);
     });
-      var event = new CustomEvent('bounds_changed', {'detail': {bounds: map.getBounds(), zoomLevel: map.getZoom(), center: map.getCenter()}});
-      element.dispatchEvent(event);
+    var event = new CustomEvent('bounds_changed', {'detail': {bounds: map.getBounds(), zoomLevel: map.getZoom(), center: map.getCenter()}});
+    element.dispatchEvent(event);
       // 3 seconds after the center of the map has changed, pan back to the
       // marker.
     this.update(null, element);

@@ -21770,9 +21770,7 @@ var _utils = require('../utils');
 
 function intent(domDriver) {
   return {
-    mapBoundsChanged$: domDriver.get('#timma-map', 'bounds_changed').map(function (ev) {
-      return ev.detail;
-    }).throttle(500).startWith({ bounds: null, zoomLevel: 14, center: null }).shareReplay(1),
+    //mapBoundsChanged$: domDriver.get('#timma-map', 'bounds_changed').map(ev => ev.detail).throttle(500).startWith({bounds: null, zoomLevel: 14, center: null}).shareReplay(1),
     thumbnailClick$: domDriver.get('.list-slot', 'clickCustom').map(function (ev) {
       return ev.detail;
     }).shareReplay(1),
@@ -21926,11 +21924,33 @@ function vrenderMainSection(slots) {
   */
 }
 
+function intent(drivers, isClient) {
+  if (isClient) {
+    //mapBoundsChanged$: domDriver.get('#timma-map', 'bounds_changed').map(ev => ev.detail).throttle(500).startWith({bounds: null, zoomLevel: 14, center: null}).shareReplay(1),
+    var bounds_change$ = drivers.DOM.get('#timma-map', 'bounds_changed').map(function (ev) {
+      return ev.detail;
+    }).throttle(500).startWith({ bounds: null, zoomLevel: 14, center: null });
+    return {
+      boundsChange$: bounds_change$
+    };
+  } else {
+    return {
+      boundsChange$: _cycleCore.Rx.Observable.just(0)
+    };
+  }
+}
+
+function model(intent, data$) {
+  return intent.boundsChange$.combineLatest(data$, function (bounds, slots) {
+    return slots;
+  });
+}
+
 function map(drivers) {
 
   var SLOT_URL = 'https://timma.fi/api/public/lastminuteslots';
 
-  var isClient$ = _cycleCore.Rx.Observable.just(typeof window !== 'undefined' ? true : false);
+  var isClient = typeof window !== 'undefined' ? true : false;
   //.map(ev => ev.target.value)
 
   var slot_req$ = _cycleCore.Rx.Observable.just({
@@ -21938,13 +21958,13 @@ function map(drivers) {
     method: 'GET'
   });
 
-  var slots$ = drivers.HTTP.filter(function (res$) {
+  var slots$ = model(intent(drivers, isClient), drivers.HTTP.filter(function (res$) {
     return res$.request.url.indexOf(SLOT_URL) === 0;
   }).mergeAll().map(function (res) {
     return res.body;
-  });
+  }));
 
-  var dom$ = _cycleCore.Rx.Observable.combineLatest(isClient$, slots$, function (isClient, slots) {
+  var dom$ = slots$.map(function (slots) {
     return (0, _cycleDom.h)('section#map', [(function () {
       if (isClient) {
         return vrenderMapSection(slots);

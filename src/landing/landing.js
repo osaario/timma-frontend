@@ -70,7 +70,7 @@ export default function landing(drivers) {
   .filter(res$ => res$.request.url.indexOf(SERVICES_URL) === 0)
   .mergeAll()
   .map(res => res.body);
-  
+
   let vtree$ = services$.map((services) =>
   {
     return h('section#services', [

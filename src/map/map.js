@@ -63,11 +63,34 @@ function vrenderMainSection(slots) {
   */
 }
 
+function intent(drivers, isClient) {
+  if(isClient) {
+    //mapBoundsChanged$: domDriver.get('#timma-map', 'bounds_changed').map(ev => ev.detail).throttle(500).startWith({bounds: null, zoomLevel: 14, center: null}).shareReplay(1),
+    let bounds_change$ = drivers.DOM.get('#timma-map', 'bounds_changed').map(ev => ev.detail)
+    .throttle(500)
+    .startWith({bounds: null, zoomLevel: 14, center: null});
+  return {
+    boundsChange$: bounds_change$
+  };
+  } else {
+  return {
+    boundsChange$: Rx.Observable.just(0)
+  };
+  }
+
+}
+
+function model(intent, data$) {
+  return intent.boundsChange$.combineLatest(data$, (bounds, slots) => {
+    return slots;
+  });
+}
+
 export default function map(drivers) {
 
   let SLOT_URL = 'https://timma.fi/api/public/lastminuteslots';
 
-  let isClient$ = Rx.Observable.just(typeof window !== 'undefined' ? true : false);
+  let isClient = typeof window !== 'undefined' ? true : false;
     //.map(ev => ev.target.value)
 
   let slot_req$ = Rx.Observable.just({
@@ -75,12 +98,12 @@ export default function map(drivers) {
     method: 'GET'
   });
 
-  let slots$ = drivers.HTTP
+  let slots$ = model(intent(drivers, isClient), drivers.HTTP
    .filter(res$ => res$.request.url.indexOf(SLOT_URL) === 0)
    .mergeAll()
-   .map(res => res.body);
+   .map(res => res.body));
 
-   let dom$ = Rx.Observable.combineLatest(isClient$, slots$, (isClient, slots) => {
+   let dom$ = slots$.map((slots) => {
       return h('section#map', [
         (() => {
           if(isClient) {
