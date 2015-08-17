@@ -9,7 +9,6 @@ import landing from './landing/landing';
 import map from './map/map';
 import localStorageSink from './sinks/local-storage.js';
 import todoItemComponent from './components/todo-item';
-import googleMapComponent from './components/googlemap-component';
 import cityItemComponent from './components/city-item';
 import landingServiceItemComponent from './components/landing/landing-service-item';
 import serviceItemComponent from './components/service-item';
@@ -30,8 +29,7 @@ function components() {
     'todo-item': todoItemComponent,
     'landing-service-item': landingServiceItemComponent,
     'service-item': serviceItemComponent,
-    'city-item': cityItemComponent,
-    'main-map': googleMapComponent
+    'city-item': cityItemComponent
   };
 }
 
@@ -73,7 +71,7 @@ function app(drivers) {
     .merge(routeFromClick$).scan((acc, x) => {
       acc.route = x;
       return acc;
-    });
+    }).distinctUntilChanged();
 
 
     let mapApp = map(drivers);

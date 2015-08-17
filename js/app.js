@@ -11646,7 +11646,7 @@ function transposeVTree(vtree) {
 
       return new VirtualNode(vtree.tagName, vtree.properties, arr, vtree.key, vtree.namespace);
     });
-  } else if (vtree.type === "VirtualNode") {
+  } else if (vtree.type === "VirtualNode" || vtree.type === "Widget") {
     return Rx.Observable.just(vtree);
   } else {
     throw new Error("Unhandled case in transposeVTree()");
@@ -21448,10 +21448,6 @@ var _componentsTodoItem = require('./components/todo-item');
 
 var _componentsTodoItem2 = _interopRequireDefault(_componentsTodoItem);
 
-var _componentsGooglemapComponent = require('./components/googlemap-component');
-
-var _componentsGooglemapComponent2 = _interopRequireDefault(_componentsGooglemapComponent);
-
 var _componentsCityItem = require('./components/city-item');
 
 var _componentsCityItem2 = _interopRequireDefault(_componentsCityItem);
@@ -21473,8 +21469,7 @@ function components() {
     'todo-item': _componentsTodoItem2['default'],
     'landing-service-item': _componentsLandingLandingServiceItem2['default'],
     'service-item': _componentsServiceItem2['default'],
-    'city-item': _componentsCityItem2['default'],
-    'main-map': _componentsGooglemapComponent2['default']
+    'city-item': _componentsCityItem2['default']
   };
 }
 
@@ -21516,7 +21511,7 @@ function app(drivers) {
   var ongoingContext$ = drivers.context.merge(routeFromClick$).scan(function (acc, x) {
     acc.route = x;
     return acc;
-  });
+  }).distinctUntilChanged();
 
   var mapApp = (0, _mapMap2['default'])(drivers);
   var mapHttp$ = mapApp.HTTP;
@@ -21563,7 +21558,7 @@ module.exports = {
   components: components
 };
 
-},{"./components/city-item":118,"./components/googlemap-component":119,"./components/landing/landing-service-item":120,"./components/service-item":121,"./components/todo-item":122,"./intents/landing":123,"./intents/todos":124,"./landing/landing":125,"./map/map":126,"./models/todos":127,"./sinks/local-storage.js":128,"@cycle/core":1,"@cycle/dom":5}],118:[function(require,module,exports){
+},{"./components/city-item":118,"./components/landing/landing-service-item":119,"./components/service-item":120,"./components/todo-item":121,"./intents/landing":122,"./intents/todos":123,"./landing/landing":124,"./map/map":125,"./models/todos":126,"./sinks/local-storage.js":127,"@cycle/core":1,"@cycle/dom":5}],118:[function(require,module,exports){
 'use strict';
 
 var _cycleCore = require('@cycle/core');
@@ -21599,36 +21594,6 @@ module.exports = cityItemComponent;
 },{"@cycle/core":1,"@cycle/dom":5}],119:[function(require,module,exports){
 'use strict';
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-var _cycleCore = require('@cycle/core');
-
-var _cycleDom = require('@cycle/dom');
-
-var _widgetsGooglemapWidget = require('../widgets/googlemap-widget');
-
-var _widgetsGooglemapWidget2 = _interopRequireDefault(_widgetsGooglemapWidget);
-
-function googleMapComponent(drivers) {
-  var props$ = drivers.props.getAll().shareReplay(1);
-
-  var vtree$ = props$.map(function (_ref) {
-    var markers = _ref.markers;
-    var setBounds = _ref.setBounds;
-
-    return new _widgetsGooglemapWidget2['default'](markers, setBounds);
-  });
-
-  return {
-    DOM: vtree$
-  };
-}
-
-module.exports = googleMapComponent;
-
-},{"../widgets/googlemap-widget":133,"@cycle/core":1,"@cycle/dom":5}],120:[function(require,module,exports){
-'use strict';
-
 var _cycleCore = require('@cycle/core');
 
 var _cycleDom = require('@cycle/dom');
@@ -21658,7 +21623,7 @@ function landingServiceItemComponent(drivers) {
 
 module.exports = landingServiceItemComponent;
 
-},{"@cycle/core":1,"@cycle/dom":5}],121:[function(require,module,exports){
+},{"@cycle/core":1,"@cycle/dom":5}],120:[function(require,module,exports){
 'use strict';
 
 var _cycleCore = require('@cycle/core');
@@ -21691,7 +21656,7 @@ function serviceItemComponent(drivers) {
 
 module.exports = serviceItemComponent;
 
-},{"@cycle/core":1,"@cycle/dom":5}],122:[function(require,module,exports){
+},{"@cycle/core":1,"@cycle/dom":5}],121:[function(require,module,exports){
 'use strict';
 
 var _cycleCore = require('@cycle/core');
@@ -21771,7 +21736,7 @@ function todoItemComponent(drivers) {
 
 module.exports = todoItemComponent;
 
-},{"../utils":131,"@cycle/core":1,"@cycle/dom":5}],123:[function(require,module,exports){
+},{"../utils":130,"@cycle/core":1,"@cycle/dom":5}],122:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -21791,7 +21756,7 @@ function intent(domDriver) {
 
 module.exports = exports['default'];
 
-},{"@cycle/core":1}],124:[function(require,module,exports){
+},{"@cycle/core":1}],123:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -21822,7 +21787,7 @@ function intent(domDriver) {
 
 module.exports = exports['default'];
 
-},{"../utils":131,"@cycle/core":1}],125:[function(require,module,exports){
+},{"../utils":130,"@cycle/core":1}],124:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -21839,7 +21804,7 @@ var _utils = require('../utils');
 var _stringsStrings = require('../strings/strings');
 
 function vrenderServiceItem(serviceType) {
-  return (0, _cycleDom.h)('div.landing-service-item', [(0, _cycleDom.h)('img', { "src": serviceType.imageURL }), (0, _cycleDom.h)('a.container', { href: '/map' }, [(0, _cycleDom.h)('h2', serviceType.name), (0, _cycleDom.h)('p', serviceType.description)])]);
+  return (0, _cycleDom.h)('div.landing-service-item', [(0, _cycleDom.h)('img', { "src": serviceType.imageURL }), (0, _cycleDom.h)('a.container.link', { href: '/map' }, [(0, _cycleDom.h)('h2', serviceType.name), (0, _cycleDom.h)('p', serviceType.description)])]);
 }
 
 function vRenderServices(services) {
@@ -21892,7 +21857,7 @@ function landing(drivers) {
 
 module.exports = exports['default'];
 
-},{"../strings/strings":130,"../utils":131,"@cycle/core":1,"@cycle/dom":5}],126:[function(require,module,exports){
+},{"../strings/strings":129,"../utils":130,"@cycle/core":1,"@cycle/dom":5}],125:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -21985,7 +21950,7 @@ function map(drivers) {
         return vrenderMapSection(slots);
       }
     })(), vrenderMainSection(slots)]);
-  }).repeat(2);
+  });
   var http$ = slot_req$;
 
   return {
@@ -21996,7 +21961,7 @@ function map(drivers) {
 
 module.exports = exports['default'];
 
-},{"../utils":131,"../widgets/googlemap-widget":133,"@cycle/core":1,"@cycle/dom":5,"immutable":116}],127:[function(require,module,exports){
+},{"../utils":130,"../widgets/googlemap-widget":132,"@cycle/core":1,"@cycle/dom":5,"immutable":116}],126:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -22096,7 +22061,7 @@ function model(intent, _ref) {
 exports['default'] = model;
 module.exports = exports['default'];
 
-},{"@cycle/core":1}],128:[function(require,module,exports){
+},{"@cycle/core":1}],127:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22122,7 +22087,7 @@ function localStorageSink(todosData) {
 
 module.exports = exports["default"];
 
-},{}],129:[function(require,module,exports){
+},{}],128:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -22137,7 +22102,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{"@cycle/core":1}],130:[function(require,module,exports){
+},{"@cycle/core":1}],129:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -22160,7 +22125,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}],131:[function(require,module,exports){
+},{}],130:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22199,7 +22164,7 @@ exports.propHook = propHook;
 exports.ENTER_KEY = ENTER_KEY;
 exports.ESC_KEY = ESC_KEY;
 
-},{}],132:[function(require,module,exports){
+},{}],131:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -22294,18 +22259,12 @@ function mapView(todos) {
 
 module.exports = exports['default'];
 
-},{"../utils":131,"@cycle/core":1,"@cycle/dom":5}],133:[function(require,module,exports){
+},{"../utils":130,"@cycle/core":1,"@cycle/dom":5}],132:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-var _immutable = require('immutable');
-
-var _immutable2 = _interopRequireDefault(_immutable);
 
 var TimmaMap = (function () {
   function TimmaMap(markers) {
@@ -22324,37 +22283,30 @@ var TimmaMap = (function () {
       var element = document.createElement('div');
       element.id = 'timma-map';
 
-      /*
-          let mapOptions = {
-            zoom: 14,
-            scrollwheel: true,
-            center: new google.maps.LatLng(
-              60.1543,
-              24.9341
-              ),
-            draggable: true,
-          };
-      
-          let map = new google.maps.Map(element, mapOptions);
-      
-          element.officesMap = {
-            map
-          };
-      
-          this.update(null, element);
-      
-      
-          google.maps.event.addListener(map, 'bounds_changed', function() {
-            // 3 seconds after the center of the map has changed, pan back to the
-            // marker.
-            var event = new CustomEvent('bounds_changed', {'detail': {bounds: map.getBounds(), zoomLevel: map.getZoom(), center: map.getCenter()}});
-            element.dispatchEvent(event);
-          });
-            var event = new CustomEvent('bounds_changed', {'detail': {bounds: map.getBounds(), zoomLevel: map.getZoom(), center: map.getCenter()}});
-            element.dispatchEvent(event);
-            // 3 seconds after the center of the map has changed, pan back to the
-            // marker.
-            */
+      var mapOptions = {
+        zoom: 14,
+        scrollwheel: true,
+        center: new google.maps.LatLng(60.1543, 24.9341),
+        draggable: true
+      };
+
+      var map = new google.maps.Map(element, mapOptions);
+
+      element.officesMap = {
+        map: map
+      };
+
+      google.maps.event.addListener(map, 'bounds_changed', function () {
+        // 3 seconds after the center of the map has changed, pan back to the
+        // marker.
+        var event = new CustomEvent('bounds_changed', { 'detail': { bounds: map.getBounds(), zoomLevel: map.getZoom(), center: map.getCenter() } });
+        element.dispatchEvent(event);
+      });
+      var event = new CustomEvent('bounds_changed', { 'detail': { bounds: map.getBounds(), zoomLevel: map.getZoom(), center: map.getCenter() } });
+      element.dispatchEvent(event);
+      // 3 seconds after the center of the map has changed, pan back to the
+      // marker.
+      this.update(null, element);
       return element;
     }
   }, {
@@ -22381,6 +22333,7 @@ var TimmaMap = (function () {
       // Let's be optimistic: ceil()
 
       // How much we have traveled already
+      return null;
     }
   }, {
     key: 'destroy',
@@ -22392,4 +22345,4 @@ var TimmaMap = (function () {
 
 module.exports = TimmaMap;
 
-},{"immutable":116}]},{},[117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133]);
+},{}]},{},[117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132]);

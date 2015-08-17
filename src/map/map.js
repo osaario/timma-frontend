@@ -89,7 +89,7 @@ export default function map(drivers) {
       })(),
         vrenderMainSection(slots)
       ]);
-   }).repeat(2);
+   });
    let http$ = slot_req$;
 
   return {

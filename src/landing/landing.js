@@ -8,7 +8,7 @@ import {strings} from '../strings/strings';
 function vrenderServiceItem(serviceType) {
   return h('div.landing-service-item', [
     h('img', {"src": serviceType.imageURL}),
-    h('a.container', {href: '/map'}, [
+    h('a.container.link', {href: '/map'}, [
       h('h2', serviceType.name),
       h('p', serviceType.description)
     ])
@@ -70,7 +70,7 @@ export default function landing(drivers) {
   .filter(res$ => res$.request.url.indexOf(SERVICES_URL) === 0)
   .mergeAll()
   .map(res => res.body);
-
+  
   let vtree$ = services$.map((services) =>
   {
     return h('section#services', [

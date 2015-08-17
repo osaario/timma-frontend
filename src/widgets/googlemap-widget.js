@@ -37,7 +37,7 @@ class TimmaMap {
       element.dispatchEvent(event);
       // 3 seconds after the center of the map has changed, pan back to the
       // marker.
-    //this.update(null, element);
+    this.update(null, element);
     return element;
   }
 
