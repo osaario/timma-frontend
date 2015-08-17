@@ -90,6 +90,10 @@ function model(intent, data$, isClient) {
     .filter((slot) => {
       //return true;
       return bounds.contains(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon));
+    }).groupBy((slot) => {
+      return slot.customerId;
+    }).map((kvPair) => {
+      return kvPair.toArray()[0];
     }).toArray();
   });
 }

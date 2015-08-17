@@ -21950,6 +21950,10 @@ function model(intent, data$, isClient) {
     return _immutable2['default'].Seq(slots).filter(function (slot) {
       //return true;
       return bounds.contains(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon));
+    }).groupBy(function (slot) {
+      return slot.customerId;
+    }).map(function (kvPair) {
+      return kvPair.toArray().first();
     }).toArray();
   });
 }
