@@ -21927,29 +21927,23 @@ function vrenderMainSection(slots, services) {
   */
 }
 
-function intent(drivers, isClient) {
-  if (isClient) {
-    //mapBoundsChanged$: domDriver.get('#timma-map', 'bounds_changed').map(ev => ev.detail).throttle(500).startWith({bounds: null, zoomLevel: 14, center: null}).shareReplay(1),
-    var bounds_change$ = drivers.DOM.get('#timma-map', 'bounds_changed').map(function (ev) {
-      return ev.detail;
-    }).throttle(500).startWith({ bounds: null, zoomLevel: 14, center: null }).map(function (_ref) {
-      var bounds = _ref.bounds;
+function intent(drivers) {
+  //mapBoundsChanged$: domDriver.get('#timma-map', 'bounds_changed').map(ev => ev.detail).throttle(500).startWith({bounds: null, zoomLevel: 14, center: null}).shareReplay(1),
+  var bounds_change$ = drivers.DOM.get('#timma-map', 'bounds_changed').map(function (ev) {
+    return ev.detail;
+  }).throttle(500).startWith({ bounds: null, zoomLevel: 14, center: null }).map(function (_ref) {
+    var bounds = _ref.bounds;
 
-      return bounds;
-    });
-    return {
-      boundsChange$: bounds_change$
-    };
-  } else {
-    return {
-      boundsChange$: _cycleCore.Rx.Observable.just(0)
-    };
-  }
+    return bounds;
+  });
+  return {
+    boundsChange$: bounds_change$
+  };
 }
 
-function model(intent, data$, isClient) {
+function model(intent, data$) {
   return intent.boundsChange$.combineLatest(data$, function (bounds, slots) {
-    if (!isClient || bounds === null) return slots;
+    if (bounds === null) return slots;
     return _immutable2['default'].Seq(slots).filter(function (slot) {
       //return true;
       return bounds.contains(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon));
@@ -21965,7 +21959,6 @@ function map(drivers) {
 
   var SLOT_URL = 'https://timma.fi/api/public/lastminuteslots';
 
-  var isClient = typeof window !== 'undefined' ? true : false;
   //.map(ev => ev.target.value)
 
   var SERVICES_URL = 'https://timma.fi/api/public/services/app';
@@ -21984,18 +21977,14 @@ function map(drivers) {
     return res.body;
   });
 
-  var slots$ = model(intent(drivers, isClient), drivers.HTTP.filter(function (res$) {
+  var slots$ = model(intent(drivers), drivers.HTTP.filter(function (res$) {
     return res$.request.url.indexOf(SLOT_URL) === 0;
   }).mergeAll().map(function (res) {
     return res.body;
-  }), isClient);
+  }));
 
   var dom$ = slots$.combineLatest(services$, function (slots, services) {
-    return (0, _cycleDom.h)('section#map', [(function () {
-      if (isClient) {
-        return vrenderMapSection(slots);
-      }
-    })(), vrenderMainSection(slots, services)]);
+    return (0, _cycleDom.h)('section#map', [vrenderMapSection(slots), vrenderMainSection(slots, services)]);
   });
   var http$ = _cycleCore.Rx.Observable.merge(slot_req$, services_req$);
 
@@ -22317,10 +22306,16 @@ var TimmaMap = (function () {
     _classCallCheck(this, TimmaMap);
 
     this.type = 'Widget';
-    this.markers = markers.map(function (x) {
-      return new google.maps.LatLng(x.lastMinuteInfo.lat, x.lastMinuteInfo.lon);
-    });
-    this.markersRendered = false;
+    var isClient = typeof window !== 'undefined' ? true : false;
+    if (isClient) {
+      this.markers = markers.map(function (x) {
+        return new google.maps.LatLng(x.lastMinuteInfo.lat, x.lastMinuteInfo.lon);
+      });
+      this.markersRendered = false;
+    } else {
+      this.markers = null;
+      this.markersRendered = false;
+    }
   }
 
   _createClass(TimmaMap, [{
@@ -22328,6 +22323,12 @@ var TimmaMap = (function () {
     value: function init() {
       var element = document.createElement('div');
       element.id = 'timma-map';
+
+      var isClient = typeof window !== 'undefined' ? true : false;
+      if (!isClient) {
+        this.update(null, element);
+        return element;
+      }
 
       var mapOptions = {
         zoom: 14,
@@ -22359,6 +22360,9 @@ var TimmaMap = (function () {
     key: 'update',
     value: function update(previous, domNode) {
       //Epic diffing function for now since we only render markers once atm
+      var isClient = typeof window !== 'undefined' ? true : false;
+      if (!isClient) return;
+
       if (this.markersRendered === true) return;
       this.markers.forEach(function (m) {
         var _ = new google.maps.Marker({

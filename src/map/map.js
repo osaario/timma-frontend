@@ -67,29 +67,23 @@ function vrenderMainSection(slots, services) {
   */
 }
 
-function intent(drivers, isClient) {
-  if(isClient) {
-    //mapBoundsChanged$: domDriver.get('#timma-map', 'bounds_changed').map(ev => ev.detail).throttle(500).startWith({bounds: null, zoomLevel: 14, center: null}).shareReplay(1),
-    let bounds_change$ = drivers.DOM.get('#timma-map', 'bounds_changed').map(ev => ev.detail)
-    .throttle(500)
-    .startWith({bounds: null, zoomLevel: 14, center: null})
-    .map(({bounds}) => {
-      return bounds;
-    });
+function intent(drivers) {
+  //mapBoundsChanged$: domDriver.get('#timma-map', 'bounds_changed').map(ev => ev.detail).throttle(500).startWith({bounds: null, zoomLevel: 14, center: null}).shareReplay(1),
+  let bounds_change$ = drivers.DOM.get('#timma-map', 'bounds_changed').map(ev => ev.detail)
+  .throttle(500)
+  .startWith({bounds: null, zoomLevel: 14, center: null})
+  .map(({bounds}) => {
+    return bounds;
+  });
   return {
     boundsChange$: bounds_change$
   };
-  } else {
-  return {
-    boundsChange$: Rx.Observable.just(0)
-  };
-  }
 
 }
 
-function model(intent, data$, isClient) {
+function model(intent, data$) {
   return intent.boundsChange$.combineLatest(data$, (bounds, slots) => {
-    if(!isClient || bounds === null) return slots;
+    if(bounds === null) return slots;
     return Immutable.Seq(slots)
     .filter((slot) => {
       //return true;
@@ -106,7 +100,6 @@ export default function map(drivers) {
 
   let SLOT_URL = 'https://timma.fi/api/public/lastminuteslots';
 
-  let isClient = typeof window !== 'undefined' ? true : false;
     //.map(ev => ev.target.value)
 
   let SERVICES_URL = 'https://timma.fi/api/public/services/app';
@@ -124,18 +117,14 @@ export default function map(drivers) {
   .mergeAll()
   .map(res => res.body);
 
-  let slots$ = model(intent(drivers, isClient), drivers.HTTP
+  let slots$ = model(intent(drivers), drivers.HTTP
    .filter(res$ => res$.request.url.indexOf(SLOT_URL) === 0)
    .mergeAll()
-   .map(res => res.body), isClient);
+   .map(res => res.body));
 
    let dom$ = slots$.combineLatest(services$, (slots, services) => {
       return h('section#map', [
-        (() => {
-          if(isClient) {
-            return vrenderMapSection(slots);
-          }
-      })(),
+        vrenderMapSection(slots),
         vrenderMainSection(slots, services)
       ]);
    });

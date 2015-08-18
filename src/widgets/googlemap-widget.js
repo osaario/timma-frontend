@@ -1,13 +1,25 @@
 class TimmaMap {
   constructor(markers) {
     this.type = 'Widget';
-    this.markers = markers.map(x => new google.maps.LatLng(x.lastMinuteInfo.lat, x.lastMinuteInfo.lon));
-    this.markersRendered = false;
+    let isClient = typeof window !== 'undefined' ? true : false;
+    if(isClient) {
+      this.markers = markers.map(x => new google.maps.LatLng(x.lastMinuteInfo.lat, x.lastMinuteInfo.lon));
+      this.markersRendered = false;
+    } else {
+      this.markers = null;
+      this.markersRendered = false;
+    }
   }
 
   init() {
     let element = document.createElement('div');
     element.id = 'timma-map';
+
+    let isClient = typeof window !== 'undefined' ? true : false;
+    if(!isClient)  {
+      this.update(null, element);
+      return element;
+    }
 
     let mapOptions = {
       zoom: 14,
@@ -43,6 +55,9 @@ class TimmaMap {
 
   update(previous, domNode) {
     //Epic diffing function for now since we only render markers once atm
+    let isClient = typeof window !== 'undefined' ? true : false;
+    if(!isClient) return;
+
     if(this.markersRendered === true) return;
     this.markers.forEach((m) => {
       var _ = new google.maps.Marker({
