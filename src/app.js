@@ -67,11 +67,8 @@ function app(drivers) {
     .doOnNext(ev => ev.preventDefault())
     .map(ev => ev.currentTarget.attributes.href.value);
 
-  let ongoingContext$ = drivers.route
-    .merge(routeFromClick$).scan((acc, x) => {
-      acc.route = x;
-      return acc;
-    });
+  let ongoingContext$ = drivers.route ;
+
 
 
     let mapApp = map(drivers);
@@ -82,6 +79,7 @@ function app(drivers) {
     let landingHttp$ = landingApp.HTTP;
     let landingVtree$ = landingApp.DOM;
 
+    let route$ = ongoingContext$.merge(mapApp.route);
     let http$ = Rx.Observable.merge(landingHttp$, mapHttp$);
 
     let vtree$ = Rx.Observable
@@ -110,7 +108,7 @@ function app(drivers) {
   return {
     DOM: vtree$,
     HTTP: http$,
-    route: ongoingContext$
+    route: route$
   };
 }
 

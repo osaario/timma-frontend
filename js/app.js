@@ -21508,10 +21508,7 @@ function app(drivers) {
     return ev.currentTarget.attributes.href.value;
   });
 
-  var ongoingContext$ = drivers.route.merge(routeFromClick$).scan(function (acc, x) {
-    acc.route = x;
-    return acc;
-  });
+  var ongoingContext$ = drivers.route;
 
   var mapApp = (0, _mapMap2['default'])(drivers);
   var mapHttp$ = mapApp.HTTP;
@@ -21521,6 +21518,7 @@ function app(drivers) {
   var landingHttp$ = landingApp.HTTP;
   var landingVtree$ = landingApp.DOM;
 
+  var route$ = ongoingContext$.merge(mapApp.route);
   var http$ = _cycleCore.Rx.Observable.merge(landingHttp$, mapHttp$);
 
   var vtree$ = _cycleCore.Rx.Observable.combineLatest(ongoingContext$, landingVtree$, mapVtree$, function (route, landingVtree, mapVtree) {
@@ -21542,7 +21540,7 @@ function app(drivers) {
   return {
     DOM: vtree$,
     HTTP: http$,
-    route: ongoingContext$
+    route: route$
   };
 }
 
@@ -21737,20 +21735,25 @@ Object.defineProperty(exports, '__esModule', {
 });
 exports.makeRouteDriver = makeRouteDriver;
 
-function makeRouteDriver(initalRoute) {
+var _cycleCore = require('@cycle/core');
+
+function makeRouteDriver(initialRoute) {
+  var subject = new _cycleCore.Rx.BehaviorSubject(initialRoute);
   if (typeof window !== 'undefined') {
-    window.history.pushState(null, '', route);
+    window.history.pushState(null, '', initialRoute);
   }
   return function routeDriver(routeOut$) {
     routeOut$.subscribe(function (routeOut) {
       if (typeof window !== 'undefined') {
-        window.history.pushState(null, '', route);
+        window.history.pushState(null, '', routeOut);
+        subject.onNext(routeOut);
       }
     });
+    return subject.distinctUntilChanged();
   };
 }
 
-},{}],123:[function(require,module,exports){
+},{"@cycle/core":1}],123:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -21909,7 +21912,7 @@ function vrenderFilters(services, selectedService) {
   </div>
   */
   var selectedServiceId = parseInt(selectedService);
-  return (0, _cycleDom.h)('select', [services.map(function (service) {
+  return (0, _cycleDom.h)('select#service-select', [services.map(function (service) {
     if (selectedServiceId == service.serviceId) {
       return (0, _cycleDom.h)('option', { value: 'map?serviceId=' + service.serviceId, attributes: { 'selected': 'selected' } }, service.name);
     } else {
@@ -21955,8 +21958,15 @@ function intent(drivers) {
 
     return bounds;
   });
+
+  var service_changed$ = drivers.DOM.get('#service-select', 'change').map(function (ev) {
+    //service select
+    return ev.target.children[ev.target.selectedIndex].value;
+  });
+
   return {
-    boundsChange$: bounds_change$
+    boundsChange$: bounds_change$,
+    serviceChanged$: service_changed$
   };
 }
 
@@ -21996,7 +22006,8 @@ function map(drivers) {
     return res.body;
   });
 
-  var slots$ = model(intent(drivers), drivers.HTTP.filter(function (res$) {
+  var intentObj = intent(drivers);
+  var slots$ = model(intentObj, drivers.HTTP.filter(function (res$) {
     return res$.request.url.indexOf(SLOT_URL) === 0;
   }).mergeAll().map(function (res) {
     return res.body;
@@ -22014,7 +22025,8 @@ function map(drivers) {
 
   return {
     DOM: dom$,
-    HTTP: http$
+    HTTP: http$,
+    route: intentObj.serviceChanged$
   };
 }
 

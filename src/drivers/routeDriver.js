@@ -1,6 +1,7 @@
 import {Rx} from '@cycle/core';
 
 export function makeRouteDriver(initialRoute) {
+  let subject = new Rx.BehaviorSubject(initialRoute);
   if (typeof window !== 'undefined') {
     window.history.pushState(null, '', initialRoute);
   }
@@ -8,8 +9,9 @@ export function makeRouteDriver(initialRoute) {
     routeOut$.subscribe(routeOut => {
       if (typeof window !== 'undefined') {
         window.history.pushState(null, '', routeOut);
+        subject.onNext(routeOut);
       }
     });
-    return Rx.Observable.just(window.location.href);
+    return subject.distinctUntilChanged();
   };
 }

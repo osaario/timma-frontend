@@ -20,7 +20,7 @@ function vrenderFilters(services, selectedService) {
 </div>
 */
 let selectedServiceId = parseInt(selectedService);
-return h('select', [
+return h('select#service-select', [
   services.map((service) => {
     if(selectedServiceId == service.serviceId) {
       return h('option', {value: `map?serviceId=${service.serviceId}`, attributes: {'selected': 'selected'}}, service.name);
@@ -81,8 +81,16 @@ function intent(drivers) {
   .map(({bounds}) => {
     return bounds;
   });
+
+  let service_changed$ = drivers.DOM.get('#service-select', 'change')
+  .map((ev) => {
+    //service select
+    return ev.target.children[ev.target.selectedIndex].value;
+  });
+
   return {
-    boundsChange$: bounds_change$
+    boundsChange$: bounds_change$,
+    serviceChanged$: service_changed$
   };
 
 }
@@ -110,6 +118,7 @@ export default function map(drivers) {
 
   let SERVICES_URL = 'https://timma.fi/api/public/services/app';
 
+
   let services_req$ = Rx.Observable.just({
     url: SERVICES_URL,
     method: 'GET'
@@ -123,7 +132,8 @@ export default function map(drivers) {
   .mergeAll()
   .map(res => res.body);
 
-  let slots$ = model(intent(drivers), drivers.HTTP
+  let intentObj = intent(drivers);
+  let slots$ = model(intentObj, drivers.HTTP
    .filter(res$ => res$.request.url.indexOf(SLOT_URL) === 0)
    .mergeAll()
    .map(res => res.body));
@@ -142,6 +152,7 @@ export default function map(drivers) {
 
   return {
     DOM: dom$,
-    HTTP: http$
+    HTTP: http$,
+    route: intentObj.serviceChanged$
   };
 }
