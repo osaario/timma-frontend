@@ -91,7 +91,7 @@ function app(drivers) {
       return h('div.app-div', [
         vrenderNav(),
         (() => {
-          if(route.match(/map\?serviceId=\d?/)) return mapVtree;
+          if(route.match(/map\?serviceId=\d+,bounds=(\d+\.\d+,){4}/)) return mapVtree;
           else if(route === '/') return landingVtree;
           else return h('div', 'Unknown page');
         }

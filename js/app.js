@@ -21527,7 +21527,7 @@ function app(drivers) {
       window.history.pushState(null, '', route);
     }*/
     return (0, _cycleDom.h)('div.app-div', [vrenderNav(), (function () {
-      if (route.match(/map\?serviceId=\d?/)) return mapVtree;else if (route === '/') return landingVtree;else return (0, _cycleDom.h)('div', 'Unknown page');
+      if (route.match(/map\?serviceId=\d+,bounds=(\d+\.\d+,){4}/)) return mapVtree;else if (route === '/') return landingVtree;else return (0, _cycleDom.h)('div', 'Unknown page');
     })()]);
   });
   /*
@@ -21929,8 +21929,8 @@ function vrenderSlotList(slots) {
   }))]);
 }
 
-function vrenderMapSection(slots) {
-  return new _widgetsGooglemapWidget2['default'](slots);
+function vrenderMapSection(slots, bounds) {
+  return new _widgetsGooglemapWidget2['default'](slots, bounds);
 }
 
 function vrenderMainSection(slots, services, selectedService) {
@@ -21949,9 +21949,10 @@ function intent(drivers) {
   //mapBoundsChanged$: domDriver.get('#timma-map', 'bounds_changed').map(ev => ev.detail).throttle(500).startWith({bounds: null, zoomLevel: 14, center: null}).shareReplay(1),
   var bounds_change$ = drivers.DOM.get('#timma-map', 'bounds_changed').map(function (ev) {
     return ev.detail;
-  }).throttle(500).startWith({ bounds: null, zoomLevel: 14, center: null }).map(function (_ref) {
+  }).throttle(500).map(function (_ref) {
     var bounds = _ref.bounds;
 
+    console.log(bounds);
     return bounds;
   });
 
@@ -21967,10 +21968,10 @@ function intent(drivers) {
 }
 
 function model(intent, data$, selectedService$) {
-  return intent.boundsChange$.combineLatest(data$, selectedService$, function (bounds, slots, selectedService) {
+  return data$.combineLatest(selectedService$, function (slots, selectedService) {
     return _immutable2['default'].Seq(slots).filter(function (slot) {
       //return true;
-      return (bounds === null || bounds.contains(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon))) && _immutable2['default'].Seq(slot.services).find(function (s) {
+      return _immutable2['default'].Seq(slot.services).find(function (s) {
         return s.serviceId == selectedService;
       }) !== undefined;
     }).groupBy(function (slot) {
@@ -21988,6 +21989,14 @@ function map(drivers) {
   //.map(ev => ev.target.value)
 
   var SERVICES_URL = 'https://timma.fi/api/public/services/app';
+
+  var bounds$ = drivers.route.map(function (route) {
+    var b = route.match(/map\?serviceId=\d+,bounds=(\d+\.\d+,){4}/)[0].match(/(\d+\.\d+,){4}/)[0].split(',').splice(0, 4).map(function (x) {
+      return parseFloat(x);
+    });
+    console.log(b);
+    return b;
+  });
 
   var selectedService$ = drivers.route.map(function (route) {
     console.log('selected service' + route);
@@ -22015,8 +22024,8 @@ function map(drivers) {
     return res.body;
   }), selectedService$);
 
-  var dom$ = slots$.combineLatest(services$, selectedService$, function (slots, services, selectedService) {
-    return (0, _cycleDom.h)('section#map', [vrenderMapSection(slots), vrenderMainSection(slots, services, selectedService)]);
+  var dom$ = slots$.combineLatest(services$, selectedService$, bounds$, function (slots, services, selectedService, bounds) {
+    return (0, _cycleDom.h)('section#map', [vrenderMapSection(slots, bounds), vrenderMainSection(slots, services, selectedService)]);
   });
   var http$ = _cycleCore.Rx.Observable.merge(slot_req$, services_req$);
 
@@ -22334,8 +22343,16 @@ var _createClass = (function () { function defineProperties(target, props) { for
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
+function gmapsBoundsToTimmaBounds(gmapsBounds) {
+  return [gmapsBounds.getNorthEast().lat, gmapsBounds.getNorthEast().lng, gmapsBounds.getSouthWest().lat, gmapsBounds.getSouthWest().lng];
+}
+
+function timmaBoundsToGmapsBounds(timmaBounds) {
+  return new google.maps.LatLngBounds(new google.maps.LatLng(timmaBounds[0], timmaBounds[1]), new google.maps.LatLng(timmaBounds[2], timmaBounds[3]));
+}
+
 var TimmaMap = (function () {
-  function TimmaMap(markers) {
+  function TimmaMap(markers, bounds) {
     _classCallCheck(this, TimmaMap);
 
     this.type = 'Widget';
@@ -22349,6 +22366,7 @@ var TimmaMap = (function () {
       this.markers = null;
       this.markersRendered = false;
     }
+    this.bounds = bounds;
   }
 
   _createClass(TimmaMap, [{
@@ -22358,32 +22376,29 @@ var TimmaMap = (function () {
       element.id = 'timma-map';
 
       var isClient = typeof window !== 'undefined' ? true : false;
-      if (!isClient) {
-        this.update(null, element);
-        return element;
+      if (isClient) {
+        (function () {
+          var mapOptions = {
+            zoom: 14,
+            scrollwheel: true,
+            center: new google.maps.LatLng(60.1543, 24.9341),
+            draggable: true
+          };
+
+          var map = new google.maps.Map(element, mapOptions);
+
+          element.officesMap = {
+            map: map
+          };
+
+          google.maps.event.addListener(map, 'bounds_changed', function () {
+            // 3 seconds after the center of the map has changed, pan back to the
+            // marker.
+            var event = new CustomEvent('bounds_changed', { 'detail': { bounds: gmapsBoundsToTimmaBounds(map.getBounds()) } });
+            element.dispatchEvent(event);
+          });
+        })();
       }
-
-      var mapOptions = {
-        zoom: 14,
-        scrollwheel: true,
-        center: new google.maps.LatLng(60.1543, 24.9341),
-        draggable: true
-      };
-
-      var map = new google.maps.Map(element, mapOptions);
-
-      element.officesMap = {
-        map: map
-      };
-
-      google.maps.event.addListener(map, 'bounds_changed', function () {
-        // 3 seconds after the center of the map has changed, pan back to the
-        // marker.
-        var event = new CustomEvent('bounds_changed', { 'detail': { bounds: map.getBounds(), zoomLevel: map.getZoom(), center: map.getCenter() } });
-        element.dispatchEvent(event);
-      });
-      var event = new CustomEvent('bounds_changed', { 'detail': { bounds: map.getBounds(), zoomLevel: map.getZoom(), center: map.getCenter() } });
-      element.dispatchEvent(event);
       // 3 seconds after the center of the map has changed, pan back to the
       // marker.
       this.update(null, element);
@@ -22395,6 +22410,10 @@ var TimmaMap = (function () {
       //Epic diffing function for now since we only render markers once atm
       var isClient = typeof window !== 'undefined' ? true : false;
       if (!isClient) return;
+      if (this.bounds !== null && !timmaBoundsToGmapsBounds(this.bounds).equals(domNode.officesMap.map.getBounds())) {
+        domNode.officesMap.map.panToBounds(timmaBoundsToGmapsBounds(this.bounds));
+        this.bounds = null;
+      }
 
       if (this.markersRendered === true) return;
       this.markers.forEach(function (m) {
