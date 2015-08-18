@@ -73,20 +73,20 @@ function vrenderMainSection(slots, services, selectedService) {
   */
 }
 
-function intent(drivers) {
+function intent(drivers, initalBounds$, initalService$) {
   //mapBoundsChanged$: domDriver.get('#timma-map', 'bounds_changed').map(ev => ev.detail).throttle(500).startWith({bounds: null, zoomLevel: 14, center: null}).shareReplay(1),
   let bounds_change$ = drivers.DOM.get('#timma-map', 'bounds_changed').map(ev => ev.detail)
   .throttle(500)
   .map(({bounds}) => {
     console.log(bounds);
     return bounds;
-  });
+  }).merge(initalBounds$.take(1));
 
   let service_changed$ = drivers.DOM.get('#service-select', 'change')
   .map((ev) => {
     //service select
     return ev.target.children[ev.target.selectedIndex].value;
-  });
+  }).merge(initalService$.take(1));
 
   return {
     boundsChange$: bounds_change$,
@@ -146,7 +146,7 @@ export default function map(drivers) {
   .mergeAll()
   .map(res => res.body);
 
-  let intentObj = intent(drivers);
+  let intentObj = intent(drivers, bounds$, selectedService$);
   let slots$ = model(intentObj, drivers.HTTP
    .filter(res$ => res$.request.url.indexOf(SLOT_URL) === 0)
    .mergeAll()
@@ -161,9 +161,16 @@ export default function map(drivers) {
    });
    let http$ = Rx.Observable.merge(slot_req$, services_req$);
 
+   let outgoingRoute$ = Rx.Observable.combineLatest(intentObj.serviceChanged$, intentObj.boundsChange$, (service, bounds) => {
+     var string = `/map?serviceId=${service},bounds=`;
+     bounds.forEach((bound) => {
+       string += bound + ',';
+     });
+     return string;
+   });
   return {
     DOM: dom$,
     HTTP: http$,
-    route: intentObj.serviceChanged$
+    route: outgoingRoute$
   };
 }

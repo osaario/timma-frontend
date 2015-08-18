@@ -21945,7 +21945,7 @@ function vrenderMainSection(slots, services, selectedService) {
   */
 }
 
-function intent(drivers) {
+function intent(drivers, initalBounds$, initalService$) {
   //mapBoundsChanged$: domDriver.get('#timma-map', 'bounds_changed').map(ev => ev.detail).throttle(500).startWith({bounds: null, zoomLevel: 14, center: null}).shareReplay(1),
   var bounds_change$ = drivers.DOM.get('#timma-map', 'bounds_changed').map(function (ev) {
     return ev.detail;
@@ -21954,12 +21954,12 @@ function intent(drivers) {
 
     console.log(bounds);
     return bounds;
-  });
+  }).merge(initalBounds$.take(1));
 
   var service_changed$ = drivers.DOM.get('#service-select', 'change').map(function (ev) {
     //service select
     return ev.target.children[ev.target.selectedIndex].value;
-  });
+  }).merge(initalService$.take(1));
 
   return {
     boundsChange$: bounds_change$,
@@ -22017,7 +22017,7 @@ function map(drivers) {
     return res.body;
   });
 
-  var intentObj = intent(drivers);
+  var intentObj = intent(drivers, bounds$, selectedService$);
   var slots$ = model(intentObj, drivers.HTTP.filter(function (res$) {
     return res$.request.url.indexOf(SLOT_URL) === 0;
   }).mergeAll().map(function (res) {
@@ -22029,10 +22029,17 @@ function map(drivers) {
   });
   var http$ = _cycleCore.Rx.Observable.merge(slot_req$, services_req$);
 
+  var outgoingRoute$ = _cycleCore.Rx.Observable.combineLatest(intentObj.serviceChanged$, intentObj.boundsChange$, function (service, bounds) {
+    var string = '/map?serviceId=' + service + ',bounds=';
+    bounds.forEach(function (bound) {
+      string += bound + ',';
+    });
+    return string;
+  });
   return {
     DOM: dom$,
     HTTP: http$,
-    route: intentObj.serviceChanged$
+    route: outgoingRoute$
   };
 }
 
@@ -22344,7 +22351,7 @@ var _createClass = (function () { function defineProperties(target, props) { for
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
 function gmapsBoundsToTimmaBounds(gmapsBounds) {
-  return [gmapsBounds.getNorthEast().lat, gmapsBounds.getNorthEast().lng, gmapsBounds.getSouthWest().lat, gmapsBounds.getSouthWest().lng];
+  return [gmapsBounds.getNorthEast().lat(), gmapsBounds.getNorthEast().lng(), gmapsBounds.getSouthWest().lat(), gmapsBounds.getSouthWest().lng()];
 }
 
 function timmaBoundsToGmapsBounds(timmaBounds) {
@@ -22367,6 +22374,7 @@ var TimmaMap = (function () {
       this.markersRendered = false;
     }
     this.bounds = bounds;
+    this.initialBoundsJumped = true;
   }
 
   _createClass(TimmaMap, [{
@@ -22374,12 +22382,12 @@ var TimmaMap = (function () {
     value: function init() {
       var element = document.createElement('div');
       element.id = 'timma-map';
-
+      this.initialBoundsJumped = false;
       var isClient = typeof window !== 'undefined' ? true : false;
       if (isClient) {
         (function () {
           var mapOptions = {
-            zoom: 14,
+            zoom: 10,
             scrollwheel: true,
             center: new google.maps.LatLng(60.1543, 24.9341),
             draggable: true
@@ -22394,7 +22402,8 @@ var TimmaMap = (function () {
           google.maps.event.addListener(map, 'bounds_changed', function () {
             // 3 seconds after the center of the map has changed, pan back to the
             // marker.
-            var event = new CustomEvent('bounds_changed', { 'detail': { bounds: gmapsBoundsToTimmaBounds(map.getBounds()) } });
+            var sendB = gmapsBoundsToTimmaBounds(map.getBounds());
+            var event = new CustomEvent('bounds_changed', { 'detail': { bounds: sendB } });
             element.dispatchEvent(event);
           });
         })();
@@ -22410,9 +22419,9 @@ var TimmaMap = (function () {
       //Epic diffing function for now since we only render markers once atm
       var isClient = typeof window !== 'undefined' ? true : false;
       if (!isClient) return;
-      if (this.bounds !== null && !timmaBoundsToGmapsBounds(this.bounds).equals(domNode.officesMap.map.getBounds())) {
+      if (!this.initialBoundsJumped) {
         domNode.officesMap.map.panToBounds(timmaBoundsToGmapsBounds(this.bounds));
-        this.bounds = null;
+        this.initialBoundsJumped = true;
       }
 
       if (this.markersRendered === true) return;

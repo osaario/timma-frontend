@@ -1,10 +1,10 @@
 
 function gmapsBoundsToTimmaBounds(gmapsBounds) {
   return  [
-    gmapsBounds.getNorthEast().lat,
-    gmapsBounds.getNorthEast().lng,
-    gmapsBounds.getSouthWest().lat,
-    gmapsBounds.getSouthWest().lng
+    gmapsBounds.getNorthEast().lat(),
+    gmapsBounds.getNorthEast().lng(),
+    gmapsBounds.getSouthWest().lat(),
+    gmapsBounds.getSouthWest().lng()
   ];
 }
 
@@ -28,16 +28,17 @@ class TimmaMap {
       this.markersRendered = false;
     }
     this.bounds = bounds;
+    this.initialBoundsJumped = true;
   }
 
   init() {
     let element = document.createElement('div');
     element.id = 'timma-map';
-
+    this.initialBoundsJumped = false;
     let isClient = typeof window !== 'undefined' ? true : false;
     if(isClient)  {
       let mapOptions = {
-        zoom: 14,
+        zoom: 10,
         scrollwheel: true,
         center: new google.maps.LatLng(
           60.1543,
@@ -55,7 +56,8 @@ class TimmaMap {
       google.maps.event.addListener(map, 'bounds_changed', function() {
         // 3 seconds after the center of the map has changed, pan back to the
         // marker.
-        var event = new CustomEvent('bounds_changed', {'detail': {bounds: gmapsBoundsToTimmaBounds(map.getBounds())}});
+        let sendB = gmapsBoundsToTimmaBounds(map.getBounds());
+        var event = new CustomEvent('bounds_changed', {'detail': {bounds: sendB }});
         element.dispatchEvent(event);
       });
     }
@@ -69,9 +71,9 @@ class TimmaMap {
     //Epic diffing function for now since we only render markers once atm
     let isClient = typeof window !== 'undefined' ? true : false;
     if(!isClient) return;
-    if(this.bounds !== null && !timmaBoundsToGmapsBounds(this.bounds).equals(domNode.officesMap.map.getBounds())) {
+    if(!this.initialBoundsJumped) {
       domNode.officesMap.map.panToBounds(timmaBoundsToGmapsBounds(this.bounds));
-      this.bounds = null;
+      this.initialBoundsJumped = true;
     }
 
     if(this.markersRendered === true) return;
