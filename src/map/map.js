@@ -97,11 +97,10 @@ function intent(drivers) {
 
 function model(intent, data$, selectedService$) {
   return intent.boundsChange$.combineLatest(data$, selectedService$, (bounds, slots, selectedService) => {
-    if(bounds === null) return slots;
     return Immutable.Seq(slots)
     .filter((slot) => {
       //return true;
-      return bounds.contains(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon)) &&
+      return (bounds === null || bounds.contains(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon))) &&
       Immutable.Seq(slot.services).find((s) => {
             return s.serviceId == selectedService;
         }) !== undefined;
@@ -123,6 +122,7 @@ export default function map(drivers) {
 
 
    let selectedService$ = drivers.route.map((route) => {
+     console.log('selected service' + route);
      return /\d+/.exec(route)[0];
    });
   let services_req$ = Rx.Observable.just({

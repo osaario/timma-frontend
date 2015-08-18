@@ -21739,15 +21739,11 @@ var _cycleCore = require('@cycle/core');
 
 function makeRouteDriver(initialRoute) {
   var subject = new _cycleCore.Rx.BehaviorSubject(initialRoute);
-  if (typeof window !== 'undefined') {
-    window.history.pushState(null, '', initialRoute);
-  }
+  window.history.pushState(null, '', initialRoute);
   return function routeDriver(routeOut$) {
     routeOut$.subscribe(function (routeOut) {
-      if (typeof window !== 'undefined') {
-        window.history.pushState(null, '', routeOut);
-        subject.onNext(routeOut);
-      }
+      window.history.pushState(null, '', routeOut);
+      subject.onNext(routeOut);
     });
     return subject.distinctUntilChanged();
   };
@@ -21972,10 +21968,9 @@ function intent(drivers) {
 
 function model(intent, data$, selectedService$) {
   return intent.boundsChange$.combineLatest(data$, selectedService$, function (bounds, slots, selectedService) {
-    if (bounds === null) return slots;
     return _immutable2['default'].Seq(slots).filter(function (slot) {
       //return true;
-      return bounds.contains(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon)) && _immutable2['default'].Seq(slot.services).find(function (s) {
+      return (bounds === null || bounds.contains(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon))) && _immutable2['default'].Seq(slot.services).find(function (s) {
         return s.serviceId == selectedService;
       }) !== undefined;
     }).groupBy(function (slot) {
@@ -21995,6 +21990,7 @@ function map(drivers) {
   var SERVICES_URL = 'https://timma.fi/api/public/services/app';
 
   var selectedService$ = drivers.route.map(function (route) {
+    console.log('selected service' + route);
     return (/\d+/.exec(route)[0]
     );
   });

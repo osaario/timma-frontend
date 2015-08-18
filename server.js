@@ -50,7 +50,8 @@ function wrapAppResultWithBoilerplate(appFn, context$, bundle$) {
     );
     return {
       DOM: wrappedVTree$,
-      HTTP: http$
+      HTTP: http$,
+      route: context$
     };
   };
 }
