@@ -2,6 +2,7 @@
 let Cycle = require('@cycle/core');
 let {makeDOMDriver} = require('@cycle/dom');
 let {makeHTTPDriver} = require('@cycle/http');
+let {makeRouteDriver} = require('./src/drivers/routeDriver');
 let {app, components} = require('./src/app');
 
 function clientSideApp(responses) {
@@ -13,5 +14,5 @@ function clientSideApp(responses) {
 Cycle.run(clientSideApp, {
   DOM: makeDOMDriver('.app-container', components() ),
   HTTP: makeHTTPDriver(),
-  context: () => Cycle.Rx.Observable.just(window.appContext)
+  route: makeRouteDriver(window.appContext)
 });

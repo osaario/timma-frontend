@@ -100,11 +100,11 @@ server.use(function (req, res) {
        */
 
 
-  let context$ = Rx.Observable.just({route: req.url});
+  let context$ = Rx.Observable.just(req.url);
   let wrappedAppFn = wrapAppResultWithBoilerplate(app, context$, clientBundle$);
   let [requests, responses] = Cycle.run(wrappedAppFn, {
     DOM: makeHTMLDriver(components()),
-    context: () => context$,
+    route: () => context$,
     HTTP: makeHTTPDriver()
   });
   let html$ = responses.DOM.get(':root').map(prependHTML5Doctype);

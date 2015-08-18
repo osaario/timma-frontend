@@ -21508,12 +21508,12 @@ function app(drivers) {
     return ev.currentTarget.attributes.href.value;
   });
 
-  var ongoingContext$ = drivers.context.merge(routeFromClick$).scan(function (acc, x) {
+  var ongoingContext$ = drivers.route.merge(routeFromClick$).scan(function (acc, x) {
     acc.route = x;
     return acc;
   });
 
-  var mapApp = (0, _mapMap2['default'])(drivers, ongoingContext$);
+  var mapApp = (0, _mapMap2['default'])(drivers);
   var mapHttp$ = mapApp.HTTP;
   var mapVtree$ = mapApp.DOM;
 
@@ -21523,12 +21523,11 @@ function app(drivers) {
 
   var http$ = _cycleCore.Rx.Observable.merge(landingHttp$, mapHttp$);
 
-  var vtree$ = _cycleCore.Rx.Observable.combineLatest(ongoingContext$, landingVtree$, mapVtree$, function (_ref, landingVtree, mapVtree) {
-    var route = _ref.route;
-
+  var vtree$ = _cycleCore.Rx.Observable.combineLatest(ongoingContext$, landingVtree$, mapVtree$, function (route, landingVtree, mapVtree) {
+    /*
     if (typeof window !== 'undefined') {
       window.history.pushState(null, '', route);
-    }
+    }*/
     return (0, _cycleDom.h)('div.app-div', [vrenderNav(), (function () {
       if (route.match(/map\?serviceId=\d?/)) return mapVtree;else if (route === '/') return landingVtree;else return (0, _cycleDom.h)('div', 'Unknown page');
     })()]);
@@ -21542,7 +21541,8 @@ function app(drivers) {
   */
   return {
     DOM: vtree$,
-    HTTP: http$
+    HTTP: http$,
+    route: ongoingContext$
   };
 }
 
@@ -21551,7 +21551,7 @@ module.exports = {
   components: components
 };
 
-},{"./components/city-item":118,"./components/landing/landing-service-item":119,"./components/service-item":120,"./components/todo-item":121,"./intents/landing":122,"./intents/todos":123,"./landing/landing":124,"./map/map":125,"./models/todos":126,"./sinks/local-storage.js":127,"@cycle/core":1,"@cycle/dom":5}],118:[function(require,module,exports){
+},{"./components/city-item":118,"./components/landing/landing-service-item":119,"./components/service-item":120,"./components/todo-item":121,"./intents/landing":123,"./intents/todos":124,"./landing/landing":125,"./map/map":126,"./models/todos":127,"./sinks/local-storage.js":128,"@cycle/core":1,"@cycle/dom":5}],118:[function(require,module,exports){
 'use strict';
 
 var _cycleCore = require('@cycle/core');
@@ -21729,7 +21729,28 @@ function todoItemComponent(drivers) {
 
 module.exports = todoItemComponent;
 
-},{"../utils":130,"@cycle/core":1,"@cycle/dom":5}],122:[function(require,module,exports){
+},{"../utils":131,"@cycle/core":1,"@cycle/dom":5}],122:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+exports.makeRouteDriver = makeRouteDriver;
+
+function makeRouteDriver(initalRoute) {
+  if (typeof window !== 'undefined') {
+    window.history.pushState(null, '', route);
+  }
+  return function routeDriver(routeOut$) {
+    routeOut$.subscribe(function (routeOut) {
+      if (typeof window !== 'undefined') {
+        window.history.pushState(null, '', route);
+      }
+    });
+  };
+}
+
+},{}],123:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -21749,7 +21770,7 @@ function intent(domDriver) {
 
 module.exports = exports['default'];
 
-},{"@cycle/core":1}],123:[function(require,module,exports){
+},{"@cycle/core":1}],124:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -21778,7 +21799,7 @@ function intent(domDriver) {
 
 module.exports = exports['default'];
 
-},{"../utils":130,"@cycle/core":1}],124:[function(require,module,exports){
+},{"../utils":131,"@cycle/core":1}],125:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -21848,7 +21869,7 @@ function landing(drivers) {
 
 module.exports = exports['default'];
 
-},{"../strings/strings":129,"../utils":130,"@cycle/core":1,"@cycle/dom":5}],125:[function(require,module,exports){
+},{"../strings/strings":130,"../utils":131,"@cycle/core":1,"@cycle/dom":5}],126:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -21890,9 +21911,9 @@ function vrenderFilters(services, selectedService) {
   var selectedServiceId = parseInt(selectedService);
   return (0, _cycleDom.h)('select', [services.map(function (service) {
     if (selectedServiceId == service.serviceId) {
-      return (0, _cycleDom.h)('option', { attributes: { 'selected': 'selected' } }, service.name);
+      return (0, _cycleDom.h)('option', { value: 'map?serviceId=' + service.serviceId, attributes: { 'selected': 'selected' } }, service.name);
     } else {
-      return (0, _cycleDom.h)('option', service.name);
+      return (0, _cycleDom.h)('option', { value: 'map?serviceId=' + service.serviceId, attributes: {} }, service.name);
     }
   })]);
 }
@@ -21953,7 +21974,7 @@ function model(intent, data$) {
   });
 }
 
-function map(drivers, context$) {
+function map(drivers) {
 
   var SLOT_URL = 'https://timma.fi/api/public/lastminuteslots';
 
@@ -21981,9 +22002,7 @@ function map(drivers, context$) {
     return res.body;
   }));
 
-  var selectedService$ = context$.map(function (_ref2) {
-    var route = _ref2.route;
-
+  var selectedService$ = drivers.route.map(function (route) {
     return (/\d+/.exec(route)[0]
     );
   });
@@ -22001,7 +22020,7 @@ function map(drivers, context$) {
 
 module.exports = exports['default'];
 
-},{"../utils":130,"../widgets/googlemap-widget":132,"@cycle/core":1,"@cycle/dom":5,"immutable":116}],126:[function(require,module,exports){
+},{"../utils":131,"../widgets/googlemap-widget":133,"@cycle/core":1,"@cycle/dom":5,"immutable":116}],127:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -22101,7 +22120,7 @@ function model(intent, _ref) {
 exports['default'] = model;
 module.exports = exports['default'];
 
-},{"@cycle/core":1}],127:[function(require,module,exports){
+},{"@cycle/core":1}],128:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22127,7 +22146,7 @@ function localStorageSink(todosData) {
 
 module.exports = exports["default"];
 
-},{}],128:[function(require,module,exports){
+},{}],129:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -22142,7 +22161,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{"@cycle/core":1}],129:[function(require,module,exports){
+},{"@cycle/core":1}],130:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -22165,7 +22184,7 @@ exports['default'] = {
 };
 module.exports = exports['default'];
 
-},{}],130:[function(require,module,exports){
+},{}],131:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -22204,7 +22223,7 @@ exports.propHook = propHook;
 exports.ENTER_KEY = ENTER_KEY;
 exports.ESC_KEY = ESC_KEY;
 
-},{}],131:[function(require,module,exports){
+},{}],132:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -22299,7 +22318,7 @@ function mapView(todos) {
 
 module.exports = exports['default'];
 
-},{"../utils":130,"@cycle/core":1,"@cycle/dom":5}],132:[function(require,module,exports){
+},{"../utils":131,"@cycle/core":1,"@cycle/dom":5}],133:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -22400,4 +22419,4 @@ var TimmaMap = (function () {
 
 module.exports = TimmaMap;
 
-},{}]},{},[117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132]);
+},{}]},{},[117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133]);

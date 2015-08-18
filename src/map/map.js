@@ -23,10 +23,10 @@ let selectedServiceId = parseInt(selectedService);
 return h('select', [
   services.map((service) => {
     if(selectedServiceId == service.serviceId) {
-      return h('option', {attributes: {'selected': 'selected'}}, service.name);
+      return h('option', {value: `map?serviceId=${service.serviceId}`, attributes: {'selected': 'selected'}}, service.name);
     }
     else {
-      return h('option', service.name);
+      return h('option', {value: `map?serviceId=${service.serviceId}`, attributes: {}}, service.name);
     }
   })
 ]);
@@ -102,7 +102,7 @@ function model(intent, data$) {
   });
 }
 
-export default function map(drivers, context$) {
+export default function map(drivers) {
 
   let SLOT_URL = 'https://timma.fi/api/public/lastminuteslots';
 
@@ -128,7 +128,7 @@ export default function map(drivers, context$) {
    .mergeAll()
    .map(res => res.body));
 
-   let selectedService$ = context$.map(({route}) => {
+   let selectedService$ = drivers.route.map((route) => {
      return /\d+/.exec(route)[0];
    });
 
