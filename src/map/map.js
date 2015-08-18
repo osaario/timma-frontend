@@ -4,8 +4,30 @@ import Immutable from 'immutable';
 import {propHook} from '../utils';
 import TimmaMap from '../widgets/googlemap-widget';
 
+function vrenderFilters(services) {
+  /*
+  <div class="dropdown">
+  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+    Dropdown
+    <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+    <li><a href="#">Action</a></li>
+    <li><a href="#">Another action</a></li>
+    <li><a href="#">Something else here</a></li>
+    <li><a href="#">Separated link</a></li>
+  </ul>
+</div>
+*/
+return h('select', [
+  services.map((service) => {
+    return h('option', service.name);
+  })
+]);
+
+}
 function vrenderSlotList(slots) {
-  return h('section.right-panel', {
+  return h('div#slot-list', {
     style: {'display': ''}
   }, [ h('ul.list-group',
   /*
@@ -24,35 +46,17 @@ function vrenderSlotList(slots) {
   )]);
 }
 
-function vrenderCityList(cities) {
-  return h('section.right-panel', {
-    style: {'display': ''}
-  }, [ h('ul.list-group',
-    _.chain(cities)
-    .map((city) => {
-      return h('city-item.city-item', {city: city});
-    }).value()
-  )]);
-}
-
-function vrenderServiceList(services) {
-  return h('section.right-panel', {
-    style: {'display': ''}
-  }, [ h('ul.list-group',
-    _.chain(services)
-    .map((service) => {
-      return h('service-item.service-item', {service: service});
-    }).value()
-  )]);
-}
 
 function vrenderMapSection(slots) {
     return new TimmaMap(slots);
 }
 
 
-function vrenderMainSection(slots) {
-    return vrenderSlotList(slots);
+function vrenderMainSection(slots, services) {
+  return h('section.right-panel', [
+    vrenderFilters(services),
+    vrenderSlotList(slots)
+  ]);
     /*
   switch(route) {
     case '/city_list': return vrenderCityList(cities);
@@ -105,27 +109,37 @@ export default function map(drivers) {
   let isClient = typeof window !== 'undefined' ? true : false;
     //.map(ev => ev.target.value)
 
+  let SERVICES_URL = 'https://timma.fi/api/public/services/app';
+
+  let services_req$ = Rx.Observable.just({
+    url: SERVICES_URL,
+    method: 'GET'
+  });
   let slot_req$ = Rx.Observable.just({
     url: SLOT_URL,
     method: 'GET'
   });
+  let services$ = drivers.HTTP
+  .filter(res$ => res$.request.url.indexOf(SERVICES_URL) === 0)
+  .mergeAll()
+  .map(res => res.body);
 
   let slots$ = model(intent(drivers, isClient), drivers.HTTP
    .filter(res$ => res$.request.url.indexOf(SLOT_URL) === 0)
    .mergeAll()
    .map(res => res.body), isClient);
 
-   let dom$ = slots$.map((slots) => {
+   let dom$ = slots$.combineLatest(services$, (slots, services) => {
       return h('section#map', [
         (() => {
           if(isClient) {
             return vrenderMapSection(slots);
           }
       })(),
-        vrenderMainSection(slots)
+        vrenderMainSection(slots, services)
       ]);
    });
-   let http$ = slot_req$;
+   let http$ = Rx.Observable.merge(slot_req$, services_req$);
 
   return {
     DOM: dom$,

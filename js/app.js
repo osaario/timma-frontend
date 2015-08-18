@@ -21879,8 +21879,27 @@ var _widgetsGooglemapWidget = require('../widgets/googlemap-widget');
 
 var _widgetsGooglemapWidget2 = _interopRequireDefault(_widgetsGooglemapWidget);
 
+function vrenderFilters(services) {
+  /*
+  <div class="dropdown">
+  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+    Dropdown
+    <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+    <li><a href="#">Action</a></li>
+    <li><a href="#">Another action</a></li>
+    <li><a href="#">Something else here</a></li>
+    <li><a href="#">Separated link</a></li>
+  </ul>
+  </div>
+  */
+  return (0, _cycleDom.h)('select', [services.map(function (service) {
+    return (0, _cycleDom.h)('option', service.name);
+  })]);
+}
 function vrenderSlotList(slots) {
-  return (0, _cycleDom.h)('section.right-panel', {
+  return (0, _cycleDom.h)('div#slot-list', {
     style: { 'display': '' }
   }, [(0, _cycleDom.h)('ul.list-group',
   /*
@@ -21892,28 +21911,12 @@ function vrenderSlotList(slots) {
   }))]);
 }
 
-function vrenderCityList(cities) {
-  return (0, _cycleDom.h)('section.right-panel', {
-    style: { 'display': '' }
-  }, [(0, _cycleDom.h)('ul.list-group', _.chain(cities).map(function (city) {
-    return (0, _cycleDom.h)('city-item.city-item', { city: city });
-  }).value())]);
-}
-
-function vrenderServiceList(services) {
-  return (0, _cycleDom.h)('section.right-panel', {
-    style: { 'display': '' }
-  }, [(0, _cycleDom.h)('ul.list-group', _.chain(services).map(function (service) {
-    return (0, _cycleDom.h)('service-item.service-item', { service: service });
-  }).value())]);
-}
-
 function vrenderMapSection(slots) {
   return new _widgetsGooglemapWidget2['default'](slots);
 }
 
-function vrenderMainSection(slots) {
-  return vrenderSlotList(slots);
+function vrenderMainSection(slots, services) {
+  return (0, _cycleDom.h)('section.right-panel', [vrenderFilters(services), vrenderSlotList(slots)]);
   /*
   switch(route) {
   case '/city_list': return vrenderCityList(cities);
@@ -21965,9 +21968,20 @@ function map(drivers) {
   var isClient = typeof window !== 'undefined' ? true : false;
   //.map(ev => ev.target.value)
 
+  var SERVICES_URL = 'https://timma.fi/api/public/services/app';
+
+  var services_req$ = _cycleCore.Rx.Observable.just({
+    url: SERVICES_URL,
+    method: 'GET'
+  });
   var slot_req$ = _cycleCore.Rx.Observable.just({
     url: SLOT_URL,
     method: 'GET'
+  });
+  var services$ = drivers.HTTP.filter(function (res$) {
+    return res$.request.url.indexOf(SERVICES_URL) === 0;
+  }).mergeAll().map(function (res) {
+    return res.body;
   });
 
   var slots$ = model(intent(drivers, isClient), drivers.HTTP.filter(function (res$) {
@@ -21976,14 +21990,14 @@ function map(drivers) {
     return res.body;
   }), isClient);
 
-  var dom$ = slots$.map(function (slots) {
+  var dom$ = slots$.combineLatest(services$, function (slots, services) {
     return (0, _cycleDom.h)('section#map', [(function () {
       if (isClient) {
         return vrenderMapSection(slots);
       }
-    })(), vrenderMainSection(slots)]);
+    })(), vrenderMainSection(slots, services)]);
   });
-  var http$ = slot_req$;
+  var http$ = _cycleCore.Rx.Observable.merge(slot_req$, services_req$);
 
   return {
     DOM: dom$,
