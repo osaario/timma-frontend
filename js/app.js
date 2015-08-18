@@ -21970,12 +21970,14 @@ function intent(drivers) {
   };
 }
 
-function model(intent, data$) {
-  return intent.boundsChange$.combineLatest(data$, function (bounds, slots) {
+function model(intent, data$, selectedService$) {
+  return intent.boundsChange$.combineLatest(data$, selectedService$, function (bounds, slots, selectedService) {
     if (bounds === null) return slots;
     return _immutable2['default'].Seq(slots).filter(function (slot) {
       //return true;
-      return bounds.contains(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon));
+      return bounds.contains(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon)) && _immutable2['default'].Seq(slot.services).find(function (s) {
+        return s.serviceId == selectedService;
+      }) !== undefined;
     }).groupBy(function (slot) {
       return slot.customerId;
     }).map(function (kvPair) {
@@ -21992,6 +21994,10 @@ function map(drivers) {
 
   var SERVICES_URL = 'https://timma.fi/api/public/services/app';
 
+  var selectedService$ = drivers.route.map(function (route) {
+    return (/\d+/.exec(route)[0]
+    );
+  });
   var services_req$ = _cycleCore.Rx.Observable.just({
     url: SERVICES_URL,
     method: 'GET'
@@ -22011,12 +22017,7 @@ function map(drivers) {
     return res$.request.url.indexOf(SLOT_URL) === 0;
   }).mergeAll().map(function (res) {
     return res.body;
-  }));
-
-  var selectedService$ = drivers.route.map(function (route) {
-    return (/\d+/.exec(route)[0]
-    );
-  });
+  }), selectedService$);
 
   var dom$ = slots$.combineLatest(services$, selectedService$, function (slots, services, selectedService) {
     return (0, _cycleDom.h)('section#map', [vrenderMapSection(slots), vrenderMainSection(slots, services, selectedService)]);

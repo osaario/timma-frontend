@@ -95,13 +95,16 @@ function intent(drivers) {
 
 }
 
-function model(intent, data$) {
-  return intent.boundsChange$.combineLatest(data$, (bounds, slots) => {
+function model(intent, data$, selectedService$) {
+  return intent.boundsChange$.combineLatest(data$, selectedService$, (bounds, slots, selectedService) => {
     if(bounds === null) return slots;
     return Immutable.Seq(slots)
     .filter((slot) => {
       //return true;
-      return bounds.contains(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon));
+      return bounds.contains(new google.maps.LatLng(slot.lastMinuteInfo.lat, slot.lastMinuteInfo.lon)) &&
+      Immutable.Seq(slot.services).find((s) => {
+            return s.serviceId == selectedService;
+        }) !== undefined;
     }).groupBy((slot) => {
       return slot.customerId;
     }).map((kvPair) => {
@@ -119,6 +122,9 @@ export default function map(drivers) {
   let SERVICES_URL = 'https://timma.fi/api/public/services/app';
 
 
+   let selectedService$ = drivers.route.map((route) => {
+     return /\d+/.exec(route)[0];
+   });
   let services_req$ = Rx.Observable.just({
     url: SERVICES_URL,
     method: 'GET'
@@ -136,11 +142,8 @@ export default function map(drivers) {
   let slots$ = model(intentObj, drivers.HTTP
    .filter(res$ => res$.request.url.indexOf(SLOT_URL) === 0)
    .mergeAll()
-   .map(res => res.body));
+   .map(res => res.body), selectedService$);
 
-   let selectedService$ = drivers.route.map((route) => {
-     return /\d+/.exec(route)[0];
-   });
 
    let dom$ = slots$.combineLatest(services$, selectedService$,  (slots, services, selectedService) => {
       return h('section#map', [
