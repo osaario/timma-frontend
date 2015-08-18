@@ -83,6 +83,7 @@ server.use('/static', express.static('styles'));
 
 server.use(function (req, res) {
   // Ignore favicon requests
+  if(req.url === '/null') return;
   if (req.url === '/favicon.ico') {
     res.writeHead(200, {'Content-Type': 'image/x-icon'});
     res.end();
