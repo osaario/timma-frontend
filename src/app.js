@@ -74,7 +74,7 @@ function app(drivers) {
     });
 
 
-    let mapApp = map(drivers);
+    let mapApp = map(drivers, ongoingContext$);
     let mapHttp$ = mapApp.HTTP;
     let mapVtree$ = mapApp.DOM;
 
@@ -92,11 +92,9 @@ function app(drivers) {
       return h('div.app-div', [
         vrenderNav(),
         (() => {
-          switch (route) {
-            case '/': return landingVtree;
-            case '/map': return mapVtree;
-            default: return h('div', 'Unknown page');
-          }
+          if(route.match(/map\?serviceId=\d?/)) return mapVtree;
+          else if(route === '/') return landingVtree;
+          else return h('div', 'Unknown page');
         }
       )()
       ]);

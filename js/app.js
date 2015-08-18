@@ -21513,7 +21513,7 @@ function app(drivers) {
     return acc;
   });
 
-  var mapApp = (0, _mapMap2['default'])(drivers);
+  var mapApp = (0, _mapMap2['default'])(drivers, ongoingContext$);
   var mapHttp$ = mapApp.HTTP;
   var mapVtree$ = mapApp.DOM;
 
@@ -21530,14 +21530,7 @@ function app(drivers) {
       window.history.pushState(null, '', route);
     }
     return (0, _cycleDom.h)('div.app-div', [vrenderNav(), (function () {
-      switch (route) {
-        case '/':
-          return landingVtree;
-        case '/map':
-          return mapVtree;
-        default:
-          return (0, _cycleDom.h)('div', 'Unknown page');
-      }
+      if (route.match(/map\?serviceId=\d?/)) return mapVtree;else if (route === '/') return landingVtree;else return (0, _cycleDom.h)('div', 'Unknown page');
     })()]);
   });
   /*
@@ -21802,7 +21795,7 @@ var _utils = require('../utils');
 var _stringsStrings = require('../strings/strings');
 
 function vrenderServiceItem(serviceType) {
-  return (0, _cycleDom.h)('div.landing-service-item', [(0, _cycleDom.h)('img', { "src": serviceType.imageURL }), (0, _cycleDom.h)('a.container.link', { href: '/map' }, [(0, _cycleDom.h)('h2', serviceType.name), (0, _cycleDom.h)('p', serviceType.description)])]);
+  return (0, _cycleDom.h)('div.landing-service-item', [(0, _cycleDom.h)('img', { "src": serviceType.imageURL }), (0, _cycleDom.h)('a.container.link', { href: '/map?serviceId=' + serviceType.serviceId }, [(0, _cycleDom.h)('h2', serviceType.name), (0, _cycleDom.h)('p', serviceType.description)])]);
 }
 
 function vRenderServices(services) {
@@ -21879,7 +21872,7 @@ var _widgetsGooglemapWidget = require('../widgets/googlemap-widget');
 
 var _widgetsGooglemapWidget2 = _interopRequireDefault(_widgetsGooglemapWidget);
 
-function vrenderFilters(services) {
+function vrenderFilters(services, selectedService) {
   /*
   <div class="dropdown">
   <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
@@ -21894,8 +21887,13 @@ function vrenderFilters(services) {
   </ul>
   </div>
   */
+  var selectedServiceId = parseInt(selectedService);
   return (0, _cycleDom.h)('select', [services.map(function (service) {
-    return (0, _cycleDom.h)('option', service.name);
+    if (selectedServiceId == service.serviceId) {
+      return (0, _cycleDom.h)('option', { attributes: { 'selected': 'selected' } }, service.name);
+    } else {
+      return (0, _cycleDom.h)('option', service.name);
+    }
   })]);
 }
 function vrenderSlotList(slots) {
@@ -21915,8 +21913,8 @@ function vrenderMapSection(slots) {
   return new _widgetsGooglemapWidget2['default'](slots);
 }
 
-function vrenderMainSection(slots, services) {
-  return (0, _cycleDom.h)('section.right-panel', [vrenderFilters(services), vrenderSlotList(slots)]);
+function vrenderMainSection(slots, services, selectedService) {
+  return (0, _cycleDom.h)('section.right-panel', [vrenderFilters(services, selectedService), vrenderSlotList(slots)]);
   /*
   switch(route) {
   case '/city_list': return vrenderCityList(cities);
@@ -21955,7 +21953,7 @@ function model(intent, data$) {
   });
 }
 
-function map(drivers) {
+function map(drivers, context$) {
 
   var SLOT_URL = 'https://timma.fi/api/public/lastminuteslots';
 
@@ -21983,8 +21981,15 @@ function map(drivers) {
     return res.body;
   }));
 
-  var dom$ = slots$.combineLatest(services$, function (slots, services) {
-    return (0, _cycleDom.h)('section#map', [vrenderMapSection(slots), vrenderMainSection(slots, services)]);
+  var selectedService$ = context$.map(function (_ref2) {
+    var route = _ref2.route;
+
+    return (/\d+/.exec(route)[0]
+    );
+  });
+
+  var dom$ = slots$.combineLatest(services$, selectedService$, function (slots, services, selectedService) {
+    return (0, _cycleDom.h)('section#map', [vrenderMapSection(slots), vrenderMainSection(slots, services, selectedService)]);
   });
   var http$ = _cycleCore.Rx.Observable.merge(slot_req$, services_req$);
 

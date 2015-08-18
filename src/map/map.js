@@ -4,7 +4,7 @@ import Immutable from 'immutable';
 import {propHook} from '../utils';
 import TimmaMap from '../widgets/googlemap-widget';
 
-function vrenderFilters(services) {
+function vrenderFilters(services, selectedService) {
   /*
   <div class="dropdown">
   <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
@@ -19,9 +19,15 @@ function vrenderFilters(services) {
   </ul>
 </div>
 */
+let selectedServiceId = parseInt(selectedService);
 return h('select', [
   services.map((service) => {
-    return h('option', service.name);
+    if(selectedServiceId == service.serviceId) {
+      return h('option', {attributes: {'selected': 'selected'}}, service.name);
+    }
+    else {
+      return h('option', service.name);
+    }
   })
 ]);
 
@@ -52,9 +58,9 @@ function vrenderMapSection(slots) {
 }
 
 
-function vrenderMainSection(slots, services) {
+function vrenderMainSection(slots, services, selectedService) {
   return h('section.right-panel', [
-    vrenderFilters(services),
+    vrenderFilters(services, selectedService),
     vrenderSlotList(slots)
   ]);
     /*
@@ -96,7 +102,7 @@ function model(intent, data$) {
   });
 }
 
-export default function map(drivers) {
+export default function map(drivers, context$) {
 
   let SLOT_URL = 'https://timma.fi/api/public/lastminuteslots';
 
@@ -122,10 +128,14 @@ export default function map(drivers) {
    .mergeAll()
    .map(res => res.body));
 
-   let dom$ = slots$.combineLatest(services$, (slots, services) => {
+   let selectedService$ = context$.map(({route}) => {
+     return /\d+/.exec(route)[0];
+   });
+
+   let dom$ = slots$.combineLatest(services$, selectedService$,  (slots, services, selectedService) => {
       return h('section#map', [
         vrenderMapSection(slots),
-        vrenderMainSection(slots, services)
+        vrenderMainSection(slots, services, selectedService)
       ]);
    });
    let http$ = Rx.Observable.merge(slot_req$, services_req$);

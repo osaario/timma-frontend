@@ -8,7 +8,7 @@ import {strings} from '../strings/strings';
 function vrenderServiceItem(serviceType) {
   return h('div.landing-service-item', [
     h('img', {"src": serviceType.imageURL}),
-    h('a.container.link', {href: '/map'}, [
+    h('a.container.link', {href: `/map?serviceId=${serviceType.serviceId}`}, [
       h('h2', serviceType.name),
       h('p', serviceType.description)
     ])
@@ -57,6 +57,7 @@ function vRenderImageSearch() {
 </div>
 */
 }
+
 
 export default function landing(drivers) {
   let SERVICES_URL = 'https://timma.fi/api/public/services/app';
